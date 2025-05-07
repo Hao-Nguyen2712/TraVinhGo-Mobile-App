@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
+import 'home/home_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -13,7 +14,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   List screens = const [
     Scaffold(),
     Scaffold(),
-    Scaffold(),
+    HomeScreen(),
     Scaffold(),
     Scaffold(),
   ];

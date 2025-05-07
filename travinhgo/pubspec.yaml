@@ -68,6 +68,7 @@ flutter:
   assets:
       - assets/images/navigations/
       - assets/images/auth/
+      - assets/images/sample/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
