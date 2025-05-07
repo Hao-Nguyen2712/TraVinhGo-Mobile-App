@@ -1,0 +1,1 @@
+List<String> imageListHome = ["destination1.jpg", "destination2.jpg", "destination3.jpg","destination4.jpg"];
