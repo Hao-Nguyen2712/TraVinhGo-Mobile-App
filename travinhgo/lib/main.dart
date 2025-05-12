@@ -15,16 +15,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) => MultiProvider(
-    providers: [ChangeNotifierProvider(create: (_) => CardProvider())],
-    child: MaterialApp(
-      title: "TraVinhGo",
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        textTheme: GoogleFonts.mulishTextTheme(),
-      ),
-      home: const SplashScreen(),
-    ),
-  );
+        providers: [ChangeNotifierProvider(create: (_) => CardProvider())],
+        child: MaterialApp(
+          title: "TraVinhGo",
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+            textTheme: GoogleFonts.mulishTextTheme(),
+          ),
+          home: const SplashScreen(),
+        ),
+      );
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,6 +10,23 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/login.png"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
