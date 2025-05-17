@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants.dart';
+import '../utils/constants.dart';
 import 'home/home_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -40,7 +40,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ),
         ),
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         height: 70,

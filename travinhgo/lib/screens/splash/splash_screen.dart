@@ -4,7 +4,6 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 
 import '../auth/login_screen.dart';
-import '../nav_bar_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Timer(const Duration(seconds: 3), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const BottomNavBar()),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       });
     });

@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../../introduction/introduction_page.dart';
+import 'package:travinhgo/screens/introduction/introduction_page.dart';
 
 class CategoryItem extends StatelessWidget {
   final String iconName;
@@ -19,7 +17,7 @@ class CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List screen = const [IntroductionPage()];
+    List<Widget> screen = const [IntroductionPage()];
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -28,23 +26,37 @@ class CategoryItem extends StatelessWidget {
         );
       },
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 85,
-            height: 85,
+            width: 70,
+            height: 70,
             decoration: BoxDecoration(
               color: Color(ColorName),
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(15.0),
               child: Image.asset(
-                "assets/images/navigations/" + iconName + ".png",
-                scale: 10,
+                "assets/images/navigations/$iconName.png",
+                fit: BoxFit.contain,
               ),
             ),
           ),
-          Text(title, style: TextStyle(fontSize: 16)),
+          const SizedBox(height: 5),
+          SizedBox(
+            width: 70,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
