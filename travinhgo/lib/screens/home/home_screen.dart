@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:travinhgo/widget/category_item.dart';
 import 'package:travinhgo/widget/image_slider.dart';
 
+import '../../providers/auth_provider.dart';
 import '../../sampledata/samplelist.dart';
+import '../../utils/constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +19,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final authProvider = Provider.of<AuthProvider>(context);
+    final isLoggedIn = authProvider.isAuthenticated;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -100,55 +105,77 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                             const SizedBox(width: 10),
-                            SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    width: 45,
-                                    height: 45,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: const Color(0xFFA29C9C),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image.asset(
-                                        "assets/images/navigations/bell.png",
-                                        scale: 10,
-                                        color: const Color(0xFFA29C9C),
-                                      ),
-                                    ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/signin');
+                              },
+                              child: Container(
+                                width: 100,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: kprimaryColor,
+                                    borderRadius: BorderRadius.circular(20)),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 10),
+                                child: Center(
+                                  child: Text(
+                                    "Login",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
                                   ),
-                                  Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Container(
-                                      width: 22,
-                                      height: 22,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Color(0xFFDD2334),
-                                      ),
-                                      child: const Center(
-                                        child: Text(
-                                          "9+",
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
+                            )
+                            // SizedBox(
+                            //   width: 50,
+                            //   height: 50,
+                            //   child: Stack(
+                            //     children: [
+                            //       Container(
+                            //         width: 45,
+                            //         height: 45,
+                            //         decoration: BoxDecoration(
+                            //           shape: BoxShape.circle,
+                            //           border: Border.all(
+                            //             color: const Color(0xFFA29C9C),
+                            //             width: 2,
+                            //           ),
+                            //         ),
+                            //         child: Padding(
+                            //           padding: const EdgeInsets.all(8.0),
+                            //           child: Image.asset(
+                            //             "assets/images/navigations/bell.png",
+                            //             scale: 10,
+                            //             color: const Color(0xFFA29C9C),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //       Positioned(
+                            //         top: 0,
+                            //         right: 0,
+                            //         child: Container(
+                            //           width: 22,
+                            //           height: 22,
+                            //           decoration: const BoxDecoration(
+                            //             shape: BoxShape.circle,
+                            //             color: Color(0xFFDD2334),
+                            //           ),
+                            //           child: const Center(
+                            //             child: Text(
+                            //               "9+",
+                            //               style: TextStyle(
+                            //                 fontSize: 10,
+                            //                 fontWeight: FontWeight.w900,
+                            //                 color: Colors.white,
+                            //               ),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                           ],
                         ),
                         const Align(
@@ -195,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 15),
                   ImageSlider(imageList: imageListHome),
-
+                  const SizedBox(height: 15),
                   // Categories grid using GridView
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -203,9 +230,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisCount: 4,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      childAspectRatio:
-                          0.8, // Increased for more vertical space
-                      mainAxisSpacing: 10, // Reduced spacing
+                      childAspectRatio: 0.8,
+                      // Increased for more vertical space
+                      mainAxisSpacing: 10,
+                      // Reduced spacing
                       crossAxisSpacing: 5,
                       children: const [
                         // First row
@@ -231,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           iconName: "destination",
                           ColorName: 0xFFFFE4E1,
                           title: "Destination",
-                          index: 0,
+                          index: 1,
                         ),
                         // Second row
                         CategoryItem(
