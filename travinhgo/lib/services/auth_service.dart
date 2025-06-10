@@ -9,6 +9,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/services.dart';
 
+import '../utils/constants.dart';
+
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   String? _otpToken;
@@ -31,7 +33,8 @@ class AuthService {
   }
 
   final String _baseUrl =
-      'http://192.168.3.132:5000/api/Auth/'; // Replace with your API base URL
+      '${Base_api}Auth/'; // Replace with your API base URL
+  
 
   final Dio dio = Dio();
 
