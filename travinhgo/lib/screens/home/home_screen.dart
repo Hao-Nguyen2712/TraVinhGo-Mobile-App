@@ -6,6 +6,9 @@ import 'package:travinhgo/widget/category_grid.dart';
 import 'package:travinhgo/widget/category_item.dart';
 import 'package:travinhgo/widget/home_header.dart';
 import 'package:travinhgo/widget/image_slider.dart';
+import '../../providers/auth_provider.dart';
+import '../../sampledata/samplelist.dart';
+import '../../utils/constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -19,6 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final screenHeight = MediaQuery.of(context).size.height;
+    final authProvider = Provider.of<AuthProvider>(context);
+    final isLoggedIn = authProvider.isAuthenticated;
 
     // No longer using ProtectedScreen - allowing access to all users
     return Scaffold(

@@ -5,6 +5,9 @@ import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/providers/card_provider.dart';
 import 'package:travinhgo/providers/setting_provider.dart';
 import 'package:travinhgo/router/app_router.dart';
+import 'package:travinhgo/providers/destination_type_provider.dart';
+import 'package:travinhgo/providers/marker_provider.dart';
+import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/screens/auth/login_screen.dart';
 import 'package:travinhgo/screens/nav_bar_screen.dart';
 import 'package:travinhgo/screens/splash/splash_screen.dart';
@@ -23,6 +26,9 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => CardProvider()),
           ChangeNotifierProvider(create: (_) => AuthProvider()),
           ChangeNotifierProvider(create: (_) => SettingProvider()),
+          ChangeNotifierProvider(create: (_) => MarkerProvider()),
+          ChangeNotifierProvider(create: (_) => DestinationTypeProvider()),
+          ChangeNotifierProvider(create: (_) => TagProvider()),
         ],
         child: Builder(
           builder: (context) {

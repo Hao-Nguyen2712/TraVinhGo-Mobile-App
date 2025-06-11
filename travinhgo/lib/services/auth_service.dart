@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:travinhgo/screens/auth/login_screen.dart';
 
+import '../utils/constants.dart';
+
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   String? _otpToken;

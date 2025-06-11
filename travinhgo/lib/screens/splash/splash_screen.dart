@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF158247),
+      backgroundColor: kprimaryColor,
       body: Center(
         child: DefaultTextStyle(
           style: const TextStyle(
@@ -53,6 +53,46 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _loadData() async {
+    final markerProvider = Provider.of<MarkerProvider>(context, listen: false);
+    final destinationTypeProvider =
+        Provider.of<DestinationTypeProvider>(context, listen: false);
+    final tagProvider = Provider.of<TagProvider>(context, listen: false);
+
+    // fetch data
+    await markerProvider.fetchMarkers();
+    await destinationTypeProvider.fetchDestinationType();
+    await tagProvider.fetchDestinationType();
+
+    // Handle
+    final markers = markerProvider.markers;
+    for (var destinationType in destinationTypeProvider.destinationTypes) {
+      final matchedMarker = markers.firstWhere(
+        (m) => m.id == destinationType.markerId,
+        orElse: () => Marker(id: '', name: 'Unknown', image: ''),
+      );
+      destinationType.marker = matchedMarker.id.isEmpty ? null : matchedMarker;
+    }
+
+    // Preload marker images
+    final futures = <Future>[];
+    for (final marker in markers) {
+      if (marker.image.isNotEmpty) {
+        futures.add(precacheImage(NetworkImage(marker.image), context));
+      }
+    }
+    await Future.wait(futures);
+
+    // Sau khi load xong, đợi thêm 1 giây để splash được nhìn thấy rõ hơn
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Chuyển sang màn hình chính
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const BottomNavBar()),
     );
   }
 }
