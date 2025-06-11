@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import 'home/home_screen.dart';
+import 'map/map_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -11,13 +12,24 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int cuttentIndex = 2;
-  List screens = const [
-    Scaffold(),
-    Scaffold(),
-    HomeScreen(),
-    Scaffold(),
-    Scaffold(),
-  ];
+  late final List<Widget> screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeScreens();
+  }
+
+  void _initializeScreens() {
+    screens = [
+      MapScreen(
+          key: UniqueKey()), // Using UniqueKey to force rebuild on navigation
+      const Scaffold(body: Center(child: Text("Events Coming Soon"))),
+      const HomeScreen(),
+      const Scaffold(body: Center(child: Text("Favorites Coming Soon"))),
+      const Scaffold(body: Center(child: Text("Profile Coming Soon"))),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +67,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
             IconButton(
               onPressed: () {
                 setState(() {
+                  // If already on map screen, reinitialize all screens
+                  if (cuttentIndex == 0) {
+                    _initializeScreens();
+                  }
                   cuttentIndex = 0;
                 });
               },

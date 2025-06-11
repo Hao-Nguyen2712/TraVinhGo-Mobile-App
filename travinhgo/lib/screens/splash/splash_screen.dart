@@ -1,9 +1,9 @@
 import 'dart:async';
-
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-
-import '../auth/login_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:travinhgo/providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,15 +16,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Đợi sau frame đầu tiên mới push để tránh lỗi context chưa sẵn sàng
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Timer(const Duration(seconds: 3), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
+        if (mounted) {
+          _navigateToNextScreen();
+        }
       });
     });
+  }
+
+  void _navigateToNextScreen() {
+    context.go('/home');
   }
 
   @override

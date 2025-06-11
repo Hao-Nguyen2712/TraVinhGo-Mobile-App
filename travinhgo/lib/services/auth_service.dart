@@ -6,8 +6,11 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'dart:io';
 import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:travinhgo/screens/auth/login_screen.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -28,10 +31,24 @@ class AuthService {
           (X509Certificate cert, String host, int port) => true;
       return client;
     };
+
+    // Add interceptor to handle 401 responses
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
+          if (error.response?.statusCode == 401) {
+            // Clear tokens on 401 (Unauthorized) response
+            await logout();
+            debugPrint('Session expired: 401 Unauthorized');
+          }
+          return handler.next(error);
+        },
+      ),
+    );
   }
 
   final String _baseUrl =
-      'http://192.168.3.132:5000/api/Auth/'; // Replace with your API base URL
+      'https://dv67l8z6-7162.asse.devtunnels.ms/api/Auth/'; // Replace with your API base URL
 
   final Dio dio = Dio();
 
@@ -105,12 +122,19 @@ class AuthService {
         String dataJsonString = response.data['data'];
         Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
 
-// Extract sessionId and refreshToken from the response
+        // Extract sessionId, refreshToken and userId from the response
         final sessionId = dataMap['sessionId'];
         final refreshToken = dataMap['refreshToken'];
+        final userId = dataMap['userId']; // Get userId from response
 
+        // Save tokens and user claim
         await _secureStorage.write(key: 'session_id', value: sessionId);
         await _secureStorage.write(key: 'refresh_token', value: refreshToken);
+
+        // Store userId as a claim (only exists when logged in)
+        if (userId != null) {
+          await _secureStorage.write(key: 'user_id', value: userId.toString());
+        }
 
         // Clear the temporary OTP token
         await _secureStorage.delete(key: 'token');
@@ -160,8 +184,10 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _secureStorage.delete(key: 'access_token');
+    // Delete all auth-related tokens and claims
+    await _secureStorage.delete(key: 'session_id');
     await _secureStorage.delete(key: 'refresh_token');
+    await _secureStorage.delete(key: 'user_id'); // Also remove user claim
   }
 
   Future<String?> getSessionId() async {
@@ -172,9 +198,47 @@ class AuthService {
     return await _secureStorage.read(key: 'refresh_token');
   }
 
+  // Get the user ID (claim)
+  Future<String?> getUserId() async {
+    return await _secureStorage.read(key: 'user_id');
+  }
+
   Future<bool> isLoggedIn() async {
     final token = await getSessionId();
     return token != null;
+  }
+
+  // Show session expired dialog
+  Future<void> showSessionExpiredDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Session Expired'),
+          content: const Text('Your session has expired, please log in again.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.goNamed('login'); // Use GoRouter
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Check for valid session and show dialog if expired
+  Future<bool> checkSession(BuildContext context) async {
+    final isValid = await isLoggedIn();
+    if (!isValid) {
+      await showSessionExpiredDialog(context);
+      return false;
+    }
+    return true;
   }
 
   Future<bool> authenticateWithGoogle() async {
