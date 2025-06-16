@@ -38,13 +38,13 @@ class CategoryGrid extends StatelessWidget {
             iconName: "destination",
             ColorName: 0xFFFFE4E1,
             title: "Destination",
-            index: 0,
+            index: 1,
           ),
           CategoryItem(
             iconName: "food",
             ColorName: 0xFFFFFACD,
             title: "Local specialty",
-            index: 0,
+            index: 2,
           ),
           CategoryItem(
             iconName: "hotel",
