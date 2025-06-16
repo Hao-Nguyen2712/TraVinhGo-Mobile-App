@@ -137,11 +137,13 @@ class _SplashScreenState extends State<SplashScreen> {
           Provider.of<DestinationTypeProvider>(context, listen: false);
       final tagProvider = Provider.of<TagProvider>(context, listen: false);
 
+
       // Start all loading operations in parallel
       final markersFuture = markerProvider.fetchMarkers();
       final destinationTypesFuture =
           destinationTypeProvider.fetchDestinationType();
       final tagsFuture = tagProvider.fetchDestinationType();
+
 
       // Wait for all data to load
       await Future.wait([markersFuture, destinationTypesFuture, tagsFuture]);

@@ -46,6 +46,10 @@ dependencies:
   device_info_plus: ^11.4.0
   flutter_secure_storage: ^9.2.4
   google_sign_in: ^6.3.0
+
+
+  flutter_html: ^3.0.0
+
   geolocator: ^10.1.0
   cached_network_image: ^3.3.1
   here_sdk:
