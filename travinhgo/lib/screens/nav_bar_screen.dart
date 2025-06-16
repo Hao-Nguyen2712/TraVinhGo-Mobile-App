@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
+import '../widget/auth_required_screen.dart';
 import 'home/home_screen.dart';
+import 'map/map_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -11,13 +13,43 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int cuttentIndex = 2;
-  List screens = const [
-    Scaffold(),
-    Scaffold(),
-    HomeScreen(),
-    Scaffold(),
-    Scaffold(),
-  ];
+  late List<Widget> screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeScreens();
+  }
+
+  void _initializeScreens() {
+    screens = [
+      MapScreen(
+          key: UniqueKey()), // Using UniqueKey to force rebuild on navigation
+      // Events screen - Auth required
+      const AuthRequiredScreen(
+        child: Scaffold(body: Center(child: Text("Events Coming Soon"))),
+        message: 'Please login to use this feature',
+      ),
+      // Home screen - Available to all users
+      const HomeScreen(),
+      // Favorites screen - Auth required
+      const AuthRequiredScreen(
+        child: Scaffold(body: Center(child: Text("Favorites Coming Soon"))),
+        message: 'Please login to use this feature',
+      ),
+      // Profile screen - Auth required
+      const AuthRequiredScreen(
+        child: Scaffold(body: Center(child: Text("Profile Coming Soon"))),
+        message: 'Please login to use this feature',
+      ),
+    ];
+  }
+
+  void _refreshMapScreen() {
+    setState(() {
+      screens[0] = MapScreen(key: UniqueKey());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +86,13 @@ class _BottomNavBarState extends State<BottomNavBar> {
           children: [
             IconButton(
               onPressed: () {
-                setState(() {
-                  cuttentIndex = 0;
-                });
+                if (cuttentIndex == 0) {
+                  _refreshMapScreen();
+                } else {
+                  setState(() {
+                    cuttentIndex = 0;
+                  });
+                }
               },
               icon: Image.asset(
                 'assets/images/navigations/map.png',

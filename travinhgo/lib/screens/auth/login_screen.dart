@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
-import 'package:travinhgo/screens/auth/otp_verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  static const routeName = '/signin';
   const LoginScreen({super.key});
 
   @override
@@ -47,24 +46,21 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Show loading overlay
-    _showLoadingOverlay();
+    final dialogContext = await _showLoadingOverlay();
 
     final success = await authProvider.signInWithPhone(phoneNumber);
 
     // Hide loading overlay
-    if (mounted) {
-      Navigator.of(context).pop();
+    if (mounted && dialogContext != null) {
+      Navigator.of(dialogContext).pop(); // Use the dialog's own context to pop
     }
 
     if (success) {
       if (mounted) {
-        // Navigate to OTP verification screen
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => OtpVerificationScreen(
-              phoneNumber: phoneNumber,
-            ),
-          ),
+        // Navigate to OTP verification screen using GoRouter
+        context.goNamed(
+          'verifyOtp',
+          queryParameters: {'phoneNumber': phoneNumber},
         );
       }
     } else {
@@ -78,11 +74,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Show loading overlay with carousel
-  void _showLoadingOverlay() {
-    showDialog(
+  Future<BuildContext?> _showLoadingOverlay() async {
+    BuildContext? dialogContext;
+
+    await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        dialogContext = context;
         return PopScope(
           canPop: false, // Prevent closing with back button
           child: Dialog(
@@ -174,6 +173,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
     );
+
+    return dialogContext;
   }
 
   // Handle Google sign-in
@@ -181,25 +182,23 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Show loading overlay
-    _showLoadingOverlay();
+    final dialogContext = await _showLoadingOverlay();
 
     try {
       final success = await authProvider.signInWithGoogle();
 
       // Hide loading overlay
-      if (mounted) {
-        Navigator.of(context).pop();
+      if (mounted && dialogContext != null) {
+        Navigator.of(dialogContext)
+            .pop(); // Use the dialog's own context to pop
       }
 
       if (success) {
-        // Navigate to OTP verification screen
+        // Navigate to OTP verification screen using GoRouter
         if (mounted) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => OtpVerificationScreen(
-                googleEmail: authProvider.email,
-              ),
-            ),
+          context.goNamed(
+            'verifyOtp',
+            queryParameters: {'googleEmail': authProvider.email},
           );
         }
       } else {
@@ -213,8 +212,12 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       // Hide loading overlay
+      if (mounted && dialogContext != null) {
+        Navigator.of(dialogContext)
+            .pop(); // Use the dialog's own context to pop
+      }
+
       if (mounted) {
-        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Error during Google sign-in: ${e.toString()}"),
           backgroundColor: Colors.red,
@@ -245,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       top: 10,
                       left: 10,
                       child: InkWell(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () => context.pop(),
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: const BoxDecoration(

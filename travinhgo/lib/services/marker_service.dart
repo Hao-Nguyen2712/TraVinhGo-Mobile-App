@@ -5,7 +5,7 @@ import 'package:dio/io.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:travinhgo/models/marker/marker.dart';
 
-import '../utils/constants.dart';
+import '../utils/env_config.dart';
 
 class MarkerService {
   static final MarkerService _instance = MarkerService._internal();
@@ -25,8 +25,7 @@ class MarkerService {
     };
   }
 
-  final String _baseUrl =
-      '${Base_api}Marker/'; // Replace with your API base URL
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/Marker/';
 
   final Dio dio = Dio();
 

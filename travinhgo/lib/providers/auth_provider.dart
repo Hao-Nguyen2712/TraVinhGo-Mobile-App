@@ -9,12 +9,28 @@ class AuthProvider with ChangeNotifier {
   String? _error;
   String? _phoneNumber;
   String? _email;
+  String? _userId;
 
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get phoneNumber => _phoneNumber;
   String? get email => _email;
+  String? get userId => _userId;
+
+  // Constructor to check authentication state
+  AuthProvider() {
+    _initAuthState();
+  }
+
+  // Initialize auth state and load user claim
+  Future<void> _initAuthState() async {
+    _isAuthenticated = await _authService.isLoggedIn();
+    if (_isAuthenticated) {
+      _userId = await _authService.getUserId();
+    }
+    notifyListeners();
+  }
 
   Future<bool> signInWithPhone(String phoneNumber) async {
     try {
@@ -52,6 +68,8 @@ class AuthProvider with ChangeNotifier {
 
       if (success) {
         _isAuthenticated = true;
+        // Get user ID from secure storage
+        _userId = await _authService.getUserId();
       } else {
         _error = 'OTP verification failed';
       }
@@ -119,14 +137,28 @@ class AuthProvider with ChangeNotifier {
   Future<bool> checkAuthentication() async {
     final isLoggedIn = await _authService.isLoggedIn();
     _isAuthenticated = isLoggedIn;
+
+    if (isLoggedIn) {
+      // Load user ID from secure storage
+      _userId = await _authService.getUserId();
+    } else {
+      _userId = null;
+    }
+
     notifyListeners();
     return isLoggedIn;
+  }
+
+  // Check session with context to show dialog if needed
+  Future<bool> checkSession(BuildContext context) async {
+    return await _authService.checkSession(context);
   }
 
   Future<void> signOut() async {
     await _authService.logout();
     _isAuthenticated = false;
     _phoneNumber = null;
+    _userId = null;
     notifyListeners();
   }
 }
