@@ -6,7 +6,7 @@ import 'package:dio/io.dart';
 import 'package:flutter/widgets.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 
-import '../utils/constants.dart';
+import '../utils/env_config.dart';
 
 class DestinationService {
   static final DestinationService _instance = DestinationService._internal();
@@ -25,9 +25,8 @@ class DestinationService {
       return client;
     };
   }
-  
-  final String _baseUrl =
-      '${Base_api}TouristDestination/'; // Replace with your API base URL
+
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/TouristDestination/';
 
   final Dio dio = Dio();
 

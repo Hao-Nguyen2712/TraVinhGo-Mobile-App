@@ -22,7 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final screenHeight = MediaQuery.of(context).size.height;
-    final authProvider = Provider.of<AuthProvider>(context);
     final isLoggedIn = authProvider.isAuthenticated;
 
     // No longer using ProtectedScreen - allowing access to all users
@@ -85,14 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 15),
-
                         // Image slider
                         ImageSlider(imageList: imageListHome),
-
                         const SizedBox(height: 20),
-
                         // Categories grid - now using the CategoryGrid widget
                         const CategoryGrid(),
                       ],

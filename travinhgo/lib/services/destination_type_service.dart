@@ -5,7 +5,7 @@ import 'package:dio/io.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../models/destination_types/destination_type.dart';
-import '../utils/constants.dart';
+import '../utils/env_config.dart';
 
 class DestinationTypeService {
   static final DestinationTypeService _instance =
@@ -26,8 +26,7 @@ class DestinationTypeService {
     };
   }
 
-  final String _baseUrl =
-      '${Base_api}DestinationType/';
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/DestinationType/';
 
   final Dio dio = Dio();
 

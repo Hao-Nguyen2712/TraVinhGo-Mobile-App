@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
+import '../widget/auth_required_screen.dart';
 import 'home/home_screen.dart';
 import 'map/map_screen.dart';
 
@@ -12,7 +13,7 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int cuttentIndex = 2;
-  late final List<Widget> screens;
+  late List<Widget> screens;
 
   @override
   void initState() {
@@ -24,11 +25,30 @@ class _BottomNavBarState extends State<BottomNavBar> {
     screens = [
       MapScreen(
           key: UniqueKey()), // Using UniqueKey to force rebuild on navigation
-      const Scaffold(body: Center(child: Text("Events Coming Soon"))),
+      // Events screen - Auth required
+      const AuthRequiredScreen(
+        child: Scaffold(body: Center(child: Text("Events Coming Soon"))),
+        message: 'Please login to use this feature',
+      ),
+      // Home screen - Available to all users
       const HomeScreen(),
-      const Scaffold(body: Center(child: Text("Favorites Coming Soon"))),
-      const Scaffold(body: Center(child: Text("Profile Coming Soon"))),
+      // Favorites screen - Auth required
+      const AuthRequiredScreen(
+        child: Scaffold(body: Center(child: Text("Favorites Coming Soon"))),
+        message: 'Please login to use this feature',
+      ),
+      // Profile screen - Auth required
+      const AuthRequiredScreen(
+        child: Scaffold(body: Center(child: Text("Profile Coming Soon"))),
+        message: 'Please login to use this feature',
+      ),
     ];
+  }
+
+  void _refreshMapScreen() {
+    setState(() {
+      screens[0] = MapScreen(key: UniqueKey());
+    });
   }
 
   @override
@@ -66,13 +86,13 @@ class _BottomNavBarState extends State<BottomNavBar> {
           children: [
             IconButton(
               onPressed: () {
-                setState(() {
-                  // If already on map screen, reinitialize all screens
-                  if (cuttentIndex == 0) {
-                    _initializeScreens();
-                  }
-                  cuttentIndex = 0;
-                });
+                if (cuttentIndex == 0) {
+                  _refreshMapScreen();
+                } else {
+                  setState(() {
+                    cuttentIndex = 0;
+                  });
+                }
               },
               icon: Image.asset(
                 'assets/images/navigations/map.png',

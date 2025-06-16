@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  static const routeName = '/signin';
   const LoginScreen({super.key});
 
   @override

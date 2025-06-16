@@ -5,7 +5,7 @@ import 'package:dio/io.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:travinhgo/models/Tag/Tag.dart';
 
-import '../utils/constants.dart';
+import '../utils/env_config.dart';
 
 class TagService {
   static final TagService _instance = TagService._internal();
@@ -25,7 +25,7 @@ class TagService {
     };
   }
 
-  final String _baseUrl = '${Base_api}Tags/';
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/Tags/';
 
   final Dio dio = Dio();
 

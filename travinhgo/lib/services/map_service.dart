@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../Models/Maps/top_favorite_destination.dart';
+import '../utils/env_config.dart';
 
 class MapService {
-  // Base URL for API calls - replace with your actual API base URL
-  static const String baseUrl = 'https://dv67l8z6-7162.asse.devtunnels.ms';
+  // Base URL for API calls from environment config
   final Dio _dio = Dio();
 
   // Method to fetch top favorite destinations
   Future<List<TopFavoriteDestination>> getTopFavoriteDestinations() async {
     try {
       final response = await _dio.get(
-        '$baseUrl/api/TouristDestination/top-favorite-destination',
+        '${EnvConfig.apiBaseUrl}/TouristDestination/top-favorite-destination',
       );
 
       // Check if the response is successful and has data

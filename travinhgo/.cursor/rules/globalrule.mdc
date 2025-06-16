@@ -3,3 +3,12 @@ description:
 globs: 
 alwaysApply: true
 ---
++ Please read through the entire source code before proceeding with the tasks.
+
++ When you want to generate a function or a file, please check if a similar function or class already exists to avoid generating similar functions or classes with the same content.
+
++ Analyze the output carefully before deciding to do it.
+
++ Keep source code clean, easy to read and understand
+
++ Always comment functions

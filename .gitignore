@@ -48,3 +48,5 @@ travinhgo/.vscode/mcp.json
 # Local SDK & Plugin - Exclude HERE SDK 
 travinhgo/plugins/*
 !travinhgo/plugins/Dev_SDK_Instruction.md
+
+.env

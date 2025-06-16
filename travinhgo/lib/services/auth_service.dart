@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:travinhgo/screens/auth/login_screen.dart';
 
-import '../utils/constants.dart';
+import '../utils/env_config.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -25,7 +25,9 @@ class AuthService {
   }
 
   AuthService._internal() {
-    dio.options.connectTimeout = const Duration(minutes: 3);
+    dio.options.connectTimeout = const Duration(seconds: 30);
+    dio.options.receiveTimeout = const Duration(seconds: 30);
+    dio.options.sendTimeout = const Duration(seconds: 30);
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       final client = HttpClient();
@@ -49,8 +51,8 @@ class AuthService {
     );
   }
 
-  final String _baseUrl =
-      'https://dv67l8z6-7162.asse.devtunnels.ms/api/Auth/'; // Replace with your API base URL
+  // Using the environment config for base URL
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/Auth/';
 
   final Dio dio = Dio();
 
@@ -59,27 +61,43 @@ class AuthService {
       var endPoint =
           '${_baseUrl}request-phonenumber-authen?phoneNumber=$phoneNumber';
 
+      debugPrint('Attempting phone authentication: $endPoint');
+
       final response = await dio.post(
         endPoint,
         options: Options(
           headers: {
-            'Content-Type': 'application/json charset=UTF-8',
+            'Content-Type': 'application/json; charset=UTF-8',
           },
+          validateStatus: (status) => status != null && status < 500,
         ),
       );
 
       if (response.statusCode == 200) {
         // Store the OTP token received from the server
+        debugPrint('Authentication successful, processing response');
+
+        if (response.data['data'] == null) {
+          debugPrint('Error: Response data is null or invalid');
+          return false;
+        }
+
         String dataJsonString = response.data['data'];
 
         // Parse the JSON string to extract the token
         Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
         _otpToken = dataMap['token'];
 
+        if (_otpToken == null) {
+          debugPrint('Error: Token is null or invalid');
+          return false;
+        }
+
         await _secureStorage.write(key: "token", value: _otpToken);
+        debugPrint('Token saved successfully');
         return true;
       } else {
-        debugPrint('Error: ${response.statusCode}');
+        debugPrint('Error: ${response.statusCode} - ${response.data}');
         return false;
       }
     } catch (e) {
