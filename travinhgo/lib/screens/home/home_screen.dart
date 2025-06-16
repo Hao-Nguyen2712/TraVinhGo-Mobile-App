@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           iconName: "food",
                           ColorName: 0xFFFFFACD,
                           title: "Local specialty",
-                          index: 0,
+                          index: 2,
                         ),
                         CategoryItem(
                           iconName: "hotel",

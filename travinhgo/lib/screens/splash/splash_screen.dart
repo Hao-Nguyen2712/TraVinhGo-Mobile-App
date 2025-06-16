@@ -70,6 +70,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Handle
     final markers = markerProvider.markers;
     for (var destinationType in destinationTypeProvider.destinationTypes) {
+      debugPrint(destinationType.name+ ' '+destinationType.id);
       final matchedMarker = markers.firstWhere(
             (m) => m.id == destinationType.markerId,
         orElse: () => Marker(id: '', name: 'Unknown', image: ''),

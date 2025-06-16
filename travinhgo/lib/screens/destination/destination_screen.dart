@@ -68,6 +68,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -76,6 +77,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                   SliverAppBar(
                     floating: true,
                     snap: true,
+                    backgroundColor: Colors.white,
                     title: const Text('Destination'),
                     centerTitle: true,
                     leading: IconButton(
@@ -119,7 +121,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                                 borderSide: BorderSide.none,
                               ),
                               filled: true,
-                              fillColor: Colors.white,
+                              fillColor: kSearchBackgroundColor,
                             ),
                           );
                         },
