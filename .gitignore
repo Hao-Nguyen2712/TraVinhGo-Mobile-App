@@ -4,6 +4,7 @@ project.lock.json
 .DS_Store
 *.pyc
 nupkg/
+.mdc
 
 # Visual Studio Code
 .vscode/*
@@ -43,3 +44,9 @@ msbuild.log
 msbuild.err
 msbuild.wrn
 travinhgo/.vscode/mcp.json
+
+# Local SDK & Plugin - Exclude HERE SDK 
+travinhgo/plugins/*
+!travinhgo/plugins/Dev_SDK_Instruction.md
+
+.env

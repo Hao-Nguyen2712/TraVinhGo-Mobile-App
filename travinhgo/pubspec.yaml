@@ -46,7 +46,12 @@ dependencies:
   device_info_plus: ^11.4.0
   flutter_secure_storage: ^9.2.4
   google_sign_in: ^6.3.0
-  cached_network_image: ^3.4.1
+  geolocator: ^10.1.0
+  cached_network_image: ^3.3.1
+  here_sdk:
+    path: plugins/here_sdk
+  go_router: ^12.1.0
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -75,18 +80,11 @@ flutter:
       - assets/images/navigations/
       - assets/images/auth/
       - assets/images/sample/
+      - assets/images/markers/
+      - .env
+      - assets/geo/travinh.json
 
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/to/asset-from-package
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
+ 
   fonts:
       - family: Aclonica
         fonts:

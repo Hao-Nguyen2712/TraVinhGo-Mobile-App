@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/services/auth_service.dart';
@@ -116,7 +117,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   width: double.infinity,
                   height: 35,
                   child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => context.pop(),
                     child: const Text(
                       'OK',
                       style: TextStyle(color: Color(0xFF158247)),
@@ -175,10 +176,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         if (mounted) {
           await StatusDialogs.showSuccessDialog(
             context: context,
-            message: "You've reset your password!",
+            message: "Authentication successful!",
             onOkPressed: () {
-              Navigator.of(context).pop(); // Dismiss dialog
-              Navigator.of(context).pushReplacementNamed('/home');
+              context.pop(); // Dismiss dialog
+              context.goNamed('home'); // Navigate using GoRouter
             },
           );
         }
@@ -186,9 +187,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         if (mounted) {
           await StatusDialogs.showErrorDialog(
             context: context,
-            message: 'Password reset failed!',
+            message: 'Authentication failed!',
             onOkPressed: () {
-              Navigator.of(context).pop(); // Dismiss dialog
+              context.pop(); // Dismiss dialog
               setState(() {
                 _otpError = 'Invalid OTP. Please try again.';
               });
@@ -289,7 +290,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         top: 10,
                         left: 10,
                         child: InkWell(
-                          onTap: () => Navigator.pop(context),
+                          onTap: () => context.pop(),
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: const BoxDecoration(

@@ -6,10 +6,13 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'dart:io';
 import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:travinhgo/screens/auth/login_screen.dart';
 
-import '../utils/constants.dart';
+import '../utils/env_config.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -22,7 +25,9 @@ class AuthService {
   }
 
   AuthService._internal() {
-    dio.options.connectTimeout = const Duration(minutes: 3);
+    dio.options.connectTimeout = const Duration(seconds: 30);
+    dio.options.receiveTimeout = const Duration(seconds: 30);
+    dio.options.sendTimeout = const Duration(seconds: 30);
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       final client = HttpClient();
@@ -30,11 +35,24 @@ class AuthService {
           (X509Certificate cert, String host, int port) => true;
       return client;
     };
+
+    // Add interceptor to handle 401 responses
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
+          if (error.response?.statusCode == 401) {
+            // Clear tokens on 401 (Unauthorized) response
+            await logout();
+            debugPrint('Session expired: 401 Unauthorized');
+          }
+          return handler.next(error);
+        },
+      ),
+    );
   }
 
-  final String _baseUrl =
-      '${Base_api}Auth/'; // Replace with your API base URL
-  
+  // Using the environment config for base URL
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/Auth/';
 
   final Dio dio = Dio();
 
@@ -43,27 +61,43 @@ class AuthService {
       var endPoint =
           '${_baseUrl}request-phonenumber-authen?phoneNumber=$phoneNumber';
 
+      debugPrint('Attempting phone authentication: $endPoint');
+
       final response = await dio.post(
         endPoint,
         options: Options(
           headers: {
-            'Content-Type': 'application/json charset=UTF-8',
+            'Content-Type': 'application/json; charset=UTF-8',
           },
+          validateStatus: (status) => status != null && status < 500,
         ),
       );
 
       if (response.statusCode == 200) {
         // Store the OTP token received from the server
+        debugPrint('Authentication successful, processing response');
+
+        if (response.data['data'] == null) {
+          debugPrint('Error: Response data is null or invalid');
+          return false;
+        }
+
         String dataJsonString = response.data['data'];
 
         // Parse the JSON string to extract the token
         Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
         _otpToken = dataMap['token'];
 
+        if (_otpToken == null) {
+          debugPrint('Error: Token is null or invalid');
+          return false;
+        }
+
         await _secureStorage.write(key: "token", value: _otpToken);
+        debugPrint('Token saved successfully');
         return true;
       } else {
-        debugPrint('Error: ${response.statusCode}');
+        debugPrint('Error: ${response.statusCode} - ${response.data}');
         return false;
       }
     } catch (e) {
@@ -108,12 +142,19 @@ class AuthService {
         String dataJsonString = response.data['data'];
         Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
 
-// Extract sessionId and refreshToken from the response
+        // Extract sessionId, refreshToken and userId from the response
         final sessionId = dataMap['sessionId'];
         final refreshToken = dataMap['refreshToken'];
+        final userId = dataMap['userId']; // Get userId from response
 
+        // Save tokens and user claim
         await _secureStorage.write(key: 'session_id', value: sessionId);
         await _secureStorage.write(key: 'refresh_token', value: refreshToken);
+
+        // Store userId as a claim (only exists when logged in)
+        if (userId != null) {
+          await _secureStorage.write(key: 'user_id', value: userId.toString());
+        }
 
         // Clear the temporary OTP token
         await _secureStorage.delete(key: 'token');
@@ -163,8 +204,10 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _secureStorage.delete(key: 'access_token');
+    // Delete all auth-related tokens and claims
+    await _secureStorage.delete(key: 'session_id');
     await _secureStorage.delete(key: 'refresh_token');
+    await _secureStorage.delete(key: 'user_id'); // Also remove user claim
   }
 
   Future<String?> getSessionId() async {
@@ -175,9 +218,47 @@ class AuthService {
     return await _secureStorage.read(key: 'refresh_token');
   }
 
+  // Get the user ID (claim)
+  Future<String?> getUserId() async {
+    return await _secureStorage.read(key: 'user_id');
+  }
+
   Future<bool> isLoggedIn() async {
     final token = await getSessionId();
     return token != null;
+  }
+
+  // Show session expired dialog
+  Future<void> showSessionExpiredDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Session Expired'),
+          content: const Text('Your session has expired, please log in again.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.goNamed('login'); // Use GoRouter
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Check for valid session and show dialog if expired
+  Future<bool> checkSession(BuildContext context) async {
+    final isValid = await isLoggedIn();
+    if (!isValid) {
+      await showSessionExpiredDialog(context);
+      return false;
+    }
+    return true;
   }
 
   Future<bool> authenticateWithGoogle() async {
