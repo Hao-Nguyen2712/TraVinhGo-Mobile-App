@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:travinhgo/models/Tag/Tag.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/services/destination_service.dart';
@@ -69,10 +67,10 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     }
 
     preloadImages(data.images);
-    if (data.historyStory != null && data.historyStory?.images?.isNotEmpty == true) {
+    if (data.historyStory != null &&
+        data.historyStory?.images?.isNotEmpty == true) {
       preloadImages(data.historyStory!.images!);
     }
-
 
     if (mounted) {
       setState(() {
@@ -270,7 +268,9 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               child: Text(
                                 destinationDetail.name,
                                 style: TextStyle(
-                                    fontSize: 25, fontWeight: FontWeight.bold),
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    color: kprimaryColor),
                               )),
                           const SizedBox(
                             height: 8,
@@ -322,7 +322,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                             height: 10,
                           ),
                           DataFieldRow(
-                            title: 'Opening hours',
+                            title: 'Ticket',
                             value: StringHelper.normalizeName(
                                     destinationDetail.ticket) ??
                                 "N/A",

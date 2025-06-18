@@ -4,18 +4,17 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../models/local_specialties/local_specialties.dart';
-import '../utils/constants.dart';
+import '../models/event_festival/event_and_festival.dart';
+import '../utils/env_config.dart';
 
-class LocalSpecialtieService {
-  static final LocalSpecialtieService _instance =
-      LocalSpecialtieService._internal();
+class EventFestivalService {
+  static final EventFestivalService _instance = EventFestivalService._internal();
 
-  factory LocalSpecialtieService() {
+  factory EventFestivalService() {
     return _instance;
   }
 
-  LocalSpecialtieService._internal() {
+  EventFestivalService._internal() {
     dio.options.connectTimeout = const Duration(minutes: 3);
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
@@ -26,14 +25,13 @@ class LocalSpecialtieService {
     };
   }
 
-  final String _baseUrl =
-      '${Base_api}LocalSpecialties/'; 
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/EventAndFestival/';
 
   final Dio dio = Dio();
 
-  Future<List<LocalSpecialties>> getLocalSpecialtie() async {
+  Future<List<EventAndFestival>> getDestination() async {
     try {
-      var endPoint = '${_baseUrl}all';
+      var endPoint = '${_baseUrl}GetAllEventAndFestinal';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -42,21 +40,21 @@ class LocalSpecialtieService {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
-        List<LocalSpecialties> localSpecialties =
-            data.map((item) => LocalSpecialties.fromJson(item)).toList();
-        return localSpecialties;
+        List<EventAndFestival> eventAndFestivals =
+        data.map((item) => EventAndFestival.fromJson(item)).toList();
+        return eventAndFestivals;
       } else {
         return [];
       }
     } catch (e) {
-      debugPrint('Error during get local specialties list: $e');
+      debugPrint('Error during get event and festival list: $e');
       return [];
     }
   }
 
-  Future<LocalSpecialties?> getLocalSpecialtieById(String id) async {
+  Future<EventAndFestival?> getDestinationById(String id) async {
     try {
-      var endPoint = '${_baseUrl}${id}';
+      var endPoint = '${_baseUrl}GetEventAndFestivalById/${id}';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -65,13 +63,13 @@ class LocalSpecialtieService {
 
       if (response.statusCode == 200) {
         dynamic data = response.data['data'];
-        LocalSpecialties localSpecialtie = LocalSpecialties.fromJson(data);
-        return localSpecialtie;
+        EventAndFestival eventAndFestivalDetail = EventAndFestival.fromJson(data);
+        return eventAndFestivalDetail;
       } else {
         return null;
       }
     } catch (e) {
-      debugPrint('Error during get local specialtie : $e');
+      debugPrint('Error during get event and festival list: $e');
       return null;
     }
   }

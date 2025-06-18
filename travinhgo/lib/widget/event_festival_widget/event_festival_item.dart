@@ -1,21 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:travinhgo/models/local_specialties/local_specialties.dart';
+import 'package:travinhgo/models/event_festival/event_and_festival.dart';
 
 import '../../utils/string_helper.dart';
 
-class LocalSpecialtyItem extends StatelessWidget {
-  final LocalSpecialties localSpecialty;
+class EventFestivalItem extends StatelessWidget {
+  final EventAndFestival eventAndFestival;
 
-  const LocalSpecialtyItem({super.key, required this.localSpecialty});
+  const EventFestivalItem({super.key, required this.eventAndFestival});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
         context.pushNamed(
-          'LocalSpecialtyDetail',
-          pathParameters: {'id': localSpecialty.id},
+          'EventFestivalDetail',
+          pathParameters: {'id': eventAndFestival.id},
         );
       },
       child: Card(
@@ -35,7 +36,7 @@ class LocalSpecialtyItem extends StatelessWidget {
                 topRight: Radius.circular(16),
               ),
               child: Image.network(
-                localSpecialty.images.first,
+                eventAndFestival.images.first,
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -60,7 +61,9 @@ class LocalSpecialtyItem extends StatelessWidget {
                   // Text
                   Expanded(
                     child: Text(
-                      StringHelper.toTitleCase(localSpecialty.foodName),
+                      StringHelper.toTitleCase(eventAndFestival.nameEvent),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

@@ -115,20 +115,29 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
             ),
           ),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, childAspectRatio: 1.5),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return LocalSpecialtyItem(
-                    localSpecialty: _filteredLocals[index]);
-              },
-              childCount: _filteredLocals.length,
-            ),
-          ),
-        ),
+        _isLoading
+            ? const SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              )
+            : SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1, childAspectRatio: 1.5),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return LocalSpecialtyItem(
+                          localSpecialty: _filteredLocals[index]);
+                    },
+                    childCount: _filteredLocals.length,
+                  ),
+                ),
+              ),
       ])),
     );
   }

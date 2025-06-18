@@ -29,9 +29,9 @@ class OcopProductService {
 
   final Dio dio = Dio();
 
-  Future<List<OcopProduct>> getDestination() async {
+  Future<List<OcopProduct>> getOcopProduct() async {
     try {
-      var endPoint = '${_baseUrl}GetAllDestinations';
+      var endPoint = '${_baseUrl}GetAllOcopProduct';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -49,6 +49,28 @@ class OcopProductService {
     } catch (e) {
       debugPrint('Error during get destination list: $e');
       return [];
+    }
+  }
+
+  Future<OcopProduct?> getOcopProductById(String id) async {
+    try {
+      var endPoint = '${_baseUrl}GetOcopProductById/${id}';
+
+      final response = await dio.get(endPoint,
+          options: Options(headers: {
+            'Content-Type': 'application/json charset=UTF-8',
+          }));
+
+      if (response.statusCode == 200) {
+        dynamic data = response.data['data'];
+        OcopProduct ocopProductDetail = OcopProduct.fromJson(data);
+        return ocopProductDetail;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error during get ocop product list: $e');
+      return null;
     }
   }
 }

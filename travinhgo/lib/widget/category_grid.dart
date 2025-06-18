@@ -26,7 +26,7 @@ class CategoryGrid extends StatelessWidget {
             iconName: "plantingtree",
             ColorName: 0xFFD4F4DD,
             title: "Ocop",
-            index: 0,
+            index: 4,
           ),
           CategoryItem(
             iconName: "lightbulb",
@@ -49,8 +49,8 @@ class CategoryGrid extends StatelessWidget {
           CategoryItem(
             iconName: "hotel",
             ColorName: 0xFFE0FFFF,
-            title: "Stay",
-            index: 0,
+            title: "Event",
+            index: 3,
           ),
           CategoryItem(
             iconName: "dragon-boat",

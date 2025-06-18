@@ -4,7 +4,7 @@ class OcopProduct {
   final String id;
   final String productName;
   final String? productDescription;
-  final List<String>? productImage;
+  final List<String> productImage;
   final String? productPrice;
   final String ocopTypeId;
   final List<SellLocation> sellocations;
@@ -17,7 +17,7 @@ class OcopProduct {
       {required this.id,
       required this.productName,
       this.productDescription,
-      this.productImage,
+      required this.productImage,
       this.productPrice,
       required this.ocopTypeId,
       required this.sellocations,
@@ -49,22 +49,19 @@ class OcopProduct {
 }
 
 class SellLocation {
-  final String locationName;
-  final String locationAddress;
-  final String markerId;
+  final String? locationName;
+  final String? locationAddress;
   final Location location;
 
   SellLocation(
       {required this.locationName,
-      required this.locationAddress,
-      required this.markerId,
+      this.locationAddress,
       required this.location});
 
   factory SellLocation.fromJson(Map<String, dynamic> json) {
     return SellLocation(
       locationName: json['locationName'],
       locationAddress: json['locationAddress'],
-      markerId: json['markerId'],
       location: Location.fromJson(json['location']),
     );
   }

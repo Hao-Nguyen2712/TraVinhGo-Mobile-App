@@ -5,6 +5,8 @@ import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/screens/destination/destination_detail_screen.dart';
 import 'package:travinhgo/utils/constants.dart';
 
+import '../../utils/string_helper.dart';
+
 class DestinationItem extends StatelessWidget {
   final Destination destination;
 
@@ -57,7 +59,7 @@ class DestinationItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4,),
                   Text(
-                    destination.name,
+                    StringHelper.toTitleCase(destination.name),
                     maxLines: 2,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
