@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/providers/card_provider.dart';
 import 'package:travinhgo/providers/map_provider.dart';
+import 'package:travinhgo/providers/ocop_type_provider.dart';
 import 'package:travinhgo/providers/setting_provider.dart';
 import 'package:travinhgo/router/app_router.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => MapProvider()),
           ChangeNotifierProvider(create: (_) => DestinationTypeProvider()),
           ChangeNotifierProvider(create: (_) => TagProvider()),
+          ChangeNotifierProvider(create: (_) => OcopTypeProvider()),
         ],
         child: Builder(
           builder: (context) {

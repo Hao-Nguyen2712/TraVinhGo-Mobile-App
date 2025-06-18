@@ -7,6 +7,12 @@ import 'package:travinhgo/screens/auth/otp_verification_screen.dart';
 import 'package:travinhgo/screens/nav_bar_screen.dart';
 import 'package:travinhgo/screens/splash/splash_screen.dart';
 
+import '../screens/destination/destination_detail_screen.dart';
+import '../screens/event_festival/event_fesftival_detail_screen.dart';
+import '../screens/local_specialty/local_specialty_detail_screen.dart';
+import '../screens/ocop_product/ocop_product_detail_screen.dart';
+import '../widget/auth_required_screen.dart';
+
 class AppRouter {
   final AuthProvider authProvider;
 
@@ -15,7 +21,8 @@ class AppRouter {
   late final router = GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: true,
-    refreshListenable: authProvider, // Refresh when auth state changes
+    refreshListenable: authProvider,
+    // Refresh when auth state changes
     redirect: _handleRedirect,
     routes: [
       // Splash screen
@@ -43,12 +50,51 @@ class AppRouter {
           );
         },
       ),
-
+      GoRoute(
+        path: '/local-specialty-detail/:id',
+        name: 'LocalSpecialtyDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return LocalSpecialtyDetailScreen(
+            id: id,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/event-festival-detail/:id',
+        name: 'EventFestivalDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return EventFesftivalDetailScreen(
+            id: id,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/ocop-product-detail/:id',
+        name: 'OcopProductDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return OcopProductDetailScreen(
+            id: id,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/tourist-destination-detail/:id',
+        name: 'TouristDestinationDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return DestinationDetailScreen(
+            id: id,
+          );
+        },
+      ),
       // Main app
       GoRoute(
         path: '/home',
         name: 'home',
-        builder: (context, state) => const BottomNavBar(),
+        builder: (context, state) => BottomNavBar(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
@@ -63,7 +109,11 @@ class AppRouter {
     if (state.matchedLocation == '/' ||
         state.matchedLocation.startsWith('/login') ||
         state.matchedLocation.startsWith('/verify-otp') ||
-        state.matchedLocation == '/home') {
+        state.matchedLocation == '/home' ||
+        state.matchedLocation.startsWith('/local-specialty-detail/') ||
+        state.matchedLocation.startsWith('/event-festival-detail/') ||
+        state.matchedLocation.startsWith('/ocop-product-detail/') ||
+        state.matchedLocation.startsWith('/tourist-destination-detail/')) {
       return null;
     }
 
