@@ -2,19 +2,19 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import 'package:flutter/widgets.dart';
-import 'package:travinhgo/models/destination/destination.dart';
+import 'package:flutter/cupertino.dart';
 
-import '../utils/env_config.dart';
+import '../models/ocop/ocop_product.dart';
+import '../utils/constants.dart';
 
-class DestinationService {
-  static final DestinationService _instance = DestinationService._internal();
+class OcopProductService {
+  static final OcopProductService _instance = OcopProductService._internal();
 
-  factory DestinationService() {
+  factory OcopProductService() {
     return _instance;
   }
 
-  DestinationService._internal() {
+  OcopProductService._internal() {
     dio.options.connectTimeout = const Duration(minutes: 3);
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
@@ -25,13 +25,13 @@ class DestinationService {
     };
   }
 
-  final String _baseUrl = '${EnvConfig.apiBaseUrl}/TouristDestination/';
+  final String _baseUrl = '${Base_api}OcopProduct/';
 
   final Dio dio = Dio();
 
-  Future<List<Destination>> getDestination() async {
+  Future<List<OcopProduct>> getOcopProduct() async {
     try {
-      var endPoint = '${_baseUrl}GetAllDestinations';
+      var endPoint = '${_baseUrl}GetAllOcopProduct';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -40,8 +40,8 @@ class DestinationService {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
-        List<Destination> destinations =
-            data.map((item) => Destination.fromJson(item)).toList();
+        List<OcopProduct> destinations =
+            data.map((item) => OcopProduct.fromJson(item)).toList();
         return destinations;
       } else {
         return [];
@@ -52,9 +52,9 @@ class DestinationService {
     }
   }
 
-  Future<Destination?> getDestinationById(String id) async {
+  Future<OcopProduct?> getOcopProductById(String id) async {
     try {
-      var endPoint = '${_baseUrl}GetDestinationById/${id}';
+      var endPoint = '${_baseUrl}GetOcopProductById/${id}';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -63,13 +63,13 @@ class DestinationService {
 
       if (response.statusCode == 200) {
         dynamic data = response.data['data'];
-        Destination destinationDetail = Destination.fromJson(data);
-        return destinationDetail;
+        OcopProduct ocopProductDetail = OcopProduct.fromJson(data);
+        return ocopProductDetail;
       } else {
         return null;
       }
     } catch (e) {
-      debugPrint('Error during get destination list: $e');
+      debugPrint('Error during get ocop product list: $e');
       return null;
     }
   }

@@ -2,19 +2,19 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import 'package:flutter/widgets.dart';
-import 'package:travinhgo/models/destination/destination.dart';
+import 'package:flutter/cupertino.dart';
 
+import '../models/event_festival/event_and_festival.dart';
 import '../utils/env_config.dart';
 
-class DestinationService {
-  static final DestinationService _instance = DestinationService._internal();
+class EventFestivalService {
+  static final EventFestivalService _instance = EventFestivalService._internal();
 
-  factory DestinationService() {
+  factory EventFestivalService() {
     return _instance;
   }
 
-  DestinationService._internal() {
+  EventFestivalService._internal() {
     dio.options.connectTimeout = const Duration(minutes: 3);
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
@@ -25,13 +25,13 @@ class DestinationService {
     };
   }
 
-  final String _baseUrl = '${EnvConfig.apiBaseUrl}/TouristDestination/';
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/EventAndFestival/';
 
   final Dio dio = Dio();
 
-  Future<List<Destination>> getDestination() async {
+  Future<List<EventAndFestival>> getDestination() async {
     try {
-      var endPoint = '${_baseUrl}GetAllDestinations';
+      var endPoint = '${_baseUrl}GetAllEventAndFestinal';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -40,21 +40,21 @@ class DestinationService {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
-        List<Destination> destinations =
-            data.map((item) => Destination.fromJson(item)).toList();
-        return destinations;
+        List<EventAndFestival> eventAndFestivals =
+        data.map((item) => EventAndFestival.fromJson(item)).toList();
+        return eventAndFestivals;
       } else {
         return [];
       }
     } catch (e) {
-      debugPrint('Error during get destination list: $e');
+      debugPrint('Error during get event and festival list: $e');
       return [];
     }
   }
 
-  Future<Destination?> getDestinationById(String id) async {
+  Future<EventAndFestival?> getDestinationById(String id) async {
     try {
-      var endPoint = '${_baseUrl}GetDestinationById/${id}';
+      var endPoint = '${_baseUrl}GetEventAndFestivalById/${id}';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -63,13 +63,13 @@ class DestinationService {
 
       if (response.statusCode == 200) {
         dynamic data = response.data['data'];
-        Destination destinationDetail = Destination.fromJson(data);
-        return destinationDetail;
+        EventAndFestival eventAndFestivalDetail = EventAndFestival.fromJson(data);
+        return eventAndFestivalDetail;
       } else {
         return null;
       }
     } catch (e) {
-      debugPrint('Error during get destination list: $e');
+      debugPrint('Error during get event and festival list: $e');
       return null;
     }
   }

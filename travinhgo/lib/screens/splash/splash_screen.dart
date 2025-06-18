@@ -9,6 +9,8 @@ import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/utils/constants.dart';
 
+import '../../providers/ocop_type_provider.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -136,15 +138,20 @@ class _SplashScreenState extends State<SplashScreen> {
       final destinationTypeProvider =
           Provider.of<DestinationTypeProvider>(context, listen: false);
       final tagProvider = Provider.of<TagProvider>(context, listen: false);
+      final ocopTypeProvider = Provider.of<OcopTypeProvider>(context, listen: false);
+      
+
 
       // Start all loading operations in parallel
       final markersFuture = markerProvider.fetchMarkers();
       final destinationTypesFuture =
           destinationTypeProvider.fetchDestinationType();
       final tagsFuture = tagProvider.fetchDestinationType();
+      final ocopTypeFuture = ocopTypeProvider.fetchOcopType();
+
 
       // Wait for all data to load
-      await Future.wait([markersFuture, destinationTypesFuture, tagsFuture]);
+      await Future.wait([markersFuture, destinationTypesFuture, tagsFuture, ocopTypeFuture]);
 
       // Associate markers with destination types
       final markers = markerProvider.markers;
