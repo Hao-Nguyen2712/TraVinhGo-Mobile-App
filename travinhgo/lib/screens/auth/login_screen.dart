@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
+import 'dart:math' as math;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -228,302 +229,326 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //  final authProvider = Provider.of<AuthProvider>(context);
+    // Get screen metrics for responsive layout
+    final screenHeight = MediaQuery.of(context).size.height;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardVisible = keyboardHeight > 0;
 
     return Scaffold(
-      body: Column(
-        children: [
-          // Green curved header with logo
-          ClipPath(
-            clipper: CurvedBottomClipper(),
-            child: Container(
-              color: const Color(0xFF158247), // Primary green color
-              height: 220,
-              width: double.infinity,
-              child: SafeArea(
-                child: Stack(
-                  children: [
-                    // Back button
-                    Positioned(
-                      top: 10,
-                      left: 10,
-                      child: InkWell(
-                        onTap: () => context.pop(),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Colors.black54,
-                            size: 18,
+      resizeToAvoidBottomInset: true,
+      body: GestureDetector(
+        // Dismiss keyboard when tapping outside input fields
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            // Green curved header with logo - reduce height when keyboard is visible
+            ClipPath(
+              clipper: CurvedBottomClipper(),
+              child: Container(
+                color: const Color(0xFF158247), // Primary green color
+                height: isKeyboardVisible
+                    ? screenHeight * 0.15 // Smaller when keyboard is visible
+                    : screenHeight * 0.28, // Normal height otherwise
+                width: double.infinity,
+                child: SafeArea(
+                  child: Stack(
+                    children: [
+                      // Back button
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: InkWell(
+                          onTap: () => context.pop(),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new,
+                              color: Colors.black54,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
+                      // Logo
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/auth/logo.png',
+                              height: 170,
+                              width: 170,
+                              // Use placeholder if logo not available
+                              errorBuilder: (ctx, obj, stack) => const Icon(
+                                Icons.landscape,
+                                color: Colors.white,
+                                size: 70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  left: 10,
+                  right: 10,
+                  top: 10,
+                  // Add bottom padding to prevent overflow when keyboard appears
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Sign in title
+                    Text(
+                      'Sign In',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    // Logo
-                    Center(
+                    const SizedBox(height: 14),
+                    // Subtitle
+                    Text(
+                      'Please sign in to continue our app',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Phone number field
+                    Padding(
+                      padding: const EdgeInsets.all(5),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Image.asset(
-                            'assets/images/auth/logo.png',
-                            height: 170,
-                            width: 170,
-                            // Use placeholder if logo not available
-                            errorBuilder: (ctx, obj, stack) => const Icon(
-                              Icons.landscape,
-                              color: Colors.white,
-                              size: 70,
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: RichText(
+                              text: const TextSpan(
+                                text: 'Phone Number ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: '*',
+                                    style: TextStyle(
+                                      color: Color(0xFF0B8C4C),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                              border: _phoneError != null
+                                  ? Border.all(
+                                      color: Colors.red.shade300, width: 1.0)
+                                  : null,
+                            ),
+                            child: TextField(
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                              onChanged: (value) {
+                                // Clear error when user types
+                                if (_phoneError != null) {
+                                  setState(() {
+                                    _phoneError = null;
+                                  });
+                                }
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Your phone number',
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 16,
+                                ),
+                                suffixIcon: _phoneController.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear, size: 18),
+                                        onPressed: () {
+                                          setState(() {
+                                            _phoneController.clear();
+                                            _phoneError = null;
+                                          });
+                                        },
+                                      )
+                                    : null,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Sign in title
-                  Text(
-                    'Sign In',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  // Subtitle
-                  Text(
-                    'Please sign in to continue our app',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40),
 
-                  // Phone number field
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // Error message for phone number
+                    if (_phoneError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _phoneError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 40),
+
+                    // Continue button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _handlePhoneSignIn,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0B8C4C),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26),
+                            ),
+                          ),
+                          child: const Text(
+                            'Continue',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40), // Or continue with
+                    Column(
                       children: [
+                        // Divider with text
                         Padding(
-                          padding: const EdgeInsets.only(left: 15.0),
-                          child: RichText(
-                            text: const TextSpan(
-                              text: 'Phone Number ',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black87,
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Divider(
+                                  color: Colors.grey.shade300,
+                                  thickness: 1,
+                                ),
                               ),
-                              children: [
-                                TextSpan(
-                                  text: '*',
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                child: Text(
+                                  'Or continue with',
                                   style: TextStyle(
-                                    color: Color(0xFF0B8C4C),
-                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Divider(
+                                  color: Colors.grey.shade300,
+                                  thickness: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Google sign-in button
+                        InkWell(
+                          onTap: _handleGoogleSignIn,
+                          child: Container(
+                            width: 220,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(26),
+                                  spreadRadius: 1,
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/auth/search.png',
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Google',
+                                  style: GoogleFonts.montserrat(
+                                    color: Colors.black87,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                            border: _phoneError != null
-                                ? Border.all(
-                                    color: Colors.red.shade300, width: 1.0)
-                                : null,
-                          ),
-                          child: TextField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            onChanged: (value) {
-                              // Clear error when user types
-                              if (_phoneError != null) {
-                                setState(() {
-                                  _phoneError = null;
-                                });
-                              }
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'Your phone number',
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 16,
-                              ),
-                              suffixIcon: _phoneController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear, size: 18),
-                                      onPressed: () {
-                                        setState(() {
-                                          _phoneController.clear();
-                                          _phoneError = null;
-                                        });
-                                      },
-                                    )
-                                  : null,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
-                  ),
 
-                  // Error message for phone number
-                  if (_phoneError != null)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _phoneError!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
+                    const SizedBox(height: 30),
+                    // Extra padding at the bottom to prevent overflow
+                    SizedBox(
+                      height: MediaQuery.of(context).padding.bottom +
+                          (isKeyboardVisible
+                              ? 20
+                              : 10), // More padding when keyboard is visible
                     ),
-                  const SizedBox(height: 40),
-
-                  // Continue button
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _handlePhoneSignIn,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0B8C4C),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(26),
-                          ),
-                        ),
-                        child: const Text(
-                          'Continue',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 40), // Or continue with
-                  Column(
-                    children: [
-                      // Divider with text
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey.shade300,
-                                thickness: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Text(
-                                'Or continue with',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey.shade300,
-                                thickness: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Google sign-in button
-                      InkWell(
-                        onTap: _handleGoogleSignIn,
-                        child: Container(
-                          width: 220,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(25),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(26),
-                                spreadRadius: 1,
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/images/auth/search.png',
-                                height: 20,
-                                width: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Google',
-                                style: GoogleFonts.montserrat(
-                                  color: Colors.black87,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -534,15 +559,21 @@ class CurvedBottomClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    path.lineTo(
-        0, size.height - 30); // Start from bottom-left with small offset
+
+    // Calculate curve height as a percentage of container height (10%)
+    final curveHeight = size.height * 0.1;
+    // Ensure curve offset doesn't exceed container bounds
+    final safeOffset = math.min(curveHeight, size.height * 0.15);
+
+    // Start from top-left corner
+    path.lineTo(0, size.height - safeOffset);
 
     // Use a single quadratic Bezier curve for the entire width
     path.quadraticBezierTo(
       size.width / 2, // Control point x at center
-      size.height + 20, // Control point y below the bottom edge
+      size.height - (safeOffset * 0.2), // Control point y stays within bounds
       size.width, // End point x at right edge
-      size.height - 30, // End point y same as start
+      size.height - safeOffset, // End point y same as start
     );
 
     // Complete the path

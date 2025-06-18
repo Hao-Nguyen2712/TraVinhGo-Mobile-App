@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:here_sdk/mapview.dart';
+import 'package:here_sdk/mapview.dart'
+    show HereMap, HereMapController, MapMarker, MapPickResult;
+import 'package:here_sdk/gestures.dart' show TapListener;
+import 'package:here_sdk/core.dart'
+    show GeoCoordinates, Point2D, Rectangle2D, Size2D;
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:developer' as developer;
 
 import '../../Models/Maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
 
-/// Map Screen that displays HERE Maps with POIs and user location
+/// Map Screen that displays HERE maps with POIs and user location
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
 
@@ -24,6 +31,16 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   // Track last shown POI to avoid showing duplicate snackbars
   String? _lastShownPoiName;
 
+  // Text editing controller for search input
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
+
+  // Vietnamese text input optimization
+  String? _lastSearchTerm;
+  String? _composingText;
+  bool _isComposing = false;
+  int _lastSearchTimestamp = 0;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +56,19 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    // Thoroughly clean up all map resources
+    final mapProvider = Provider.of<MapProvider>(context, listen: false);
+    mapProvider.cleanupMapResources();
+
+    // Clear markers before disposing
+    mapProvider.clearMarkers([
+      MapProvider.MARKER_TYPE_LOCATION,
+      MapProvider.MARKER_TYPE_DESTINATION,
+      MapProvider.MARKER_TYPE_CUSTOM
+    ]);
+
+    _debounceTimer?.cancel();
+    _searchController.dispose();
     _pageController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -50,7 +80,80 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // Refresh the map when app is resumed
       _mapProvider.refreshMap();
+
+      // Clear any previous markers that may have been cached
+      _mapProvider.cleanupMapResources();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      // Clean up resources when app is paused, inactive or detached
+      _mapProvider.cleanupMapResources();
     }
+  }
+
+  /// Detect if text contains Vietnamese accents or is in composition mode
+  bool _isVietnameseComposing(String text) {
+    // Regular expression for Vietnamese diacritics
+    final vietnamesePattern = RegExp(
+        r'[àáạảãăắằẳẵặâấầẩẫậèéẹẻẽêếềểễệìíịỉĩòóọỏõôốồổỗộơớờởỡợùúụủũưứừửữựỳýỵỷỹđ]');
+
+    return vietnamesePattern.hasMatch(text.toLowerCase());
+  }
+
+  /// Get appropriate debounce duration based on text content
+  Duration _getDebounceDuration(String text) {
+    // Longer debounce for Vietnamese text to allow IME composition
+    return _isVietnameseComposing(text)
+        ? const Duration(milliseconds: 800) // Vietnamese text
+        : const Duration(milliseconds: 400); // English/unaccented text
+  }
+
+  /// Handles search input changes with smart debounce for Vietnamese typing experience
+  void _onSearchChanged(String text, MapProvider provider) {
+    // Cancel any previous timer
+    _debounceTimer?.cancel();
+
+    if (text.isEmpty) {
+      provider.clearSearchResults();
+      _lastSearchTerm = null;
+      return;
+    }
+
+    // Skip if text too short
+    if (text.length < 2) return;
+
+    // Simple debounce approach - let IME handle composition naturally
+    final debounceDuration = _getDebounceDuration(text);
+
+    _debounceTimer = Timer(debounceDuration, () {
+      _performSearch(text, provider);
+    });
+  }
+
+  /// Perform search with duplicate prevention and performance tracking
+  void _performSearch(String searchTerm, MapProvider provider) {
+    final trimmedTerm = searchTerm.trim();
+
+    // Avoid duplicate searches
+    if (_lastSearchTerm == trimmedTerm) {
+      developer.log('Skipping duplicate search: "$trimmedTerm"',
+          name: 'Search');
+      return;
+    }
+
+    // Performance tracking
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final timeSinceLastSearch =
+        _lastSearchTimestamp > 0 ? now - _lastSearchTimestamp : 0;
+    _lastSearchTimestamp = now;
+
+    _lastSearchTerm = trimmedTerm;
+
+    developer.log(
+        'Performing search: "$trimmedTerm" (${timeSinceLastSearch}ms since last)',
+        name: 'Search');
+
+    provider.searchLocations(trimmedTerm);
   }
 
   /// Shows a snackbar with a message
@@ -83,6 +186,69 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   /// Called when the map is created
   void _onMapCreated(HereMapController hereMapController) {
     _mapProvider.initMapScene(hereMapController);
+
+    // Set up tap listener for category markers
+    hereMapController.gestures.tapListener = TapListener((Point2D touchPoint) {
+      _handleMapTap(touchPoint);
+    });
+  }
+
+  /// Handle taps on the map with special handling for markers
+  void _handleMapTap(Point2D touchPoint) {
+    if (_mapProvider.mapController == null) return;
+
+    // Create a small rectangle around the touch point for picking
+    final size = Size2D(20, 20); // 10 pixels radius in each direction
+    final origin = Point2D(touchPoint.x - 10, touchPoint.y - 10);
+    final Rectangle2D pickArea = Rectangle2D(origin, size);
+
+    // Use the pick API to find markers at the touch point
+    _mapProvider.mapController!.pick(null, pickArea,
+        (MapPickResult? pickResult) {
+      // Check if any markers were picked
+      if (pickResult == null ||
+          pickResult.mapItems == null ||
+          pickResult.mapItems!.markers.isEmpty) {
+        // No marker was tapped, proceed with regular tap handling
+        var geoCoords =
+            _mapProvider.mapController?.viewToGeoCoordinates(touchPoint);
+        if (geoCoords != null) {
+          // Handle regular map tap
+        }
+        return;
+      }
+
+      // A marker was tapped
+      MapMarker tappedMarker = pickResult.mapItems!.markers.first;
+
+      // Check if this is a category marker
+      if (tappedMarker.metadata != null) {
+        // Get place information from marker metadata
+        Map<String, String>? placeInfo =
+            _mapProvider.getPlaceInfoFromMarker(tappedMarker);
+
+        if (placeInfo != null) {
+          // Show POI popup with the place information
+          _showCategoryMarkerPopup(placeInfo, tappedMarker.coordinates);
+        }
+      }
+    });
+  }
+
+  /// Shows a popup with information about a place from a category marker
+  void _showCategoryMarkerPopup(
+      Map<String, String> placeInfo, GeoCoordinates coordinates) {
+    // Set the POI info in the map provider
+    _mapProvider.lastPoiName = placeInfo['name'];
+    _mapProvider.lastPoiCategory = placeInfo['category'];
+    _mapProvider.lastPoiCoordinates = coordinates;
+    _mapProvider.showPoiPopup = true;
+
+    // Move camera to the POI location
+    _mapProvider.moveCamera(coordinates, 500);
+
+    // Notify listeners
+    _mapProvider.notifyListeners();
   }
 
   /// Shows debug information in case of errors
@@ -264,14 +430,11 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                       ? const Center(child: CircularProgressIndicator())
                       : HereMap(onMapCreated: _onMapCreated),
 
-              // Search bar at the top
-              _buildSearchBar(),
+              // Category buttons
+              _buildCategoryButtons(),
 
               // Location button
               _buildLocationButton(),
-
-              // Category buttons
-              _buildCategoryButtons(),
 
               // Loading indicator
               if (provider.isLoading && provider.mapController != null)
@@ -282,6 +445,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
               // POI information popup
               _buildPoiPopup(),
+
+              // Search bar with dropdown at the top (put last to be on top of z-order)
+              _buildSearchBar(),
             ],
           ),
         );
@@ -291,42 +457,112 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   /// Builds the search bar widget
   Widget _buildSearchBar() {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 10,
-      left: 16,
-      right: 16,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(242), // 0.95 opacity
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(38), // 0.15 opacity
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: TextField(
-          decoration: InputDecoration(
-            hintText: 'Search here',
-            hintStyle: TextStyle(color: Colors.grey),
-            prefixIcon: Icon(
-              Icons.search_rounded,
-              color: Colors.green.withAlpha(230),
-              size: 24,
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(Icons.filter_list, color: Colors.grey),
-              onPressed: () {
-                // Implement search filter functionality
-              },
-            ),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 15),
+    return Consumer<MapProvider>(
+      builder: (context, provider, _) {
+        // Access search suggestions
+        final suggestions = provider.searchSuggestions;
+
+        return Positioned(
+          top: MediaQuery.of(context).padding.top + 10,
+          left: 16,
+          right: 16,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Search input field
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(242), // 0.95 opacity
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(38), // 0.15 opacity
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.search,
+
+                  // Vietnamese text optimization
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  enableInteractiveSelection: true,
+
+                  decoration: InputDecoration(
+                    hintText: 'Tìm kiếm',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: Colors.green.withAlpha(230),
+                      size: 24,
+                    ),
+                    suffixIcon: provider.isSearching
+                        ? Container(
+                            width: 24,
+                            height: 24,
+                            padding: EdgeInsets.all(6),
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : IconButton(
+                            icon: Icon(Icons.clear, color: Colors.grey),
+                            onPressed: () {
+                              _searchController.clear();
+                              provider.clearSearchResults();
+                            },
+                          ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  onChanged: (text) => _onSearchChanged(text, provider),
+                ),
+              ),
+
+              // Search results dropdown with higher z-index
+              if (suggestions.isNotEmpty)
+                Material(
+                  elevation: 12, // Higher elevation for better shadow
+                  borderRadius: BorderRadius.circular(15),
+                  child: Container(
+                    margin: EdgeInsets.only(top: 4),
+                    constraints: BoxConstraints(maxHeight: 300),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        itemCount: suggestions.length,
+                        itemBuilder: (context, index) {
+                          final suggestion = suggestions[index];
+                          return ListTile(
+                            dense: true,
+                            leading: Icon(Icons.location_on_outlined,
+                                color: Colors.black),
+                            title: Text(
+                              suggestion.title ?? "Địa điểm không tên",
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            onTap: () {
+                              provider.selectSearchSuggestion(suggestion);
+                              _searchController.text = suggestion.title ?? "";
+                              FocusScope.of(context).unfocus(); // Hide keyboard
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -369,50 +605,128 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   /// Builds the category filter buttons
   Widget _buildCategoryButtons() {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 70,
-      left: 0,
-      right: 0,
-      height: 50,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white.withAlpha(240),
-              Colors.white.withAlpha(200),
-            ],
-          ),
-        ),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          itemCount: _mapProvider.categories.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: ChoiceChip(
-                label: Text(
-                  _mapProvider.categories[index],
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: _mapProvider.selectedCategoryIndex == index
-                        ? Colors.white
-                        : Colors.black.withAlpha(200),
-                    fontWeight: FontWeight.w500,
+    return Consumer<MapProvider>(
+      builder: (context, provider, _) {
+        return Positioned(
+          top: MediaQuery.of(context).padding.top + 70,
+          left: 0,
+          right: 0,
+          height: 50,
+          child: Stack(
+            children: [
+              ShaderMask(
+                shaderCallback: (Rect rect) {
+                  return LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withAlpha(20),
+                      Colors.black.withAlpha(255),
+                      Colors.black.withAlpha(255),
+                      Colors.black.withAlpha(20)
+                    ],
+                    stops: [0.0, 0.05, 0.95, 1.0],
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  itemCount: provider.categories.length,
+                  itemBuilder: (context, index) {
+                    bool isSelected = provider.selectedCategoryIndex == index;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _onCategorySelected(index, true),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.green.withOpacity(0.8)
+                                  : Colors.white.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.green
+                                    : Colors.white.withOpacity(0.8),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 3,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Category icon
+                                Image.asset(
+                                  provider.getCategoryIcon(index),
+                                  width: 18,
+                                  height: 18,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.category,
+                                      size: 18,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black87,
+                                    );
+                                  },
+                                ),
+                                SizedBox(width: 6),
+                                // Category name
+                                Text(
+                                  provider.categories[index],
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.black87,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              // Show loading indicator when category search is in progress
+              if (provider.isCategorySearching)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.white.withAlpha(160),
+                    child: Center(
+                      child: SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.green),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                selected: _mapProvider.selectedCategoryIndex == index,
-                selectedColor: Colors.green.withAlpha(240),
-                backgroundColor: Colors.white.withAlpha(230),
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                onSelected: (selected) => _onCategorySelected(index, selected),
-              ),
-            );
-          },
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
