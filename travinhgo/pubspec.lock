@@ -406,15 +406,7 @@ packages:
       path: "plugins/here_sdk"
       relative: true
     source: path
-    version: "4.22.4"
-  html:
-    dependency: transitive
-    description:
-      name: html
-      sha256: "6d1264f2dffa1b1101c25a91dff0dc2daee4c18e87cd8538729773c073dbf602"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.15.6"
+    version: "4.22.5"
   http:
     dependency: "direct main"
     description:

@@ -16,3 +16,6 @@ Tải ở đây **https://drive.google.com/drive/folders/1C5Z2I16ap4JQhzzcqNi5db
 3. **Không cần chỉnh lại file `pubspec.yaml`**
 
 4. **Chạy câu lệnh `flutter pub get`**
+
+## Gặp bất kì lỗi nào với sdk thì chạy cú pháp sau :
+Vào thư mục here_sdk chạy lệnh **flutter pub get**
