@@ -1,0 +1,75 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/map_provider.dart';
+
+/// Location buttons for current location and Tra Vinh center
+class LocationButton extends StatelessWidget {
+  const LocationButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MapProvider>(
+      builder: (context, provider, _) {
+        // Don't show location button in routing mode
+        if (provider.isRoutingMode) {
+          return SizedBox.shrink();
+        }
+
+        return Positioned(
+          bottom: MediaQuery.of(context).padding.bottom + 160,
+          right: 16,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Current location button
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.gps_fixed, color: Colors.blue),
+                  onPressed: () => provider.getCurrentPosition(),
+                  tooltip: "My location",
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              // Tra Vinh center button
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.location_city, color: Colors.green),
+                  onPressed: () => provider.refreshMap(),
+                  tooltip: "Tra Vinh center",
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
