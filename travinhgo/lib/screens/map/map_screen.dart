@@ -12,6 +12,14 @@ import 'dart:developer' as developer;
 
 import '../../Models/Maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
+import '../../providers/map/marker_map_provider.dart';
+import '../../widget/map/search_bar.dart' as map_search;
+import '../../widget/map/location_button.dart';
+import '../../widget/map/category_buttons.dart';
+import '../../widget/map/poi_popup.dart';
+import '../../widget/map/favorite_destinations_slider.dart';
+import '../../widget/map/error_view.dart';
+import '../../widget/map/routing_ui.dart';
 
 /// Map Screen that displays HERE maps with POIs and user location
 class MapScreen extends StatefulWidget {
@@ -31,8 +39,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   // Track last shown POI to avoid showing duplicate snackbars
   String? _lastShownPoiName;
 
-  // Text editing controller for search input
+  // Text editing controllers for search and departure inputs
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _departureController = TextEditingController();
+  final FocusNode _departureFocusNode = FocusNode();
   Timer? _debounceTimer;
 
   // Vietnamese text input optimization
@@ -62,13 +72,15 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
     // Clear markers before disposing
     mapProvider.clearMarkers([
-      MapProvider.MARKER_TYPE_LOCATION,
-      MapProvider.MARKER_TYPE_DESTINATION,
-      MapProvider.MARKER_TYPE_CUSTOM
+      MarkerMapProvider.MARKER_TYPE_LOCATION,
+      MarkerMapProvider.MARKER_TYPE_DESTINATION,
+      MarkerMapProvider.MARKER_TYPE_CUSTOM
     ]);
 
     _debounceTimer?.cancel();
     _searchController.dispose();
+    _departureController.dispose();
+    _departureFocusNode.dispose();
     _pageController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -106,6 +118,29 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     return _isVietnameseComposing(text)
         ? const Duration(milliseconds: 800) // Vietnamese text
         : const Duration(milliseconds: 400); // English/unaccented text
+  }
+
+  /// Update departure controller text when departure name changes
+  void _updateDepartureControllerText(MapProvider provider) {
+    // When showing departure input mode, only clear if we're just entering input mode
+    // Don't clear if the user is actively typing (has focus and non-empty text)
+    if (provider.isShowingDepartureInput) {
+      // Only clear when first showing the input field and it contains the provider's value
+      // This prevents clearing while typing
+      if (_departureController.text == provider.departureName) {
+        _departureController.clear();
+      }
+    } else {
+      // Outside of input mode, keep in sync with provider
+      if (provider.departureName != null &&
+          _departureController.text != provider.departureName) {
+        _departureController.text = provider.departureName!;
+      } else if (provider.departureName == null &&
+          _departureController.text.isNotEmpty) {
+        // Reset controller if provider has no departure name but controller has text
+        _departureController.text = '';
+      }
+    }
   }
 
   /// Handles search input changes with smart debounce for Vietnamese typing experience
@@ -197,6 +232,17 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   void _handleMapTap(Point2D touchPoint) {
     if (_mapProvider.mapController == null) return;
 
+    // Get the geo coordinates from the tap point
+    var geoCoords =
+        _mapProvider.mapController?.viewToGeoCoordinates(touchPoint);
+    if (geoCoords == null) return;
+
+    // If in routing mode with departure input active, use the tapped location as departure
+    if (_mapProvider.isRoutingMode && _mapProvider.isShowingDepartureInput) {
+      _mapProvider.addDepartureMarker(geoCoords, "Selected location");
+      return;
+    }
+
     // Create a small rectangle around the touch point for picking
     final size = Size2D(20, 20); // 10 pixels radius in each direction
     final origin = Point2D(touchPoint.x - 10, touchPoint.y - 10);
@@ -210,10 +256,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
           pickResult.mapItems == null ||
           pickResult.mapItems!.markers.isEmpty) {
         // No marker was tapped, proceed with regular tap handling
-        var geoCoords =
-            _mapProvider.mapController?.viewToGeoCoordinates(touchPoint);
-        if (geoCoords != null) {
-          // Handle regular map tap
+        if (_mapProvider.showPoiPopup) {
+          _mapProvider.closePoiPopup();
         }
         return;
       }
@@ -302,118 +346,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     );
   }
 
-  /// Builds the POI information popup
-  Widget _buildPoiPopup() {
-    if (!_mapProvider.showPoiPopup || _mapProvider.lastPoiName == null) {
-      return SizedBox.shrink();
-    }
-
-    return Positioned(
-      bottom: MediaQuery.of(context).padding.bottom + 160,
-      left: 20,
-      right: 20,
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    _mapProvider.lastPoiName ?? "Unknown Place",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => _mapProvider.closePoiPopup(),
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            if (_mapProvider.lastPoiCategory != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.category, size: 16, color: Colors.grey[700]),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _mapProvider.lastPoiCategory!,
-                        style: TextStyle(
-                          color: Colors.grey[800],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            if (_mapProvider.lastPoiCoordinates != null)
-              Row(
-                children: [
-                  Icon(Icons.location_on, size: 16, color: Colors.grey[700]),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '${_mapProvider.lastPoiCoordinates!.latitude.toStringAsFixed(6)}, ${_mapProvider.lastPoiCoordinates!.longitude.toStringAsFixed(6)}',
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: () {
-                    // Navigate to the POI
-                    if (_mapProvider.lastPoiCoordinates != null) {
-                      _mapProvider.moveCamera(
-                          _mapProvider.lastPoiCoordinates!, 500);
-                    }
-                  },
-                  icon: Icon(Icons.navigation, size: 16),
-                  label: Text("Navigate"),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.green[700],
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<MapProvider>(
@@ -425,460 +357,36 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             children: [
               // Map view
               provider.errorMessage != null
-                  ? _buildErrorView()
+                  ? const ErrorView()
                   : provider.isLoading && provider.mapController == null
                       ? const Center(child: CircularProgressIndicator())
                       : HereMap(onMapCreated: _onMapCreated),
 
               // Category buttons
-              _buildCategoryButtons(),
+              const CategoryButtons(),
 
               // Location button
-              _buildLocationButton(),
+              const LocationButton(),
 
               // Loading indicator
               if (provider.isLoading && provider.mapController != null)
                 const Center(child: CircularProgressIndicator()),
 
-              // Favorite destinations slider at the bottom
-              _buildFavoriteDestinationsSlider(),
+              // Conditionally show either POI info, favorite destinations, or hide both during routing
+              if (!provider.isRoutingMode)
+                provider.showPoiPopup
+                    ? const PoiPopup()
+                    : const FavoriteDestinationsSlider(),
 
-              // POI information popup
-              _buildPoiPopup(),
+              // Routing UI components when in routing mode
+              const RoutingUI(),
 
               // Search bar with dropdown at the top (put last to be on top of z-order)
-              _buildSearchBar(),
+              const map_search.SearchBar(),
             ],
           ),
         );
       },
-    );
-  }
-
-  /// Builds the search bar widget
-  Widget _buildSearchBar() {
-    return Consumer<MapProvider>(
-      builder: (context, provider, _) {
-        // Access search suggestions
-        final suggestions = provider.searchSuggestions;
-
-        return Positioned(
-          top: MediaQuery.of(context).padding.top + 10,
-          left: 16,
-          right: 16,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Search input field
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(242), // 0.95 opacity
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(38), // 0.15 opacity
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  keyboardType: TextInputType.text,
-                  textInputAction: TextInputAction.search,
-
-                  // Vietnamese text optimization
-                  autocorrect: true,
-                  enableSuggestions: true,
-                  enableInteractiveSelection: true,
-
-                  decoration: InputDecoration(
-                    hintText: 'Tìm kiếm',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: Colors.green.withAlpha(230),
-                      size: 24,
-                    ),
-                    suffixIcon: provider.isSearching
-                        ? Container(
-                            width: 24,
-                            height: 24,
-                            padding: EdgeInsets.all(6),
-                            child: CircularProgressIndicator(strokeWidth: 2))
-                        : IconButton(
-                            icon: Icon(Icons.clear, color: Colors.grey),
-                            onPressed: () {
-                              _searchController.clear();
-                              provider.clearSearchResults();
-                            },
-                          ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 15),
-                  ),
-                  onChanged: (text) => _onSearchChanged(text, provider),
-                ),
-              ),
-
-              // Search results dropdown with higher z-index
-              if (suggestions.isNotEmpty)
-                Material(
-                  elevation: 12, // Higher elevation for better shadow
-                  borderRadius: BorderRadius.circular(15),
-                  child: Container(
-                    margin: EdgeInsets.only(top: 4),
-                    constraints: BoxConstraints(maxHeight: 300),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        itemCount: suggestions.length,
-                        itemBuilder: (context, index) {
-                          final suggestion = suggestions[index];
-                          return ListTile(
-                            dense: true,
-                            leading: Icon(Icons.location_on_outlined,
-                                color: Colors.black),
-                            title: Text(
-                              suggestion.title ?? "Địa điểm không tên",
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            onTap: () {
-                              provider.selectSearchSuggestion(suggestion);
-                              _searchController.text = suggestion.title ?? "";
-                              FocusScope.of(context).unfocus(); // Hide keyboard
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// Builds the location button widget
-  Widget _buildLocationButton() {
-    return Positioned(
-      bottom: MediaQuery.of(context).padding.bottom + 160,
-      right: 16,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(242),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(38),
-              blurRadius: 8,
-              spreadRadius: 1,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: IconButton(
-          icon: Icon(Icons.my_location,
-              color: Colors.green.withAlpha(230), size: 24),
-          onPressed: () {
-            // First get location if needed
-            if (_mapProvider.currentPosition == null) {
-              _mapProvider.getCurrentPosition();
-            } else {
-              // If we already have location, just move to it
-              _mapProvider.moveToCurrentPosition();
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  /// Builds the category filter buttons
-  Widget _buildCategoryButtons() {
-    return Consumer<MapProvider>(
-      builder: (context, provider, _) {
-        return Positioned(
-          top: MediaQuery.of(context).padding.top + 70,
-          left: 0,
-          right: 0,
-          height: 50,
-          child: Stack(
-            children: [
-              ShaderMask(
-                shaderCallback: (Rect rect) {
-                  return LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withAlpha(20),
-                      Colors.black.withAlpha(255),
-                      Colors.black.withAlpha(255),
-                      Colors.black.withAlpha(20)
-                    ],
-                    stops: [0.0, 0.05, 0.95, 1.0],
-                  ).createShader(rect);
-                },
-                blendMode: BlendMode.dstIn,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  itemCount: provider.categories.length,
-                  itemBuilder: (context, index) {
-                    bool isSelected = provider.selectedCategoryIndex == index;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => _onCategorySelected(index, true),
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.green.withOpacity(0.8)
-                                  : Colors.white.withOpacity(0.7),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.green
-                                    : Colors.white.withOpacity(0.8),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 3,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Category icon
-                                Image.asset(
-                                  provider.getCategoryIcon(index),
-                                  width: 18,
-                                  height: 18,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.category,
-                                      size: 18,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black87,
-                                    );
-                                  },
-                                ),
-                                SizedBox(width: 6),
-                                // Category name
-                                Text(
-                                  provider.categories[index],
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black87,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              // Show loading indicator when category search is in progress
-              if (provider.isCategorySearching)
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.white.withAlpha(160),
-                    child: Center(
-                      child: SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.green),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// Builds the favorite destinations carousel slider
-  Widget _buildFavoriteDestinationsSlider() {
-    if (_mapProvider.topDestinations.isEmpty) return SizedBox.shrink();
-    return Positioned(
-      bottom: MediaQuery.of(context).padding.bottom + 20,
-      left: 0,
-      right: 0,
-      height: 100,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _mapProvider.topDestinations.length,
-              onPageChanged: _onDestinationPageChanged,
-              itemBuilder: (context, index) {
-                final destination = _mapProvider.topDestinations[index];
-                return AnimatedOpacity(
-                  duration: Duration(milliseconds: 300),
-                  opacity:
-                      _mapProvider.currentDestinationIndex == index ? 1.0 : 0.7,
-                  child: GestureDetector(
-                    onTap: () => _showPOIDetails(destination),
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(250),
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(60),
-                            blurRadius: 10,
-                            spreadRadius: 1,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              bottomLeft: Radius.circular(15),
-                            ),
-                            child: _buildDestinationImage(
-                                destination.image, 80, double.infinity),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    destination.name ?? 'Unknown Place',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 3),
-                                  _buildDestinationRating(
-                                      destination.averageRating ?? 0),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    destination.description ??
-                                        'No description available',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey.withAlpha(230),
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Builds the rating display for a destination
-  Widget _buildDestinationRating(double rating) {
-    return Row(
-      children: [
-        Text(
-          rating.toStringAsFixed(1),
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(width: 4),
-        ...List.generate(
-          5,
-          (index) => Icon(
-            index < rating.floor()
-                ? Icons.star
-                : (index == rating.floor() && rating % 1 > 0)
-                    ? Icons.star_half
-                    : Icons.star_border,
-            color: Colors.amber.withAlpha(230),
-            size: 16,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Builds the error view when map fails to load
-  Widget _buildErrorView() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Failed to load map: ${_mapProvider.errorMessage}',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.red),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              _mapProvider.errorMessage = null;
-              _mapProvider.isLoading = true;
-              _mapProvider.initializeHERESDK();
-            },
-            child: Text('Try Again'),
-          ),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: () => _showDebugInfo(),
-            child: Text('Show Debug Info'),
-          ),
-        ],
-      ),
     );
   }
 }
