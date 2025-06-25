@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:travinhgo/screens/introduction/introduction_page.dart';
 
+import '../screens/notification/message_screen.dart';
 import '../screens/destination/destination_screen.dart';
 import '../screens/event_festival/event_festival_screen.dart';
 import '../screens/local_specialty/local_specialty_screen.dart';
@@ -22,7 +23,7 @@ class CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> screen = const [IntroductionPage(), DestinationScreen(), LocalSpecialtyScreen(), EventFestivalScreen(), OcopProductScreen()];
+    List<Widget> screen = const [IntroductionPage(), DestinationScreen(), LocalSpecialtyScreen(), EventFestivalScreen(), OcopProductScreen(), MessageScreen()];
     return GestureDetector(
       onTap: () {
         Navigator.push(

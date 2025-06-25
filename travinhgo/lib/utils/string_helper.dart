@@ -45,6 +45,17 @@ class StringHelper {
     }
   }
 
+  /// Định dạng ngày giờ: dd-MM-yyyy hh:mm (12 giờ)
+  static String formatDateTime(String? dateTimeString) {
+    try {
+      if (dateTimeString == null) return "N/A";
+      final dateTime = DateTime.parse(dateTimeString);
+      return DateFormat('dd-MM-yyyy hh:mm').format(dateTime);
+    } catch (e) {
+      return "N/A";
+    }
+  }
+
   /// Định dạng tiền VND
   static String formatCurrency(String? amount) {
     try {
