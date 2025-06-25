@@ -12,3 +12,9 @@ alwaysApply: true
 + Keep source code clean, easy to read and understand
 
 + Always comment functions
+
++ avoid widget build exceed 100 lines
+
++ avoid Ui hard Code 
+
++ Reuse Widget if it use from 2 places 

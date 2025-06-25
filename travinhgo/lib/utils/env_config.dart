@@ -43,4 +43,12 @@ class EnvConfig {
   /// Get the API base URL
   static String get apiBaseUrl => getString('API_BASE_URL',
       defaultValue: 'https://dv67l8z6-7162.asse.devtunnels.ms/api');
+
+  /// Get the HERE API key
+  static String get hereApiKey =>
+      getString('HERE_API_KEY', defaultValue: 'YOUR_HERE_API_KEY');
+
+  /// Get the HERE API secret
+  static String get hereApiSecret =>
+      getString('HERE_API_SECRET', defaultValue: 'YOUR_HERE_API_SECRET');
 }

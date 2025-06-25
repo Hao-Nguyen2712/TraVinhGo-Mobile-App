@@ -16,11 +16,10 @@ class HomeHeader extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      height: 80, // Fixed height for the header
-      padding: const EdgeInsets.fromLTRB(0, 5, 10, 5),
-      decoration: const BoxDecoration(
-        color: Color(0xFF158247), // Green background color
-      ),
+      width: double.infinity,
+      height: 80, // Fixed content height
+      padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
+      // No background color as the parent container provides it
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
