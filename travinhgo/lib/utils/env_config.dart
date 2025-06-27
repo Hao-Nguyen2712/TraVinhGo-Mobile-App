@@ -11,6 +11,10 @@ class EnvConfig {
     try {
       await dotenv.dotenv.load(fileName: '.env');
       _instance = EnvConfig._();
+
+      // Log important configuration values
+      debugPrint('ENV_CONFIG: API Base URL: ${apiBaseUrl}');
+      debugPrint('ENV_CONFIG: HERE API Key: ${hereApiKey.substring(0, 5)}...');
     } catch (e) {
       debugPrint('Error loading .env file: $e');
       // Fallback to default values in case the .env file is not found
@@ -41,14 +45,11 @@ class EnvConfig {
   }
 
   /// Get the API base URL
-  static String get apiBaseUrl => getString('API_BASE_URL',
-      defaultValue: 'https://dv67l8z6-7162.asse.devtunnels.ms/api');
+  static String get apiBaseUrl => getString('API_BASE_URL');
 
   /// Get the HERE API key
-  static String get hereApiKey =>
-      getString('HERE_API_KEY', defaultValue: 'YOUR_HERE_API_KEY');
+  static String get hereApiKey => getString('Here_Access_KeyId');
 
   /// Get the HERE API secret
-  static String get hereApiSecret =>
-      getString('HERE_API_SECRET', defaultValue: 'YOUR_HERE_API_SECRET');
+  static String get hereApiSecret => getString('Here_Access_KeySecret');
 }

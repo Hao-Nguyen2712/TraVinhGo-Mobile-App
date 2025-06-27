@@ -48,7 +48,8 @@ class ErrorView extends StatelessWidget {
             onPressed: () {
               provider.errorMessage = null;
               provider.isLoading = true;
-              provider.initializeHERESDK();
+              // Simply notify listeners to trigger UI refresh
+              provider.notifyListeners();
             },
             child: Text('Try Again'),
           ),

@@ -59,23 +59,25 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     // Initialize the provider after widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _mapProvider = Provider.of<MapProvider>(context, listen: false);
-      _mapProvider.initializeHERESDK();
+      // SDK is already initialized in main.dart, no need to initialize again
       _mapProvider.loadTopDestinations();
     });
   }
 
   @override
   void dispose() {
-    // Thoroughly clean up all map resources
-    final mapProvider = Provider.of<MapProvider>(context, listen: false);
-    mapProvider.cleanupMapResources();
+    // Don't access Provider in dispose - use the previously cached instance
+    if (_mapProvider != null) {
+      // Use the reference cached during initState
+      _mapProvider.cleanupMapResources();
 
-    // Clear markers before disposing
-    mapProvider.clearMarkers([
-      MarkerMapProvider.MARKER_TYPE_LOCATION,
-      MarkerMapProvider.MARKER_TYPE_DESTINATION,
-      MarkerMapProvider.MARKER_TYPE_CUSTOM
-    ]);
+      // Clear markers before disposing
+      _mapProvider.clearMarkers([
+        MarkerMapProvider.MARKER_TYPE_LOCATION,
+        MarkerMapProvider.MARKER_TYPE_DESTINATION,
+        MarkerMapProvider.MARKER_TYPE_CUSTOM
+      ]);
+    }
 
     _debounceTimer?.cancel();
     _searchController.dispose();
@@ -220,63 +222,25 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   /// Called when the map is created
   void _onMapCreated(HereMapController hereMapController) {
-    _mapProvider.initMapScene(hereMapController);
+    try {
+      developer.log('Map controller created successfully', name: 'MapScreen');
+      _mapProvider.initMapScene(hereMapController);
 
-    // Set up tap listener for category markers
-    hereMapController.gestures.tapListener = TapListener((Point2D touchPoint) {
-      _handleMapTap(touchPoint);
-    });
-  }
-
-  /// Handle taps on the map with special handling for markers
-  void _handleMapTap(Point2D touchPoint) {
-    if (_mapProvider.mapController == null) return;
-
-    // Get the geo coordinates from the tap point
-    var geoCoords =
-        _mapProvider.mapController?.viewToGeoCoordinates(touchPoint);
-    if (geoCoords == null) return;
-
-    // If in routing mode with departure input active, use the tapped location as departure
-    if (_mapProvider.isRoutingMode && _mapProvider.isShowingDepartureInput) {
-      _mapProvider.addDepartureMarker(geoCoords, "Selected location");
-      return;
+      // Set up tap listener for map interactions
+      hereMapController.gestures.tapListener =
+          TapListener((Point2D touchPoint) {
+        var geoCoords = hereMapController.viewToGeoCoordinates(touchPoint);
+        if (geoCoords != null) {
+          // Let the map provider handle all tap interactions
+          _mapProvider.handleMapTap(touchPoint, geoCoords);
+        }
+      });
+    } catch (e) {
+      developer.log('Error initializing map scene: $e', name: 'MapScreen');
+      _mapProvider.errorMessage = "Map initialization failed: ${e.toString()}";
+      _mapProvider.isLoading = false;
+      _mapProvider.notifyListeners();
     }
-
-    // Create a small rectangle around the touch point for picking
-    final size = Size2D(20, 20); // 10 pixels radius in each direction
-    final origin = Point2D(touchPoint.x - 10, touchPoint.y - 10);
-    final Rectangle2D pickArea = Rectangle2D(origin, size);
-
-    // Use the pick API to find markers at the touch point
-    _mapProvider.mapController!.pick(null, pickArea,
-        (MapPickResult? pickResult) {
-      // Check if any markers were picked
-      if (pickResult == null ||
-          pickResult.mapItems == null ||
-          pickResult.mapItems!.markers.isEmpty) {
-        // No marker was tapped, proceed with regular tap handling
-        if (_mapProvider.showPoiPopup) {
-          _mapProvider.closePoiPopup();
-        }
-        return;
-      }
-
-      // A marker was tapped
-      MapMarker tappedMarker = pickResult.mapItems!.markers.first;
-
-      // Check if this is a category marker
-      if (tappedMarker.metadata != null) {
-        // Get place information from marker metadata
-        Map<String, String>? placeInfo =
-            _mapProvider.getPlaceInfoFromMarker(tappedMarker);
-
-        if (placeInfo != null) {
-          // Show POI popup with the place information
-          _showCategoryMarkerPopup(placeInfo, tappedMarker.coordinates);
-        }
-      }
-    });
   }
 
   /// Shows a popup with information about a place from a category marker

@@ -18,18 +18,27 @@ class PoiPopup extends StatelessWidget {
         }
 
         // Extract POI information
-        Map<String, String>? placeInfo;
-        if (provider.currentCustomMarker != null &&
-            provider.currentCustomMarker!.metadata != null) {
-          placeInfo =
-              provider.getPlaceInfoFromMarker(provider.currentCustomMarker!);
+        Map<String, String>? placeInfo = {};
+
+        // For predefined locations, the information is already in the provider
+        if (provider.lastPoiName != null) {
+          placeInfo['name'] = provider.lastPoiName!;
+          if (provider.lastPoiCategory != null) {
+            placeInfo['category'] = provider.lastPoiCategory!;
+          }
+          if (provider.lastPoiCoordinates != null) {
+            placeInfo['latitude'] =
+                provider.lastPoiCoordinates!.latitude.toString();
+            placeInfo['longitude'] =
+                provider.lastPoiCoordinates!.longitude.toString();
+          }
         }
 
         // Get place name, category, address and coordinates
         final name = provider.lastPoiName ?? "Unknown Place";
         final category = provider.lastPoiCategory ?? "";
-        final address = placeInfo?['address'] ?? "";
-        final phone = placeInfo?['phone'] ?? "";
+        final address = placeInfo['address'] ?? "";
+        final phone = placeInfo['phone'] ?? "";
         final coordinates = provider.lastPoiCoordinates;
 
         // Dummy rating - would come from actual data in a real app
@@ -77,10 +86,20 @@ class PoiPopup extends StatelessWidget {
 
   // Header with title, rating and close button
   Widget _buildHeader(String name, double rating, MapProvider provider) {
+    // Determine if this is an embedded POI
+    bool isEmbeddedPoi = provider.lastPoiCategory == "Embedded POI" ||
+        provider.lastPoiCategory == "HERE POI";
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
       child: Row(
         children: [
+          // Show an appropriate icon based on POI type
+          if (isEmbeddedPoi)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Icon(Icons.place, color: Colors.blue, size: 24),
+            ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,31 +114,42 @@ class PoiPopup extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 4),
-                // Rating bar
-                Row(
-                  children: [
-                    Text(
-                      rating.toString(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                // Rating bar - only show for custom markers, not embedded POIs
+                if (!isEmbeddedPoi)
+                  Row(
+                    children: [
+                      Text(
+                        rating.toString(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 4),
-                    ...List.generate(
-                      5,
-                      (index) => Icon(
-                        index < rating.floor()
-                            ? Icons.star
-                            : (index == rating.floor() && rating % 1 > 0)
-                                ? Icons.star_half
-                                : Icons.star_border,
-                        color: Colors.amber,
-                        size: 16,
+                      SizedBox(width: 4),
+                      ...List.generate(
+                        5,
+                        (index) => Icon(
+                          index < rating.floor()
+                              ? Icons.star
+                              : (index == rating.floor() && rating % 1 > 0)
+                                  ? Icons.star_half
+                                  : Icons.star_border,
+                          color: Colors.amber,
+                          size: 16,
+                        ),
                       ),
+                    ],
+                  ),
+                // For embedded POIs, show a different indicator
+                if (isEmbeddedPoi)
+                  Text(
+                    provider.lastPoiCategory ?? "Point of Interest",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
                     ),
-                  ],
-                ),
+                  ),
               ],
             ),
           ),

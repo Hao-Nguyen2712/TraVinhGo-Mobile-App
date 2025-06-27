@@ -36,7 +36,12 @@ class LoginButtonWidget extends StatelessWidget {
             height: buttonHeight,
             child: ElevatedButton(
               onPressed: () {
-                context.push('/login');
+                // Get current route to return to after login
+                final currentLocation =
+                    GoRouterState.of(context).uri.toString();
+                // Navigate to login with returnTo parameter
+                context.go(
+                    '/login?returnTo=${Uri.encodeComponent(currentLocation)}');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: kprimaryColor,

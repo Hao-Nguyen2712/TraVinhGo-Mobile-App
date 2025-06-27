@@ -61,9 +61,22 @@ class LocationButton extends StatelessWidget {
                   ],
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.location_city, color: Colors.green),
-                  onPressed: () => provider.refreshMap(),
-                  tooltip: "Tra Vinh center",
+                  icon: Icon(
+                    Icons.location_city,
+                    // Change color based on marker visibility
+                    color: provider.isCenterMarkerVisible
+                        ? Colors.red
+                        : Colors.green,
+                  ),
+                  onPressed: () {
+                    // First move to Tra Vinh center
+                    provider.refreshMap();
+                    // Then toggle the center marker
+                    provider.toggleCenterMarker();
+                  },
+                  tooltip: provider.isCenterMarkerVisible
+                      ? "Remove Tra Vinh center marker"
+                      : "Show Tra Vinh center",
                 ),
               ),
             ],

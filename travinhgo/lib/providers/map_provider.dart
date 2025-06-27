@@ -46,6 +46,9 @@ class MapProvider extends ChangeNotifier {
   GeoCoordinates? lastPoiCoordinates;
   bool showPoiPopup = false; // Flag to control POI popup visibility
   MapMarker? currentCustomMarker; // Reference to the current custom marker
+  MapMarker? centerMarker; // Reference to the Tra Vinh center marker
+  bool isCenterMarkerVisible =
+      false; // Flag to track if center marker is visible
 
   // Constructor
   MapProvider() {
@@ -57,9 +60,10 @@ class MapProvider extends ChangeNotifier {
         LocationMapProvider(_baseMapProvider, _markerMapProvider);
     _searchMapProvider =
         SearchMapProvider(_baseMapProvider, _markerMapProvider);
-    _categoryMapProvider =
-        CategoryMapProvider(_baseMapProvider, _markerMapProvider);
     _boundaryMapProvider = BoundaryMapProvider(_baseMapProvider);
+    _categoryMapProvider = CategoryMapProvider(
+        _baseMapProvider, _markerMapProvider,
+        boundaryProvider: _boundaryMapProvider);
   }
 
   // Forward property access to sub-providers for backward compatibility
@@ -113,25 +117,36 @@ class MapProvider extends ChangeNotifier {
   List<TopFavoriteDestination> topDestinations = [];
   final MapService _mapService = MapService();
 
-  /// Initialize the HERE SDK
-  Future<void> initializeHERESDK() async {
-    await _baseMapProvider.initializeHERESDK();
-    notifyListeners();
-  }
-
   /// Initializes the map scene
   void initMapScene(HereMapController controller) {
-    _baseMapProvider.initMapScene(controller, () {
-      // On successful map scene loading
+    _baseMapProvider.initMapScene(controller, () async {
+      // On successful map scene loading, just move to Tra Vinh center
+      // without adding a marker
       refreshMap();
       _boundaryMapProvider.displayTraVinhBoundary();
       _setupGestureListeners();
+
+      // Start preloading all category search data in background
+      _preloadCategories();
 
       // Load the "All" category by default
       updateSelectedCategory(0);
 
       notifyListeners();
     });
+  }
+
+  /// Preload all category search data in the background
+  Future<void> _preloadCategories() async {
+    try {
+      developer.log('Starting to preload all category data',
+          name: 'MapProvider');
+      await _categoryMapProvider.preloadAllCategories();
+      developer.log('Successfully preloaded all category data',
+          name: 'MapProvider');
+    } catch (e) {
+      developer.log('Error preloading category data: $e', name: 'MapProvider');
+    }
   }
 
   /// Sets up tap listener for the map
@@ -149,6 +164,11 @@ class MapProvider extends ChangeNotifier {
 
   /// Handle map tap events
   void handleMapTap(Point2D touchPoint, GeoCoordinates geoCoordinates) {
+    // Remove center marker when tapping elsewhere on the map
+    if (isCenterMarkerVisible) {
+      toggleCenterMarker(); // Use the toggle method to properly handle marker removal
+    }
+
     // In routing mode with departure input active, use the tapped location as departure
     if (isRoutingMode && isShowingDepartureInput) {
       _navigationMapProvider.addDepartureMarker(
@@ -156,42 +176,131 @@ class MapProvider extends ChangeNotifier {
       return;
     }
 
-    // Create a small rectangle around the touch point for picking
-    final size = Size2D(20, 20); // 10 pixels radius in each direction
-    final origin = Point2D(touchPoint.x - 10, touchPoint.y - 10);
-    final Rectangle2D pickArea = Rectangle2D(origin, size);
+    // Create a rectangle around the touch point for picking
+    Point2D originInPixels = Point2D(touchPoint.x - 25, touchPoint.y - 25);
+    Size2D sizeInPixels = Size2D(50, 50);
+    Rectangle2D rectangle = Rectangle2D(originInPixels, sizeInPixels);
 
-    // Use the pick API to find markers at the touch point
-    mapController!.pick(null, pickArea, (MapPickResult? pickResult) {
-      // Check if any markers were picked
-      if (pickResult == null ||
-          pickResult.mapItems == null ||
-          pickResult.mapItems!.markers.isEmpty) {
-        // No marker was tapped, close any open POI popup
-        if (showPoiPopup) {
-          closePoiPopup();
-        }
+    // Create a list of map content types to pick from
+    List<MapSceneMapPickFilterContentType> contentTypesToPickFrom = [
+      MapSceneMapPickFilterContentType.mapItems, // For custom markers
+      MapSceneMapPickFilterContentType.mapContent // For embedded POIs
+    ];
+
+    // Create filter with the content types
+    MapSceneMapPickFilter filter =
+        MapSceneMapPickFilter(contentTypesToPickFrom);
+
+    // Use the pick API to find markers and POIs at the touch point
+    mapController!.pick(filter, rectangle, (MapPickResult? pickResult) {
+      if (pickResult == null) {
+        _handleEmptyTap(geoCoordinates);
         return;
       }
 
-      // A marker was tapped
-      MapMarker tappedMarker = pickResult.mapItems!.markers.first;
+      bool handled = false;
 
-      // Check if this is a marker with metadata
-      if (tappedMarker.metadata != null) {
-        // Get place information from marker metadata
-        Map<String, String>? placeInfo =
-            _markerMapProvider.getPlaceInfoFromMarker(tappedMarker);
+      // First check for custom map markers
+      if (pickResult.mapItems != null &&
+          pickResult.mapItems!.markers.isNotEmpty) {
+        handled = _handleMarkerTap(pickResult.mapItems!.markers.first);
+      }
 
-        if (placeInfo != null) {
-          // Show POI popup with the place information
-          showCategoryMarkerPopup(placeInfo, tappedMarker.coordinates);
+      // If no marker was handled, then check for embedded POIs
+      if (!handled && pickResult.mapContent != null) {
+        PickMapContentResult pickMapContentResult = pickResult.mapContent!;
+
+        // Check for picked places (Carto POIs)
+        if (pickMapContentResult.pickedPlaces.isNotEmpty) {
+          _handlePickedCartoPOIs(pickMapContentResult.pickedPlaces);
+          handled = true;
         }
+      }
+
+      // If nothing was picked, handle as an empty tap
+      if (!handled) {
+        _handleEmptyTap(geoCoordinates);
       }
     });
   }
 
-  /// Shows a popup with information about a place from a category marker
+  // Handle tap on a custom marker
+  bool _handleMarkerTap(MapMarker tappedMarker) {
+    // Check if this is a marker with metadata
+    if (tappedMarker.metadata != null) {
+      // Get place information from marker metadata
+      Map<String, String>? placeInfo =
+          _markerMapProvider.getPlaceInfoFromMarker(tappedMarker);
+
+      if (placeInfo != null) {
+        // Store reference to the tapped marker if it's a custom marker
+        if (tappedMarker == _markerMapProvider.currentCustomMarker) {
+          currentCustomMarker = tappedMarker;
+        }
+
+        // Show POI popup with the place information
+        showCategoryMarkerPopup(placeInfo, tappedMarker.coordinates);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Handle tap on empty map area
+  void _handleEmptyTap(GeoCoordinates geoCoordinates) {
+    // Close any existing popup
+    if (showPoiPopup) {
+      closePoiPopup();
+    }
+
+    // Add custom marker at the tapped location
+    addMarker(geoCoordinates, MarkerMapProvider.MARKER_TYPE_CUSTOM);
+  }
+
+  // Handle picked Carto POIs (embedded POIs)
+  void _handlePickedCartoPOIs(List<PickedPlace> cartoPOIList) {
+    if (cartoPOIList.isEmpty) return;
+
+    // Get the topmost picked place
+    PickedPlace topmostPickedPlace = cartoPOIList.first;
+
+    // Extract information
+    Map<String, String> placeInfo = {
+      'name': topmostPickedPlace.name ?? "Unnamed Place",
+      'category':
+          topmostPickedPlace.placeCategoryId.toString() ?? "Unnamed Category",
+    };
+
+    // Add coordinates to the place info
+    placeInfo['latitude'] = topmostPickedPlace.coordinates.latitude.toString();
+    placeInfo['longitude'] =
+        topmostPickedPlace.coordinates.longitude.toString();
+
+    // Try to extract more information if available
+    try {
+      // Log detailed information about the picked POI for debugging
+      developer.log('Picked POI details: ${topmostPickedPlace.toString()}',
+          name: 'MapProvider');
+
+      // Try to get place categories if available
+      if (topmostPickedPlace.toString().contains("categories")) {
+        placeInfo['category'] = "HERE POI";
+      }
+    } catch (e) {
+      developer.log('Error extracting additional POI details: $e',
+          name: 'MapProvider');
+    }
+
+    // Log the picked POI
+    developer.log(
+        'Picked embedded POI: ${placeInfo['name']} at ${placeInfo['latitude']}, ${placeInfo['longitude']}',
+        name: 'MapProvider');
+
+    // Show POI popup with the place information
+    showCategoryMarkerPopup(placeInfo, topmostPickedPlace.coordinates);
+  }
+
+  /// Shows a popup with information about a place from a category marker or embedded POI
   void showCategoryMarkerPopup(
       Map<String, String> placeInfo, GeoCoordinates coordinates) {
     // Set the POI info
@@ -200,10 +309,14 @@ class MapProvider extends ChangeNotifier {
     lastPoiCoordinates = coordinates;
     showPoiPopup = true;
 
-    // Move camera to the POI location
+    // Move camera to the POI location with closer zoom for better visibility
     moveCamera(coordinates, 500);
 
-    // Notify listeners
+    // Log the POI being displayed
+    developer.log('Showing POI popup for: ${lastPoiName} (${lastPoiCategory})',
+        name: 'MapProvider');
+
+    // Notify listeners to update the UI
     notifyListeners();
   }
 
@@ -237,7 +350,44 @@ class MapProvider extends ChangeNotifier {
 
   /// Refreshes the map to show Tra Vinh province
   void refreshMap() {
+    // Move to Tra Vinh center without adding a marker
     _boundaryMapProvider.moveToTraVinhCenter();
+  }
+
+  /// Toggle the center marker visibility
+  void toggleCenterMarker() {
+    // Define Tra Vinh center coordinates directly
+    final centerCoordinates = GeoCoordinates(
+        BoundaryMapProvider.traVinhLat, BoundaryMapProvider.traVinhLon);
+
+    // If center marker is visible, remove it
+    if (isCenterMarkerVisible) {
+      if (centerMarker != null) {
+        _markerMapProvider.removeMarker(centerMarker!);
+        centerMarker = null;
+      }
+      isCenterMarkerVisible = false;
+      developer.log('Center marker removed', name: 'MapProvider');
+    } else {
+      // Add center marker if not visible
+      // Create a custom marker type specifically for the center marker
+      _markerMapProvider.addMarker(
+          centerCoordinates, MarkerMapProvider.MARKER_TYPE_CUSTOM,
+          customAsset: "assets/images/markers/marker.png");
+
+      // Get reference to the marker that was just added
+      centerMarker = _markerMapProvider.currentCustomMarker;
+
+      // Safety check to ensure marker was created
+      if (centerMarker != null) {
+        isCenterMarkerVisible = true;
+        developer.log('Center marker added', name: 'MapProvider');
+      } else {
+        developer.log('Failed to create center marker', name: 'MapProvider');
+      }
+    }
+
+    notifyListeners();
   }
 
   /// Searches for locations based on query text
