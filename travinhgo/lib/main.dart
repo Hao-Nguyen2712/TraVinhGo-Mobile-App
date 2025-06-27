@@ -1,9 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/providers/card_provider.dart';
 import 'package:travinhgo/providers/map_provider.dart';
+import 'package:travinhgo/providers/notification_provider.dart';
 import 'package:travinhgo/providers/ocop_type_provider.dart';
 import 'package:travinhgo/providers/setting_provider.dart';
 import 'package:travinhgo/providers/user_provider.dart';
@@ -11,6 +14,10 @@ import 'package:travinhgo/router/app_router.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
+import 'package:travinhgo/screens/auth/login_screen.dart';
+import 'package:travinhgo/screens/nav_bar_screen.dart';
+import 'package:travinhgo/screens/splash/splash_screen.dart';
+import 'package:travinhgo/services/push_notification_service.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
@@ -20,6 +27,7 @@ import 'package:here_sdk/core.dart';
 import 'package:here_sdk/core.engine.dart';
 import 'package:here_sdk/core.errors.dart';
 import 'package:here_sdk/src/_library_context.dart';
+import 'firebase_options.dart';
 
 // Global navigator key for accessing navigation from anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -27,9 +35,25 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 // Global flag to track if splash screen has been shown
 bool hasShownSplashScreen = false;
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+}
+
 Future<void> main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize environment configuration
+  await EnvConfig.initialize();
+
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // Initialize environment configuration
   await EnvConfig.initialize();
@@ -53,7 +77,7 @@ Future<void> main() async {
   ]);
 
   // Run the app after HERE SDK is initialized
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 Future<void> _initializeHERESDK() async {
@@ -123,6 +147,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(create: (_) => TagProvider()),
           ChangeNotifierProvider(create: (_) => OcopTypeProvider()),
           ChangeNotifierProvider(create: (_) => UserProvider()),
+          ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ],
         child: MaterialApp.router(
           title: "TraVinhGo",

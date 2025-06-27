@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:travinhgo/screens/notification/message_screen.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/screens/auth/login_screen.dart';
 import 'package:travinhgo/screens/auth/otp_verification_screen.dart';
@@ -10,6 +11,7 @@ import 'package:travinhgo/screens/profile/profile_screen.dart';
 import 'package:travinhgo/screens/splash/splash_screen.dart';
 import 'package:travinhgo/utils/router_logger.dart';
 
+import '../main.dart';
 import '../screens/destination/destination_detail_screen.dart';
 import '../screens/event_festival/event_fesftival_detail_screen.dart';
 import '../screens/local_specialty/local_specialty_detail_screen.dart';
@@ -113,12 +115,12 @@ class AppRouter {
   }
 
   late final router = GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: '/',
     debugLogDiagnostics: true,
     refreshListenable: _routerListenable,
     redirect: _handleRedirect,
     // Use the global navigatorKey from main.dart
-    navigatorKey: navigatorKey,
     // This helps prevent router from resetting during Google sign-in
     restorationScopeId: 'app',
     routerNeglect: true,
@@ -216,6 +218,11 @@ class AppRouter {
             id: id,
           );
         },
+      ),
+      GoRoute(
+        path: '/notification',
+        name: 'Notification',
+        builder: (context, state) => MessageScreen(),
       ),
       GoRoute(
         path: '/tourist-destination-detail/:id',

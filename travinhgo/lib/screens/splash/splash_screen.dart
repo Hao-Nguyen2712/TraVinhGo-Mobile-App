@@ -10,6 +10,7 @@ import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/utils/constants.dart';
 
 import '../../providers/ocop_type_provider.dart';
+import '../../services/push_notification_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,6 +20,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  // Initialize FCM
+  PushNotificationService pushNotificationService = PushNotificationService();
   // Minimum splash screen duration
   static const splashDuration = Duration(seconds: 2);
   // Maximum time to wait for data loading before moving on
@@ -67,13 +70,22 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _startDataLoading() {
-    _loadData().then((_) {
+    _loadData().then((_) async {
+      // Initialize FCM
+      pushNotificationService.requestNotificationPermisstion();
+      pushNotificationService.subscribeToGeneralTopic();
+      pushNotificationService.firebaseInit(context);
+      
       if (mounted) {
         setState(() => _isDataLoaded = true);
         _checkNavigationConditions();
       }
     }).catchError((error) {
       debugPrint('Error loading data: $error');
+      // 🔔 Initialize FCM even if data loading fails
+      pushNotificationService.requestNotificationPermisstion();
+      pushNotificationService.subscribeToGeneralTopic();
+      pushNotificationService.firebaseInit(context);
       if (mounted) {
         setState(() => _isDataLoaded =
             true); // Consider data loading "done" even with error

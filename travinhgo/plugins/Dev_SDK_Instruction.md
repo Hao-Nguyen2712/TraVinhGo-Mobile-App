@@ -19,3 +19,15 @@ Tải ở đây **https://drive.google.com/drive/folders/1C5Z2I16ap4JQhzzcqNi5db
 
 ## Gặp bất kì lỗi nào với sdk thì chạy cú pháp sau :
 Vào thư mục here_sdk chạy lệnh **flutter pub get**
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Hướng Dẫn setup notification firebase
+tải folder tại : **https://drive.google.com/drive/folders/1XSwJBY6m5C6UqTnM7t2-o6TaqS4mcvzS?usp=sharing**
+và giải nén folder
+
+## Tại folder android (`travinhgo/android`)
+1. **Di chuyển file json có tên `google-services.json` vào `travinhgo/android/app/google-services.json`**
+2. **Chạy câu lệnh `flutter pub get`**
+
+## Tại folder server (`travinhgo/server`)
+1. **Di chuyển file json có tên `travinhmap-329cf-firebase-adminsdk-fbsvc-c5af50e9a3.jon` vào `TraVinhMaps.API/travinhmap-329cf-firebase-adminsdk-fbsvc-c5af50e9a3.jon`**
