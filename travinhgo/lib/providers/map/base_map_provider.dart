@@ -5,6 +5,7 @@ import 'package:here_sdk/core.dart';
 import 'package:here_sdk/mapview.dart';
 import 'package:here_sdk/core.engine.dart';
 import 'package:here_sdk/core.errors.dart';
+import 'package:here_sdk/src/_library_context.dart';
 import '../../utils/env_config.dart';
 import 'dart:developer' as developer;
 
@@ -23,42 +24,17 @@ class BaseMapProvider {
   // Current zoom level tracking
   double currentZoomLevel = 14.0; // Default zoom level
 
-  /// Initializes the HERE SDK
-  Future<void> initializeHERESDK() async {
-    try {
-      isLoading = true;
-
-      // Initialize SDK context
-      SdkContext.init(IsolateOrigin.main);
-
-      // Get API credentials from environment config
-      final accessKeyId = EnvConfig.hereApiKey;
-      final accessKeySecret = EnvConfig.hereApiSecret;
-
-      if (accessKeyId.isEmpty || accessKeySecret.isEmpty) {
-        errorMessage = "HERE API credentials are missing";
-        isLoading = false;
-        return;
-      }
-
-      // Set up authentication
-      AuthenticationMode authenticationMode =
-          AuthenticationMode.withKeySecret(accessKeyId, accessKeySecret);
-      SDKOptions sdkOptions =
-          SDKOptions.withAuthenticationMode(authenticationMode);
-
-      // Initialize HERE SDK
-      await SDKNativeEngine.makeSharedInstance(sdkOptions);
-      isLoading = false;
-    } catch (e) {
-      errorMessage = e.toString();
-      isLoading = false;
-    }
-  }
-
   /// Initializes the map scene
   void initMapScene(HereMapController controller,
       [VoidCallback? onSceneLoaded]) {
+    // Verify that HERE SDK is initialized
+    if (SDKNativeEngine.sharedInstance == null) {
+      errorMessage =
+          "HERE SDK not initialized. Make sure to initialize it in main.dart";
+      isLoading = false;
+      return;
+    }
+
     mapController = controller;
 
     // Load map scene
@@ -71,6 +47,7 @@ class BaseMapProvider {
       }
 
       // Scene loaded successfully
+      _setupCameraChangeListener();
       isLoading = false;
       if (onSceneLoaded != null) {
         onSceneLoaded();
@@ -133,7 +110,10 @@ class BaseMapProvider {
   /// Completely disposes HERE SDK resources
   Future<void> disposeHERESDK() async {
     try {
-      await SDKNativeEngine.sharedInstance?.dispose();
+      // Only attempt to dispose if we have a shared instance
+      if (SDKNativeEngine.sharedInstance != null) {
+        await SDKNativeEngine.sharedInstance?.dispose();
+      }
     } catch (e) {
       print("Error disposing HERE SDK: $e");
     }

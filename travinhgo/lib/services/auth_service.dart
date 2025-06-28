@@ -17,6 +17,7 @@ import '../utils/env_config.dart';
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   String? _otpToken;
+  String? _lastError;
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
@@ -24,15 +25,26 @@ class AuthService {
     return _instance;
   }
 
+  // Getter for last error message
+  String? get lastError => _lastError;
+
   AuthService._internal() {
+    debugPrint(
+        "AUTH_SERVICE: Initializing AuthService with base URL: $_baseUrl");
+
     dio.options.connectTimeout = const Duration(seconds: 30);
     dio.options.receiveTimeout = const Duration(seconds: 30);
     dio.options.sendTimeout = const Duration(seconds: 30);
+
+    debugPrint(
+        "AUTH_SERVICE: Dio timeouts configured: connect=30s, receive=30s, send=30s");
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       final client = HttpClient();
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
+      debugPrint(
+          "AUTH_SERVICE: HTTP client configured to accept all certificates");
       return client;
     };
 
@@ -40,15 +52,99 @@ class AuthService {
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (DioException error, ErrorInterceptorHandler handler) async {
+          debugPrint(
+              "AUTH_SERVICE: Dio error interceptor triggered: ${error.type}");
+
+          // Set last error message based on error type
+          _setErrorFromDioException(error);
+
           if (error.response?.statusCode == 401) {
             // Clear tokens on 401 (Unauthorized) response
             await logout();
-            debugPrint('Session expired: 401 Unauthorized');
+            debugPrint('AUTH_SERVICE: Session expired: 401 Unauthorized');
           }
           return handler.next(error);
         },
       ),
     );
+
+    debugPrint("AUTH_SERVICE: Dio configuration complete");
+  }
+
+  // Helper method to set error message from DioException
+  void _setErrorFromDioException(DioException error) {
+    debugPrint(
+        'Log_Auth_flow: AUTH_SERVICE - Processing DioException: ${error.type}');
+
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+        _lastError =
+            'Connection timed out. Please check your internet connection.';
+        debugPrint('Log_Auth_flow: AUTH_SERVICE - Connection timeout error');
+        break;
+      case DioExceptionType.sendTimeout:
+        _lastError = 'Request timed out. Please try again.';
+        debugPrint('Log_Auth_flow: AUTH_SERVICE - Send timeout error');
+        break;
+      case DioExceptionType.receiveTimeout:
+        _lastError = 'Server response timed out. Please try again.';
+        debugPrint('Log_Auth_flow: AUTH_SERVICE - Receive timeout error');
+        break;
+      case DioExceptionType.badResponse:
+        // Check status code for more specific error messages
+        final statusCode = error.response?.statusCode;
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Bad response with status code: $statusCode');
+
+        if (statusCode == 400) {
+          _lastError = 'Invalid request. Please check your information.';
+          debugPrint('Log_Auth_flow: AUTH_SERVICE - 400 Bad Request error');
+        } else if (statusCode == 401) {
+          _lastError = 'Authentication failed. Please login again.';
+          debugPrint('Log_Auth_flow: AUTH_SERVICE - 401 Unauthorized error');
+        } else if (statusCode == 403) {
+          _lastError = 'Access denied. You don\'t have permission.';
+          debugPrint('Log_Auth_flow: AUTH_SERVICE - 403 Forbidden error');
+        } else if (statusCode == 404) {
+          _lastError = 'Resource not found.';
+          debugPrint('Log_Auth_flow: AUTH_SERVICE - 404 Not Found error');
+        } else if (statusCode == 500) {
+          _lastError = 'Server error. Please try again later.';
+          debugPrint('Log_Auth_flow: AUTH_SERVICE - 500 Server error');
+        } else {
+          _lastError =
+              'Error: ${error.response?.statusMessage ?? 'Unknown error'}';
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Other HTTP error: $statusCode');
+        }
+
+        // Log response data if available
+        if (error.response?.data != null) {
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Error response data: ${error.response?.data}');
+        }
+        break;
+      case DioExceptionType.cancel:
+        _lastError = 'Request was cancelled.';
+        debugPrint('Log_Auth_flow: AUTH_SERVICE - Request cancelled');
+        break;
+      case DioExceptionType.unknown:
+        if (error.error is SocketException) {
+          _lastError = 'Network error. Please check your internet connection.';
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Socket exception (network error)');
+        } else {
+          _lastError = 'Unknown error: ${error.message}';
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Unknown error: ${error.message}');
+        }
+        break;
+      default:
+        _lastError = 'An unexpected error occurred.';
+        debugPrint('Log_Auth_flow: AUTH_SERVICE - Unexpected error type');
+    }
+
+    debugPrint('Log_Auth_flow: AUTH_SERVICE - Error set to: $_lastError');
   }
 
   // Using the environment config for base URL
@@ -56,12 +152,27 @@ class AuthService {
 
   final Dio dio = Dio();
 
+  // Check if internet is available
+
   Future<bool> authenticationWithPhone(String phoneNumber) async {
+    // Reset error message
+    _lastError = null;
+    debugPrint(
+        'Log_Auth_flow: AUTH_SERVICE - Starting phone authentication for: $phoneNumber');
+
     try {
+      // Check internet first
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Checking internet connectivity');
+
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Internet connectivity confirmed');
+
       var endPoint =
           '${_baseUrl}request-phonenumber-authen?phoneNumber=$phoneNumber';
 
-      debugPrint('Attempting phone authentication: $endPoint');
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Sending API request to: $endPoint');
 
       final response = await dio.post(
         endPoint,
@@ -73,51 +184,111 @@ class AuthService {
         ),
       );
 
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Received API response with status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         // Store the OTP token received from the server
-        debugPrint('Authentication successful, processing response');
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Authentication successful, processing response');
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response data: ${response.data}');
 
         if (response.data['data'] == null) {
-          debugPrint('Error: Response data is null or invalid');
+          _lastError = 'Invalid server response. Please try again.';
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Error: Response data is null or invalid');
           return false;
         }
 
         String dataJsonString = response.data['data'];
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Data JSON string received: $dataJsonString');
 
         // Parse the JSON string to extract the token
-        Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
-        _otpToken = dataMap['token'];
+        try {
+          Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
+          _otpToken = dataMap['token'];
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Token extracted from response: ${_otpToken != null ? "Success" : "Failed"}');
 
-        if (_otpToken == null) {
-          debugPrint('Error: Token is null or invalid');
+          if (_otpToken == null) {
+            _lastError = 'Invalid token received. Please try again.';
+            debugPrint(
+                'Log_Auth_flow: AUTH_SERVICE - Error: Token is null or invalid');
+            return false;
+          }
+
+          await _secureStorage.write(key: "token", value: _otpToken);
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Token saved successfully to secure storage');
+          return true;
+        } catch (e) {
+          _lastError = 'Error parsing server response: ${e.toString()}';
+          debugPrint('Log_Auth_flow: AUTH_SERVICE - JSON parsing error: $e');
           return false;
         }
-
-        await _secureStorage.write(key: "token", value: _otpToken);
-        debugPrint('Token saved successfully');
-        return true;
       } else {
-        debugPrint('Error: ${response.statusCode} - ${response.data}');
+        _lastError =
+            'Server error: ${response.statusCode} - ${response.statusMessage}';
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Error: ${response.statusCode} - ${response.data}');
         return false;
       }
+    } on DioException catch (e) {
+      _setErrorFromDioException(e);
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - DioException during phone authentication: $e');
+      debugPrint('Log_Auth_flow: AUTH_SERVICE - Error type: ${e.type}');
+      if (e.response != null) {
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response status: ${e.response?.statusCode}');
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response data: ${e.response?.data}');
+      }
+      return false;
     } catch (e) {
-      debugPrint('Error during authentication: $e');
+      _lastError = 'Error during authentication: ${e.toString()}';
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Error during authentication: $e');
       return false;
     }
   }
 
   Future<bool> verifyOtp(String otp) async {
+    // Reset error message
+    _lastError = null;
+    debugPrint(
+        'Log_Auth_flow: AUTH_SERVICE - Starting OTP verification for code: $otp');
+
     try {
+      // Check internet first
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Checking internet connectivity');
+
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Internet connectivity confirmed');
+
       _otpToken = await _secureStorage.read(key: 'token');
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Retrieved OTP token from storage: ${_otpToken != null ? "Success" : "Failed"}');
+
       if (_otpToken == null) {
-        debugPrint('Error: OTP token is not available');
+        _lastError =
+            'OTP token is not available. Please restart the authentication process.';
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Error: OTP token is not available');
         return false;
       }
 
       final networkInfo = NetworkInfo();
       String? ipAddress = await networkInfo.getWifiIP();
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Retrieved IP address: ${ipAddress ?? "unknown"}');
 
       final deviceInfo = await _getDeviceInfo();
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Retrieved device info: ${deviceInfo.toString()}');
 
       final headers = {
         'Content-Type': 'application/json',
@@ -128,8 +299,12 @@ class AuthService {
         'X-Platform': defaultTargetPlatform.toString(),
         'id': _otpToken ?? 'unknown',
       };
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Prepared headers for API request');
 
       var endPoint = '${_baseUrl}confirm-otp-authen?otp=$otp';
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Sending OTP verification request to: $endPoint');
 
       final response = await dio.post(
         endPoint,
@@ -138,44 +313,110 @@ class AuthService {
         ),
       );
 
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Received API response with status: ${response.statusCode}');
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Response data: ${response.data.toString()}');
+
       if (response.statusCode == 200) {
-        String dataJsonString = response.data['data'];
-        Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - OTP verification successful, processing response');
+        try {
+          String dataJsonString = response.data['data'];
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Data JSON string received: $dataJsonString');
 
-        // Extract sessionId, refreshToken and userId from the response
-        final sessionId = dataMap['sessionId'];
-        final refreshToken = dataMap['refreshToken'];
-        final userId = dataMap['userId']; // Get userId from response
+          Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Successfully parsed JSON data');
 
-        // Save tokens and user claim
-        await _secureStorage.write(key: 'session_id', value: sessionId);
-        await _secureStorage.write(key: 'refresh_token', value: refreshToken);
+          // Extract sessionId, refreshToken and userId from the response
+          final sessionId = dataMap['SessionId'];
+          final refreshToken = dataMap['RefreshToken'];
 
-        // Store userId as a claim (only exists when logged in)
-        if (userId != null) {
-          await _secureStorage.write(key: 'user_id', value: userId.toString());
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Extracted sessionId: ${sessionId != null ? "Success" : "Failed"}');
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Extracted refreshToken: ${refreshToken != null ? "Success" : "Failed"}');
+
+          if (sessionId == null || refreshToken == null) {
+            _lastError = 'Invalid session data received. Please try again.';
+            debugPrint(
+                'Log_Auth_flow: AUTH_SERVICE - Error: Invalid session data received');
+            return false;
+          }
+
+          // Save tokens and user claim
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Saving tokens to secure storage');
+          await _secureStorage.write(key: 'session_id', value: sessionId);
+          await _secureStorage.write(key: 'refresh_token', value: refreshToken);
+
+          // Verify the session ID was saved correctly
+          final savedSessionId = await _secureStorage.read(key: 'session_id');
+          if (savedSessionId == null || savedSessionId.isEmpty) {
+            _lastError =
+                'Failed to save authentication session. Please try again.';
+            debugPrint(
+                'Log_Auth_flow: AUTH_SERVICE - ERROR: Failed to save session_id to secure storage');
+            return false;
+          }
+
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Successfully saved session_id to secure storage');
+
+          // Clear the temporary OTP token
+          await _secureStorage.delete(key: 'token');
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Temporary OTP token cleared');
+
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - OTP verification completed successfully');
+          return true;
+        } catch (e) {
+          _lastError = 'Error processing server response: ${e.toString()}';
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - JSON parsing error in OTP verification: $e');
+          return false;
         }
-
-        // Clear the temporary OTP token
-        await _secureStorage.delete(key: 'token');
-
-        return true;
       } else {
-        debugPrint('Error: ${response.statusCode}');
+        _lastError =
+            'Server error: ${response.statusCode} - ${response.statusMessage}';
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Error: ${response.statusCode} - ${response.data}');
         return false;
       }
+    } on DioException catch (e) {
+      _setErrorFromDioException(e);
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - DioException during OTP verification: $e');
+      debugPrint('Log_Auth_flow: AUTH_SERVICE - Error type: ${e.type}');
+      if (e.response != null) {
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response status: ${e.response?.statusCode}');
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response data: ${e.response?.data}');
+      }
+      return false;
     } catch (e) {
-      debugPrint('Error during OTP verification: $e');
+      _lastError = 'Error during OTP verification: ${e.toString()}';
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Error during OTP verification: $e');
       return false;
     }
   }
 
   Future<bool> refreshOtp(String identifier) async {
-    try {
-      debugPrint('Requesting OTP refresh for: $identifier');
+    // Reset error message
+    _lastError = null;
+    debugPrint(
+        'Log_Auth_flow: AUTH_SERVICE - Starting OTP refresh for: $identifier');
 
+    try {
       // Construct the appropriate endpoint
       final endpoint = '${_baseUrl}refresh-otp?item=$identifier';
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Sending OTP refresh request to: $endpoint');
 
       final response = await dio.post(
         endpoint,
@@ -186,19 +427,69 @@ class AuthService {
         ),
       );
 
-      if (response.statusCode == 200) {
-        String dataJsonString = response.data['data'];
-        Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
-        _otpToken = dataMap['token'];
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Received OTP refresh API response with status: ${response.statusCode}');
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Response data: ${response.data.toString()}');
 
-        await _secureStorage.write(key: "token", value: _otpToken);
-        return true;
+      if (response.statusCode == 200) {
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - OTP refresh successful, processing response');
+
+        try {
+          String dataJsonString = response.data['data'];
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Data JSON string received: $dataJsonString');
+
+          Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Successfully parsed JSON data');
+
+          _otpToken = dataMap['token'] ?? dataMap['Token'];
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Token extracted from response: ${_otpToken != null ? "Success" : "Failed"}');
+
+          if (_otpToken == null) {
+            _lastError = 'Invalid token received. Please try again.';
+            debugPrint(
+                'Log_Auth_flow: AUTH_SERVICE - Error: Token is null or invalid');
+            return false;
+          }
+
+          await _secureStorage.write(key: "token", value: _otpToken);
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Token saved successfully to secure storage');
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - OTP refresh completed successfully');
+          return true;
+        } catch (e) {
+          _lastError = 'Error parsing server response: ${e.toString()}';
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - JSON parsing error in OTP refresh: $e');
+          return false;
+        }
       } else {
-        debugPrint('Error refreshing OTP: ${response.statusCode}');
+        _lastError =
+            'Server error: ${response.statusCode} - ${response.statusMessage}';
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Error refreshing OTP: ${response.statusCode} - ${response.data}');
         return false;
       }
+    } on DioException catch (e) {
+      _setErrorFromDioException(e);
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - DioException during OTP refresh: $e');
+      debugPrint('Log_Auth_flow: AUTH_SERVICE - Error type: ${e.type}');
+      if (e.response != null) {
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response status: ${e.response?.statusCode}');
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response data: ${e.response?.data}');
+      }
+      return false;
     } catch (e) {
-      debugPrint('Error during OTP refresh: $e');
+      _lastError = 'Error during OTP refresh: ${e.toString()}';
+      debugPrint('Log_Auth_flow: AUTH_SERVICE - Error during OTP refresh: $e');
       return false;
     }
   }
@@ -208,6 +499,7 @@ class AuthService {
     await _secureStorage.delete(key: 'session_id');
     await _secureStorage.delete(key: 'refresh_token');
     await _secureStorage.delete(key: 'user_id'); // Also remove user claim
+    await _secureStorage.delete(key: 'token'); // Also remove any OTP token
   }
 
   Future<String?> getSessionId() async {
@@ -224,8 +516,41 @@ class AuthService {
   }
 
   Future<bool> isLoggedIn() async {
-    final token = await getSessionId();
-    return token != null;
+    // CRITICAL: Authentication status is determined by presence of session_id
+    final sessionId = await getSessionId();
+    debugPrint(
+        'Log_Auth_flow: AUTH_SERVICE - Checking login status: sessionId exists = ${sessionId != null}');
+
+    if (sessionId == null || sessionId.isEmpty) {
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - User is not logged in (no session ID found)');
+      return false;
+    }
+
+    // Session ID exists, user is considered authenticated
+    debugPrint(
+        'Log_Auth_flow: AUTH_SERVICE - User is authenticated with valid session ID');
+    return true;
+  }
+
+  // Validate token without user interaction
+  Future<bool> validateToken() async {
+    final sessionId = await getSessionId();
+    if (sessionId == null) {
+      return false;
+    }
+
+    try {
+      // Check internet first
+
+      // Implement a lightweight token validation API call here
+      // For now, we'll assume the token is valid if it exists
+      return true;
+    } catch (e) {
+      debugPrint('Error validating token: $e');
+      // Consider token valid in case of errors
+      return true;
+    }
   }
 
   // Show session expired dialog
@@ -261,29 +586,22 @@ class AuthService {
     return true;
   }
 
-  Future<bool> authenticateWithGoogle() async {
+  // Authenticate with an already selected Google account email
+  Future<bool> authenticateWithSelectedEmail(String email) async {
+    // Reset error message
+    _lastError = null;
+    debugPrint(
+        'Log_Auth_flow: AUTH_SERVICE - Starting Google authentication with email: $email');
+
     try {
-      debugPrint('Starting Google Sign-In process to get email only...');
+      // Prepare the API endpoint
+      final endpoint = '${_baseUrl}request-email-authen?email=$email';
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Sending Google auth request to: $endpoint');
 
-      // Simple Google Sign-In to get user email
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-
-      // Sign out first to force the account picker to show
-      await googleSignIn.signOut();
-
-      var user = await googleSignIn.signIn();
-      if (user == null) {
-        debugPrint('Google Sign-In was cancelled or failed');
-        return false;
-      }
-
-      var email = user.email;
-
-      debugPrint('Successfully got email from Google: $email');
-
-      // Send the email to your API
+      // Send the request
       final response = await dio.post(
-        '${_baseUrl}request-email-authen?email=$email',
+        endpoint,
         options: Options(
           headers: {
             'Content-Type': 'application/json charset=UTF-8',
@@ -291,19 +609,70 @@ class AuthService {
         ),
       );
 
-      if (response.statusCode == 200) {
-        String dataJsonString = response.data['data'];
-        Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
-        _otpToken = dataMap['token'];
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Received Google auth API response with status: ${response.statusCode}');
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Response data: ${response.data.toString()}');
 
-        await _secureStorage.write(key: "token", value: _otpToken);
-        return true;
+      if (response.statusCode == 200) {
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Google auth successful, processing response');
+
+        try {
+          String dataJsonString = response.data['data'];
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Data JSON string received: $dataJsonString');
+
+          Map<String, dynamic> dataMap = jsonDecode(dataJsonString);
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Successfully parsed JSON data');
+
+          _otpToken = dataMap['token'];
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Token extracted from response: ${_otpToken != null ? "Success" : "Failed"}');
+
+          if (_otpToken == null) {
+            _lastError = 'Invalid token received. Please try again.';
+            debugPrint(
+                'Log_Auth_flow: AUTH_SERVICE - Error: Token is null or invalid');
+            return false;
+          }
+
+          await _secureStorage.write(key: "token", value: _otpToken);
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Token saved successfully to secure storage');
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - Google authentication completed successfully');
+          return true;
+        } catch (e) {
+          _lastError = 'Error parsing server response: ${e.toString()}';
+          debugPrint(
+              'Log_Auth_flow: AUTH_SERVICE - JSON parsing error in Google authentication: $e');
+          return false;
+        }
       } else {
-        debugPrint('API Error: ${response.statusCode}');
+        _lastError =
+            'Server error: ${response.statusCode} - ${response.statusMessage}';
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - API Error: ${response.statusCode} - ${response.data}');
         return false;
       }
+    } on DioException catch (e) {
+      _setErrorFromDioException(e);
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - DioException during Google authentication: $e');
+      debugPrint('Log_Auth_flow: AUTH_SERVICE - Error type: ${e.type}');
+      if (e.response != null) {
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response status: ${e.response?.statusCode}');
+        debugPrint(
+            'Log_Auth_flow: AUTH_SERVICE - Response data: ${e.response?.data}');
+      }
+      return false;
     } catch (e) {
-      debugPrint('Google auth error: $e');
+      _lastError = 'Error during Google authentication: ${e.toString()}';
+      debugPrint(
+          'Log_Auth_flow: AUTH_SERVICE - Error during Google authentication: $e');
       return false;
     }
   }

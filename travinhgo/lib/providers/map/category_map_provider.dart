@@ -3,9 +3,11 @@ import 'package:here_sdk/core.dart';
 import 'package:here_sdk/mapview.dart';
 import 'package:here_sdk/search.dart';
 import 'dart:developer' as developer;
+import 'dart:async';
 
 import 'base_map_provider.dart';
 import 'marker_map_provider.dart';
+import 'boundary_map_provider.dart';
 
 /// CategoryType defines types of POIs that can be displayed on the map
 /// with their corresponding user-friendly names and PlaceCategory IDs
@@ -30,11 +32,15 @@ class CategoryMapProvider {
   // Reference to other providers
   final BaseMapProvider baseMapProvider;
   final MarkerMapProvider markerMapProvider;
+  late final BoundaryMapProvider boundaryMapProvider;
 
   // Category state variables
   int selectedCategoryIndex = 0;
   bool isCategoryActive = true;
   bool isCategorySearching = false; // Flag to track category search progress
+  bool isPreloadingCategories = false; // Flag to track preloading progress
+  bool hasPreloadedCategories =
+      false; // Flag to indicate if categories are preloaded
 
   // Search engine
   SearchEngine? _searchEngine;
@@ -44,6 +50,9 @@ class CategoryMapProvider {
 
   // Store Place objects by their coordinates (as string key)
   final Map<String, Place> _placeObjects = {};
+
+  // Cache for category search results - maps category ID to a list of places
+  final Map<String, List<Place>> _categoryCache = {};
 
   // Constants
   static const double traVinhLat = 9.9349;
@@ -146,8 +155,11 @@ class CategoryMapProvider {
       availableCategories.map((cat) => cat.vietnameseName).toList();
 
   // Constructor
-  CategoryMapProvider(this.baseMapProvider, this.markerMapProvider) {
+  CategoryMapProvider(this.baseMapProvider, this.markerMapProvider,
+      {BoundaryMapProvider? boundaryProvider}) {
     initializeSearchEngine();
+    boundaryMapProvider =
+        boundaryProvider ?? BoundaryMapProvider(baseMapProvider);
   }
 
   /// Initialize the search engine for category searches
@@ -168,6 +180,130 @@ class CategoryMapProvider {
       return "assets/images/navigations/map.png"; // Default icon
     }
     return availableCategories[index].iconAsset;
+  }
+
+  /// Preload all category search results for caching
+  Future<void> preloadAllCategories() async {
+    if (isPreloadingCategories || hasPreloadedCategories) {
+      return; // Already preloading or preloaded
+    }
+
+    try {
+      isPreloadingCategories = true;
+      developer.log('Starting to preload all categories',
+          name: 'CategoryMapProvider');
+
+      // Skip the first category which is "All"
+      for (int i = 1; i < availableCategories.length; i++) {
+        await preloadCategorySearch(availableCategories[i]);
+      }
+
+      hasPreloadedCategories = true;
+      isPreloadingCategories = false;
+      developer.log('All categories preloaded successfully',
+          name: 'CategoryMapProvider');
+    } catch (e) {
+      isPreloadingCategories = false;
+      developer.log('Error preloading categories: $e',
+          name: 'CategoryMapProvider');
+    }
+  }
+
+  /// Preload a single category search
+  Future<void> preloadCategorySearch(CategoryType categoryType) async {
+    if (_searchEngine == null) {
+      developer.log('Search engine is null', name: 'CategoryMapProvider');
+      return;
+    }
+
+    if (_categoryCache.containsKey(categoryType.categoryId)) {
+      developer.log('Category ${categoryType.name} already cached',
+          name: 'CategoryMapProvider');
+      return; // Already cached
+    }
+
+    try {
+      developer.log('Preloading category: ${categoryType.name}',
+          name: 'CategoryMapProvider');
+
+      // Create a list with the selected category
+      List<PlaceCategory> categoryList = [];
+      categoryList.add(PlaceCategory(categoryType.categoryId));
+
+      // Create a search area centered at Tra Vinh
+      var queryArea =
+          CategoryQueryArea.withCenter(GeoCoordinates(traVinhLat, traVinhLon));
+
+      CategoryQuery categoryQuery =
+          CategoryQuery.withCategoriesInArea(categoryList, queryArea);
+
+      // Configure search options for Vietnamese language and 30 max results
+      SearchOptions searchOptions = SearchOptions();
+      searchOptions.languageCode = LanguageCode.viVn;
+      searchOptions.maxItems = 30;
+
+      // Create completer for async handling
+      final completer = Completer<void>();
+
+      // Execute the search
+      _searchEngine!.searchByCategory(categoryQuery, searchOptions,
+          (SearchError? searchError, List<Place>? places) async {
+        if (searchError != null) {
+          developer.log('Category preload error: $searchError',
+              name: 'CategoryMapProvider');
+          completer.complete(); // Complete even on error
+          return;
+        }
+
+        // If places is null or empty, try with English language
+        if (places == null || places.isEmpty) {
+          SearchOptions englishOptions = SearchOptions();
+          englishOptions.languageCode = LanguageCode.enUs;
+          englishOptions.maxItems = 30;
+
+          developer.log(
+              'No Vietnamese results, trying English search for category ${categoryType.name}',
+              name: 'CategoryMapProvider');
+
+          _searchEngine!.searchByCategory(categoryQuery, englishOptions,
+              (SearchError? secondError, List<Place>? englishPlaces) {
+            if (secondError != null) {
+              developer.log('English category preload error: $secondError',
+                  name: 'CategoryMapProvider');
+              completer.complete();
+              return;
+            }
+
+            if (englishPlaces != null && englishPlaces.isNotEmpty) {
+              // Store in cache
+              _categoryCache[categoryType.categoryId] = englishPlaces;
+              developer.log(
+                  'Cached ${englishPlaces.length} places for category: ${categoryType.name} (English)',
+                  name: 'CategoryMapProvider');
+            } else {
+              // Store empty list to avoid repeated searches
+              _categoryCache[categoryType.categoryId] = [];
+              developer.log('No places found for category ${categoryType.name}',
+                  name: 'CategoryMapProvider');
+            }
+            completer.complete();
+          });
+        } else {
+          // Cache the Vietnamese results
+          _categoryCache[categoryType.categoryId] = places;
+          developer.log(
+              'Cached ${places.length} places for category: ${categoryType.name} (Vietnamese)',
+              name: 'CategoryMapProvider');
+          completer.complete();
+        }
+      });
+
+      // Return the future from the completer
+      return completer.future;
+    } catch (e) {
+      developer.log('Error preloading category ${categoryType.name}: $e',
+          name: 'CategoryMapProvider');
+    }
   }
 
   /// Updates the selected category index and performs category search
@@ -197,9 +333,9 @@ class CategoryMapProvider {
     // Remove search radius circle if it exists
     removeSearchRadiusCircle();
 
-    // If "All" category is selected (index 0), search for all categories
+    // If "All" category is selected (index 0), display all categories
     if (index == 0) {
-      searchAllCategories();
+      displayAllCategories();
     } else {
       // Get the selected category
       final selectedCategory = availableCategories[index];
@@ -207,9 +343,123 @@ class CategoryMapProvider {
       // Show the search radius circle for specific categories
       addSearchRadiusCircle();
 
-      // Perform a search for places of this category
-      searchLocationsByCategory(selectedCategory);
+      // Display places for this category (from cache if available)
+      displayCategoryPlaces(selectedCategory);
     }
+  }
+
+  /// Display all category places from cache
+  void displayAllCategories() {
+    // Skip the first category which is "All"
+    for (int i = 1; i < availableCategories.length; i++) {
+      displayCategoryPlaces(availableCategories[i], isFromAllCategories: true);
+    }
+  }
+
+  /// Display places for a specific category using cached results when available
+  void displayCategoryPlaces(CategoryType categoryType,
+      {bool isFromAllCategories = false}) {
+    // Check if we have cached results for this category
+    if (_categoryCache.containsKey(categoryType.categoryId)) {
+      List<Place> places = _categoryCache[categoryType.categoryId]!;
+
+      // If we have cached places, display them
+      if (places.isNotEmpty) {
+        developer.log(
+            'Displaying ${places.length} cached places for ${categoryType.name}',
+            name: 'CategoryMapProvider');
+        _displayCategoryPlaces(places, categoryType);
+        return;
+      }
+    }
+
+    // If we don't have cached places, search for them (with loading indicator)
+    if (!isPreloadingCategories) {
+      searchLocationsByCategory(categoryType,
+          isFromAllCategories: isFromAllCategories);
+    }
+  }
+
+  /// Display places on the map
+  void _displayCategoryPlaces(List<Place> places, CategoryType categoryType) {
+    for (Place place in places) {
+      if (place.geoCoordinates != null) {
+        // Check if the place is inside Tra Vinh boundary before displaying it
+        _filterAndAddMarker(place, categoryType);
+      }
+    }
+  }
+
+  /// Filter place by boundary and add marker if inside Tra Vinh
+  void _filterAndAddMarker(Place place, CategoryType categoryType) async {
+    // Check if the place is within Tra Vinh boundary
+    bool isInTraVinh = await boundaryMapProvider
+        .isPointInTraVinhBoundary(place.geoCoordinates!);
+
+    if (!isInTraVinh) {
+      developer.log(
+          'Filtered out place outside Tra Vinh boundary: ${place.title}',
+          name: 'CategoryMapProvider');
+      return;
+    }
+
+    // Create rich metadata for POI display
+    Metadata metadata = Metadata();
+    metadata.setString("place_name", place.title ?? "Unknown Place");
+    metadata.setString("place_category", categoryType.vietnameseName);
+
+    // Store address information
+    if (place.address != null) {
+      if (place.address!.addressText != null) {
+        metadata.setString("place_address", place.address!.addressText!);
+      }
+
+      // Store additional address details if available
+      if (place.address!.city != null) {
+        metadata.setString("place_city", place.address!.city!);
+      }
+      if (place.address!.state != null) {
+        metadata.setString("place_state", place.address!.state!);
+      }
+    }
+
+    // Store coordinates
+    metadata.setDouble("place_lat", place.geoCoordinates!.latitude);
+    metadata.setDouble("place_lon", place.geoCoordinates!.longitude);
+
+    // Store category ID for filtering
+    metadata.setString("place_category_id", categoryType.categoryId);
+
+    // Store a reference to identify this is a HERE SDK Place
+    metadata.setString("is_here_place", "true");
+
+    // Generate a unique key for this place based on its coordinates
+    String placeKey =
+        "${place.geoCoordinates!.latitude},${place.geoCoordinates!.longitude}";
+
+    // Store the Place object for later retrieval (if not already stored)
+    if (!_placeObjects.containsKey(placeKey)) {
+      _placeObjects[placeKey] = place;
+    }
+
+    // Add phone information if available
+    try {
+      if (place.details != null && place.details!.contacts != null) {
+        // Extract phone number using proper HERE SDK structure
+        String? phoneNumber = _extractPhoneNumber(place);
+        if (phoneNumber != null && phoneNumber.isNotEmpty) {
+          metadata.setString("place_phone", phoneNumber);
+        }
+      }
+    } catch (e) {
+      developer.log('Failed to extract phone number: $e',
+          name: 'CategoryMapProvider');
+    }
+
+    // Add marker with metadata
+    markerMapProvider.addMarkerWithMetadata(
+        place.geoCoordinates!, MarkerMapProvider.MARKER_TYPE_CATEGORY, metadata,
+        customAsset: categoryType.markerAsset);
   }
 
   /// Search for locations of all available categories
@@ -290,8 +540,12 @@ class CategoryMapProvider {
             }
 
             if (englishPlaces != null && englishPlaces.isNotEmpty) {
+              // Cache the results
+              _categoryCache[categoryType.categoryId] = englishPlaces;
               _handleCategorySearchResults(englishPlaces, categoryType);
             } else {
+              // Cache empty list to avoid repeated searches
+              _categoryCache[categoryType.categoryId] = [];
               developer.log('No places found for category',
                   name: 'CategoryMapProvider');
             }
@@ -301,6 +555,9 @@ class CategoryMapProvider {
           if (!isFromAllCategories) {
             isCategorySearching = false;
           }
+
+          // Cache the results
+          _categoryCache[categoryType.categoryId] = places;
           _handleCategorySearchResults(places, categoryType);
         }
       });
@@ -320,66 +577,7 @@ class CategoryMapProvider {
         'Found ${places.length} places for category: ${categoryType.name}',
         name: 'CategoryMapProvider');
 
-    // Filter places using the Point-in-Polygon algorithm
-    for (Place place in places) {
-      if (place.geoCoordinates != null) {
-        // Create rich metadata for POI display
-        Metadata metadata = Metadata();
-        metadata.setString("place_name", place.title ?? "Unknown Place");
-        metadata.setString("place_category", categoryType.vietnameseName);
-
-        // Store address information
-        if (place.address != null) {
-          if (place.address!.addressText != null) {
-            metadata.setString("place_address", place.address!.addressText!);
-          }
-
-          // Store additional address details if available
-          if (place.address!.city != null) {
-            metadata.setString("place_city", place.address!.city!);
-          }
-          if (place.address!.state != null) {
-            metadata.setString("place_state", place.address!.state!);
-          }
-        }
-
-        // Store coordinates
-        metadata.setDouble("place_lat", place.geoCoordinates!.latitude);
-        metadata.setDouble("place_lon", place.geoCoordinates!.longitude);
-
-        // Store category ID for filtering
-        metadata.setString("place_category_id", categoryType.categoryId);
-
-        // Store a reference to identify this is a HERE SDK Place
-        metadata.setString("is_here_place", "true");
-
-        // Generate a unique key for this place based on its coordinates
-        String placeKey =
-            "${place.geoCoordinates!.latitude},${place.geoCoordinates!.longitude}";
-
-        // Store the Place object for later retrieval
-        _placeObjects[placeKey] = place;
-
-        // Add phone information if available - using proper HERE SDK API
-        try {
-          if (place.details != null && place.details!.contacts != null) {
-            // Extract phone number using proper HERE SDK structure
-            String? phoneNumber = _extractPhoneNumber(place);
-            if (phoneNumber != null && phoneNumber.isNotEmpty) {
-              metadata.setString("place_phone", phoneNumber);
-            }
-          }
-        } catch (e) {
-          developer.log('Failed to extract phone number: $e',
-              name: 'CategoryMapProvider');
-        }
-
-        // Add marker with metadata
-        markerMapProvider.addMarkerWithMetadata(place.geoCoordinates!,
-            MarkerMapProvider.MARKER_TYPE_CATEGORY, metadata,
-            customAsset: categoryType.markerAsset);
-      }
-    }
+    _displayCategoryPlaces(places, categoryType);
   }
 
   /// Helper method to extract phone number from Place object

@@ -119,8 +119,13 @@ class MarkerMapProvider {
           // Override size for location marker to make it more visible
           size = 48;
           break;
-        case MARKER_TYPE_DESTINATION:
         case MARKER_TYPE_CUSTOM:
+          // Use a distinctive marker for custom taps
+          assetPath = 'assets/images/markers/marker.png';
+          // Make custom markers slightly larger
+          size = 52;
+          break;
+        case MARKER_TYPE_DESTINATION:
         case MARKER_TYPE_CATEGORY:
         case MARKER_TYPE_DEPARTURE:
         case MARKER_TYPE_ROUTE_DESTINATION:
@@ -400,5 +405,34 @@ class MarkerMapProvider {
 
     developer.log('All marker resources have been cleaned up',
         name: 'MarkerMapProvider');
+  }
+
+  /// Remove a specific marker from the map
+  void removeMarker(MapMarker marker) {
+    if (mapController == null) return;
+
+    try {
+      mapController!.mapScene.removeMapMarker(marker);
+
+      // Remove from appropriate collection if needed
+      if (marker == currentLocationMarker) {
+        currentLocationMarker = null;
+      } else if (marker == currentCustomMarker) {
+        customMarkers.remove(marker);
+        currentCustomMarker = null;
+      } else if (marker == departureMarker) {
+        departureMarker = null;
+      } else if (marker == routeDestinationMarker) {
+        routeDestinationMarker = null;
+      } else if (categoryMarkers.contains(marker)) {
+        categoryMarkers.remove(marker);
+      } else if (destinationMarkers.contains(marker)) {
+        destinationMarkers.remove(marker);
+      }
+
+      developer.log('Marker removed from map', name: 'MarkerMapProvider');
+    } catch (e) {
+      developer.log('Failed to remove marker: $e', name: 'MarkerMapProvider');
+    }
   }
 }
