@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "530405312987",
+    "project_id": "travinhgo-ba688",
+    "storage_bucket": "travinhgo-ba688.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:530405312987:android:f2f9e1ca703e1d73447ffe",
+        "android_client_info": {
+          "package_name": "com.travinh.travinhgo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "530405312987-j8brsgq0u9itper0vjo5blogqcq8jbuf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.travinh.travinhgo",
+            "certificate_hash": "f3cfe1470204a50c00eb3c3323e4df6e2012e28b"
+          }
+        },
+        {
+          "client_id": "530405312987-o28t5alerndcjr8bvskchvfdjdtau04t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzy0vZQt3TvorxuOda8krQa9EpMUL5OUg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "530405312987-o28t5alerndcjr8bvskchvfdjdtau04t.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "530405312987-g3fqcb6vrg87glppqfn8c8psqv0g3otk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.travinhgo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,7 +14,6 @@ import 'package:travinhgo/router/app_router.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
-import 'package:travinhgo/screens/auth/login_screen.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
@@ -50,9 +49,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // // Initialize environment configuration
-  // await EnvConfig.initialize();
 
   // Initialize HERE SDK before any map-related component is created
   try {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user/user_profile.dart';
 import '../services/user_service.dart';
+import 'dart:io';
 
 class UserProvider with ChangeNotifier {
   final UserService _userService = UserService();
@@ -42,17 +43,21 @@ class UserProvider with ChangeNotifier {
   }
 
   // Update user profile
-  Future<bool> updateUserProfile(Map<String, dynamic> profileData) async {
+  Future<bool> updateUserProfile(Map<String, dynamic> profileData,
+      {File? imageFile}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final success = await _userService.updateUserProfile(profileData);
+      final updatedProfile = await _userService.updateUserProfile(profileData,
+          imageFile: imageFile);
 
-      if (success) {
-        // Refresh the user profile after update
-        await fetchUserProfile();
+      if (updatedProfile != null) {
+        // Update the user profile directly with the returned data
+        _userProfile = updatedProfile;
+        _isLoading = false;
+        notifyListeners();
         return true;
       } else {
         _error = _userService.lastError;

@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   #for http
   http: ^1.3.0
+  http_parser: ^4.0.2
   # typewriter animation
   animated_text_kit: ^4.2.3
 
@@ -53,6 +54,7 @@ dependencies:
   flutter_local_notifications: ^19.2.1
   firebase_analytics: ^11.5.0
   app_settings: ^6.1.1
+  image_picker: ^1.0.7
 
   flutter_html: ^3.0.0
 
@@ -91,8 +93,10 @@ flutter:
       - assets/images/auth/
       - assets/images/sample/
       - assets/images/markers/
+      - assets/images/profile/
       - .env
       - assets/geo/travinh.json
+      - assets/geo/vietnam-provinces.json
 
  
   fonts:
