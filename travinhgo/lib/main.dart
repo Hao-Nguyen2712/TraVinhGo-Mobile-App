@@ -15,9 +15,6 @@ import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/screens/auth/login_screen.dart';
-import 'package:travinhgo/screens/nav_bar_screen.dart';
-import 'package:travinhgo/screens/splash/splash_screen.dart';
-import 'package:travinhgo/services/push_notification_service.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
@@ -26,7 +23,6 @@ import 'package:flutter/services.dart';
 import 'package:here_sdk/core.dart';
 import 'package:here_sdk/core.engine.dart';
 import 'package:here_sdk/core.errors.dart';
-import 'package:here_sdk/src/_library_context.dart';
 import 'firebase_options.dart';
 
 // Global navigator key for accessing navigation from anywhere

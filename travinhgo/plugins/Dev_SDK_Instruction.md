@@ -22,10 +22,10 @@ Vào thư mục here_sdk chạy lệnh **flutter pub get**
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Hướng Dẫn setup notification firebase
-tải folder tại : **https://drive.google.com/drive/folders/1XSwJBY6m5C6UqTnM7t2-o6TaqS4mcvzS?usp=sharing**
+tải folder tại : **https://drive.google.com/drive/folders/1wKrZgIZcM8b54_jwIe2cPtlKDJaQNHdf**
 và giải nén folder
 
-## Tại folder android (`travinhgo/android`)
+## Tại folder android (`travinhgo/android`) 
 1. **Di chuyển file json có tên `google-services.json` vào `travinhgo/android/app/google-services.json`**
 2. **Chạy câu lệnh `flutter pub get`**
 
