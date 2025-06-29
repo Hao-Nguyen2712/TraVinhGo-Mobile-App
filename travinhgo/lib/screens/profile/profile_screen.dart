@@ -144,100 +144,113 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         centerTitle: true,
         title: Text(
           'Profile',
           style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w600,
             fontSize: 20,
+            color: Colors.black,
           ),
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.edit,
-              color: kprimaryColor,
+              color: _hasError ? Colors.grey : kprimaryColor,
               size: 24,
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EditProfileScreen(),
-                ),
-              ).then((_) => _loadUserProfile());
-            },
+            onPressed: _hasError
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfileScreen(),
+                      ),
+                    ).then((_) => _loadUserProfile());
+                  },
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : _hasError
-              ? _buildErrorView()
-              : _buildProfileView(),
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Profile data section
+                  _hasError
+                      ? _buildErrorProfileSection()
+                      : _buildProfileDataSection(),
+
+                  // Divider between profile and menu
+                  const Divider(thickness: 0.5),
+
+                  // Menu section - always visible
+                  _buildMenuSection(),
+                ],
+              ),
+            ),
     );
   }
 
-  Widget _buildErrorView() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 70,
-              color: Colors.red[300],
+  Widget _buildErrorProfileSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/profile/profile.png',
+            height: 90,
+            width: 90,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Could not load profile data',
+            style: GoogleFonts.montserrat(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Failed to load profile',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _errorMessage ?? 'An unknown error occurred',
+            style: GoogleFonts.montserrat(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _loadUserProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kprimaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Text(
+              'Try Again',
               style: GoogleFonts.montserrat(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              _errorMessage ?? 'An unknown error occurred',
-              style: GoogleFonts.montserrat(
-                fontSize: 14,
-                color: Colors.grey[700],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _loadUserProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kprimaryColor,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: Text(
-                'Try Again',
-                style: GoogleFonts.montserrat(
-                  fontWeight: FontWeight.bold,
-                ),
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProfileView() {
+  Widget _buildProfileDataSection() {
     final userProvider = Provider.of<UserProvider>(context);
     final profile = userProvider.userProfile;
 
@@ -247,95 +260,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    return SingleChildScrollView(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Profile header with avatar - centered with more spacing
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Profile avatar - larger size
-                CircleAvatar(
-                  radius: 70,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: profile.avatar.isNotEmpty
-                      ? NetworkImage(profile.avatar)
-                      : null,
-                  child: profile.avatar.isEmpty
-                      ? Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.grey[400],
-                        )
-                      : null,
-                ),
-                const SizedBox(height: 20),
-                // User name - larger and green color
-                Text(
-                  profile.fullname,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: kprimaryColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // User email - slightly larger
-                Text(
-                  profile.email,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
+          // Profile avatar
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.transparent,
+            backgroundImage: profile.avatar.isNotEmpty
+                ? NetworkImage(profile.avatar)
+                : const AssetImage('assets/images/profile/profile.png')
+                    as ImageProvider,
+          ),
+          const SizedBox(height: 16),
+          // User name
+          Text(
+            profile.fullname,
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: kprimaryColor,
             ),
           ),
-
-          // Menu items with increased spacing and font size
-          const Divider(height: 1),
-          _buildMenuItem(
-            icon: Icons.chat_bubble_outline,
-            title: 'Feedback',
-            fontSize: 18,
-            onTap: () {
-              // Navigate to feedback screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feedback feature coming soon')),
-              );
-            },
+          const SizedBox(height: 4),
+          // User email
+          Text(
+            profile.email,
+            style: GoogleFonts.montserrat(
+              fontSize: 16,
+              color: Colors.grey[500],
+            ),
           ),
-          const Divider(height: 1),
-          _buildMenuItem(
-            icon: Icons.settings,
-            title: 'Setting',
-            fontSize: 18,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
-              );
-            },
-          ),
-          const Divider(height: 1),
-          _buildMenuItem(
-            icon: Icons.logout,
-            title: 'Log out',
-            fontSize: 18,
-            onTap: _handleLogout,
-            textColor: Colors.red,
-          ),
-          const Divider(height: 1),
-
-          // Bottom padding
-          const SizedBox(height: 50),
         ],
       ),
+    );
+  }
+
+  Widget _buildMenuSection() {
+    return Column(
+      children: [
+        _buildMenuItem(
+          icon: Icons.chat_bubble_outline,
+          title: 'Feedback',
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Feedback feature coming soon')),
+            );
+          },
+        ),
+        const Divider(height: 1, indent: 16, endIndent: 16),
+        _buildMenuItem(
+          icon: Icons.settings,
+          title: 'Setting',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsScreen(),
+              ),
+            );
+          },
+        ),
+        const Divider(height: 1, indent: 16, endIndent: 16),
+        _buildMenuItem(
+          icon: Icons.logout,
+          title: 'Log out',
+          onTap: _handleLogout,
+        ),
+      ],
     );
   }
 
@@ -343,25 +338,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    double fontSize = 16,
     Color? textColor,
   }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
             Icon(
               icon,
               size: 24,
-              color: textColor ?? Colors.grey[600],
+              color: Colors.grey[600],
             ),
-            const SizedBox(width: 24),
+            const SizedBox(width: 20),
             Text(
               title,
               style: GoogleFonts.montserrat(
-                fontSize: fontSize,
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: textColor ?? Colors.black87,
               ),
@@ -370,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(
               Icons.chevron_right,
               color: Colors.grey[400],
-              size: 22,
+              size: 20,
             ),
           ],
         ),

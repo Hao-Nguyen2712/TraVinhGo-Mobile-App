@@ -23,6 +23,7 @@ class OtpVerificationScreen extends StatefulWidget {
   });
 
   @override
+  // ignore: no_logic_in_create_state
   State<OtpVerificationScreen> createState() {
     debugPrint(
         "Log_Auth_flow: OTP - Creating OTP verification screen state with phoneNumber: $phoneNumber, googleEmail: $googleEmail");
@@ -39,7 +40,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     6,
     (index) => FocusNode(),
   );
-  final AuthService _authService = AuthService();
   final TextEditingController _fullOtpController = TextEditingController();
   final FocusNode _fullOtpFocusNode = FocusNode();
 
@@ -595,43 +595,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         return;
       }
 
-      // Extract digits from pasted text
-      final digitsOnly = pastedText.replaceAll(RegExp(r'[^0-9]'), '');
-
-      if (digitsOnly.isEmpty) {
-        _showPasteError("No digits found in clipboard");
-        return;
-      }
-
-      // Check if we have enough digits
-      if (digitsOnly.length < 6) {
-        _showPasteError("Incomplete OTP code (need 6 digits)");
-        return;
-      }
-
-      // Use the first 6 digits
-      final otp = digitsOnly.substring(0, 6);
-      debugPrint("OTP: Pasted and processed OTP: $otp");
-
-      // Fill in the OTP fields
-      for (int i = 0; i < 6; i++) {
-        _otpControllers[i].text = otp[i];
-      }
-
-      // Clear any previous errors
-      if (_otpError != null) {
-        setState(() {
-          _otpError = null;
-        });
-      }
-
-      // Unfocus keyboard
-      FocusScope.of(context).unfocus();
-
-      // Small delay to allow UI to update
-      Future.delayed(const Duration(milliseconds: 300), () {
-        _verifyOtp();
-      });
+      _processPastedOtp(pastedText);
     } catch (e) {
       debugPrint("OTP: Error pasting OTP: $e");
       _showPasteError("Error accessing clipboard");
@@ -756,15 +720,35 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           _verifyOtp();
         }
       });
-    } else if (digitsOnly.isNotEmpty) {
-      // Focus the next empty field
-      final nextEmptyIndex = digitsOnly.length;
-      if (nextEmptyIndex < 6) {
-        _focusNodes[nextEmptyIndex].requestFocus();
+    }
+  }
 
-        // Also keep the hidden field focused to capture more input
-        _fullOtpFocusNode.requestFocus();
-      }
+  // Add a method to specifically handle clipboard pasting
+  void _processPastedOtp(String pastedText) {
+    if (pastedText.isEmpty) return;
+
+    // Extract only digits
+    final digitsOnly = pastedText.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (digitsOnly.isEmpty) return;
+
+    // Update individual OTP fields
+    for (int i = 0; i < math.min(digitsOnly.length, 6); i++) {
+      _otpControllers[i].text = digitsOnly[i];
+    }
+
+    // Focus the next empty field or unfocus if all fields are filled
+    if (digitsOnly.length < 6) {
+      _focusNodes[math.min(digitsOnly.length, 5)].requestFocus();
+    } else {
+      FocusScope.of(context).unfocus();
+
+      // Verify OTP if we have all 6 digits
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && !_otpSubmitted && !_isLoading) {
+          _verifyOtp();
+        }
+      });
     }
   }
 
@@ -907,7 +891,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         ),
                         SizedBox(height: 30),
 
-                        // OTP Code label and clear button
+                        // OTP Code label and action buttons
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -919,18 +903,37 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                 color: Colors.black87,
                               ),
                             ),
-                            // Clear button
-                            IconButton(
-                              onPressed: _clearOtpFields,
-                              icon: const Icon(
-                                Icons.refresh,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                              tooltip: 'Clear',
-                              constraints: const BoxConstraints(),
-                              padding: const EdgeInsets.all(8),
-                              visualDensity: VisualDensity.compact,
+                            // Action buttons
+                            Row(
+                              children: [
+                                // Paste button
+                                IconButton(
+                                  onPressed: _pasteOtp,
+                                  icon: const Icon(
+                                    Icons.content_paste,
+                                    size: 20,
+                                    color: Color(0xFF158247),
+                                  ),
+                                  tooltip: 'Paste OTP',
+                                  constraints: const BoxConstraints(),
+                                  padding: const EdgeInsets.all(8),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                const SizedBox(width: 8),
+                                // Clear button
+                                IconButton(
+                                  onPressed: _clearOtpFields,
+                                  icon: const Icon(
+                                    Icons.refresh,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  ),
+                                  tooltip: 'Clear',
+                                  constraints: const BoxConstraints(),
+                                  padding: const EdgeInsets.all(8),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -996,9 +999,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                       // Auto focus to next field
                                       if (value.isNotEmpty && index < 5) {
                                         _focusNodes[index + 1].requestFocus();
-
-                                        // Also focus the hidden field to keep capturing input
-                                        _fullOtpFocusNode.requestFocus();
                                       }
 
                                       // Auto-submit when all fields are filled
@@ -1019,19 +1019,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                         }
                                       }
                                     },
-                                    onTap: () {
-                                      // When user taps on any field, also focus the hidden field
-                                      _fullOtpFocusNode.requestFocus();
-                                    },
                                   ),
                                 ),
                               ),
                             ),
 
-                            // Hidden full OTP input field that captures keyboard input
-                            Positioned.fill(
-                              child: Opacity(
-                                opacity: 0,
+                            // Hidden full OTP input field - only used for clipboard pasting
+                            Opacity(
+                              opacity: 0,
+                              child: Offstage(
+                                offstage: true,
                                 child: TextField(
                                   controller: _fullOtpController,
                                   focusNode: _fullOtpFocusNode,
@@ -1040,7 +1037,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                     FilteringTextInputFormatter.digitsOnly,
                                     LengthLimitingTextInputFormatter(6),
                                   ],
-                                  // This field is invisible but captures input
                                 ),
                               ),
                             ),
@@ -1194,6 +1190,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ),
               ),
             ),
+
+          // Floating paste button for easier access
         ],
       ),
     );
