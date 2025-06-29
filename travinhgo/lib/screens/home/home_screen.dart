@@ -1,5 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/sampledata/samplelist.dart';
@@ -7,6 +9,8 @@ import 'package:travinhgo/widget/category_grid.dart';
 import 'package:travinhgo/widget/category_item.dart';
 import 'package:travinhgo/widget/home_header.dart';
 import 'package:travinhgo/widget/image_slider.dart';
+
+import '../../main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -16,6 +20,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _handledInitialMessage = false;
+  
   @override
   void initState() {
     super.initState();
@@ -24,6 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
       statusBarColor: Colors.transparent, // transparent status bar
       statusBarIconBrightness: Brightness.light, // light status bar icons
     ));
+
+    // _handleNotificationNavigation();
+    pushNotificationService.firebaseInit(context);
   }
 
   @override

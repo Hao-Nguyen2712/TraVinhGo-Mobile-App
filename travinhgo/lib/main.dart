@@ -32,6 +32,8 @@ import 'firebase_options.dart';
 // Global navigator key for accessing navigation from anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+final PushNotificationService pushNotificationService = PushNotificationService();
+
 // Global flag to track if splash screen has been shown
 bool hasShownSplashScreen = false;
 
@@ -55,15 +57,14 @@ Future<void> main() async {
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // // Initialize environment configuration
-  // await EnvConfig.initialize();
-
   // Initialize HERE SDK before any map-related component is created
   try {
     developer.log('Initializing HERE SDK...', name: 'main');
 
     // Wait for HERE SDK initialization to complete
     await _initializeHERESDK();
+
+    await pushNotificationService.initLocalNotification();
 
     developer.log('HERE SDK initialized successfully', name: 'main');
   } catch (e) {
