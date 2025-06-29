@@ -83,9 +83,9 @@ class _SplashScreenState extends State<SplashScreen> {
     }).catchError((error) {
       debugPrint('Error loading data: $error');
       // 🔔 Initialize FCM even if data loading fails
-      pushNotificationService.requestNotificationPermisstion();
-      pushNotificationService.subscribeToGeneralTopic();
-      pushNotificationService.firebaseInit(context);
+      // pushNotificationService.requestNotificationPermisstion();
+      // pushNotificationService.subscribeToGeneralTopic();
+      // pushNotificationService.firebaseInit(context);
       if (mounted) {
         setState(() => _isDataLoaded =
             true); // Consider data loading "done" even with error

@@ -55,8 +55,8 @@ Future<void> main() async {
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Initialize environment configuration
-  await EnvConfig.initialize();
+  // // Initialize environment configuration
+  // await EnvConfig.initialize();
 
   // Initialize HERE SDK before any map-related component is created
   try {
