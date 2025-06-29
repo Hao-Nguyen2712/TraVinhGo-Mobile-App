@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../Models/notification/notification.dart';
 import '../../providers/notification_provider.dart';
 import '../../services/notification_service.dart';
@@ -15,20 +16,27 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   List<UserNotification> _userNotification = [];
   bool _isLoading = true;
+  late NotificationProvider _notificationProvider;
+  bool _isListenerAdded = false;
 
   @override
   void initState() {
     super.initState();
     fetchNotificationMessage();
+  }
 
-    // Lắng nghe thay đổi từ NotificationProvider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      NotificationProvider.of(context, listen: false).addListener(_onNotificationChanged);
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isListenerAdded) {
+      _notificationProvider = NotificationProvider.of(context, listen: false);
+      _notificationProvider.addListener(_onNotificationChanged);
+      _isListenerAdded = true;
+    }
   }
 
   void _onNotificationChanged() {
-    final newNotifications = NotificationProvider.of(context, listen: false).userNotification;
+    final newNotifications = _notificationProvider.userNotification;
 
     if (newNotifications.isNotEmpty) {
       setState(() {
@@ -42,7 +50,7 @@ class _MessageScreenState extends State<MessageScreen> {
 
   @override
   void dispose() {
-    NotificationProvider.of(context, listen: false).removeListener(_onNotificationChanged);
+    _notificationProvider.removeListener(_onNotificationChanged);
     super.dispose();
   }
 
@@ -73,7 +81,13 @@ class _MessageScreenState extends State<MessageScreen> {
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  // context.pop();
+                  final router = GoRouter.of(context);
+                  if (router.canPop()) {
+                    router.pop();
+                  } else {
+                    router.go('/home'); // hoặc router.goNamed('Home') nếu bạn dùng tên route
+                  }
                 },
               ),
             ),
