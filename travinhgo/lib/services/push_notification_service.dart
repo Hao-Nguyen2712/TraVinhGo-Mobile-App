@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import '../Models/notification/notification.dart';
 import '../main.dart';
 import '../providers/notification_provider.dart';
@@ -64,14 +65,23 @@ class PushNotificationService {
         }
       },
     );
-
   }
 
   void firebaseInit(BuildContext context) {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('Got a message whilst in the foreground!');
+      debugPrint('Message data: ${message.data}');
+      if (message.notification != null) {
+        debugPrint(
+            'Message also contained a notification: ${message.notification}');
+      }
       final ctx = navigatorKey.currentContext;
       if (ctx != null) {
-        UserNotification item = UserNotification(id: 'newNotification', title: message.notification!.title!, content: message.notification!.body!, createdAt: DateTime.now().toLocal());
+        UserNotification item = UserNotification(
+            id: 'newNotification',
+            title: message.notification!.title!,
+            content: message.notification!.body!,
+            createdAt: DateTime.now().toLocal());
         NotificationProvider.of(ctx, listen: false).increaseNotification(item);
       }
       initLocalNotification(context, message);
@@ -82,16 +92,17 @@ class PushNotificationService {
       handleMessage(context, message);
     });
   }
-  
+
   void handleMessage(BuildContext context, RemoteMessage message) {
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) => MessageScreen()),
-    );  }
+    final ctx = navigatorKey.currentContext;
+    if (ctx != null) {
+      GoRouter.of(ctx).go('/notification');
+    }
+  }
 
   Future<void> showNotification(RemoteMessage message) async {
     AndroidNotificationChannel channel = AndroidNotificationChannel(
-        'HIGH_PRIORITY_NOTIFICATION',
-        'High Importance Notification',
+        'HIGH_PRIORITY_NOTIFICATION', 'High Importance Notification',
         importance: Importance.max);
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
@@ -118,8 +129,7 @@ class PushNotificationService {
           message.notification!.title.toString(),
           message.notification!.body.toString(),
           notificationDetails,
-          payload: '/notification'
-      );
+          payload: '/notification');
     });
   }
 }

@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD80av5GiyPktC19nKQvTB-HsHve5kZDgg',
-    appId: '1:812355667397:android:ad6146a72cf7d86f10b7ac',
-    messagingSenderId: '812355667397',
-    projectId: 'travinhmap-329cf',
-    storageBucket: 'travinhmap-329cf.firebasestorage.app',
+    apiKey: 'AIzaSyCzy0vZQt3TvorxuOda8krQa9EpMUL5OUg',
+    appId: '1:530405312987:android:f2f9e1ca703e1d73447ffe',
+    messagingSenderId: '530405312987',
+    projectId: 'travinhgo-ba688',
+    storageBucket: 'travinhgo-ba688.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyALYC7MFBI8SiBJDpH_DNxG6gwBnFlX1pU',
-    appId: '1:812355667397:ios:6fbd3822472390ee10b7ac',
-    messagingSenderId: '812355667397',
-    projectId: 'travinhmap-329cf',
-    storageBucket: 'travinhmap-329cf.firebasestorage.app',
+    apiKey: 'AIzaSyAhJZRq85LGbPOWZNvYBqORLEyXUu4tuEo',
+    appId: '1:530405312987:ios:34dbadd230b9ed0c447ffe',
+    messagingSenderId: '530405312987',
+    projectId: 'travinhgo-ba688',
+    storageBucket: 'travinhgo-ba688.firebasestorage.app',
     iosBundleId: 'com.example.travinhgo',
   );
+
 }

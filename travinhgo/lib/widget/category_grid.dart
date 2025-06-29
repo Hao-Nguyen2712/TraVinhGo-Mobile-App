@@ -20,7 +20,7 @@ class CategoryGrid extends StatelessWidget {
             iconName: "coconut-tree",
             ColorName: 0xFFFFDAB9,
             title: "Introduce",
-            index: 0,
+            index: 5,
           ),
           CategoryItem(
             iconName: "plantingtree",

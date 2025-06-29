@@ -3,17 +3,17 @@
         "platforms": {
             "android": {
                 "default": {
-                    "projectId": "travinhmap-329cf",
-                    "appId": "1:812355667397:android:ad6146a72cf7d86f10b7ac",
+                    "projectId": "travinhgo-ba688",
+                    "appId": "1:530405312987:android:f2f9e1ca703e1d73447ffe",
                     "fileOutput": "android/app/google-services.json"
                 }
             },
             "dart": {
                 "lib/firebase_options.dart": {
-                    "projectId": "travinhmap-329cf",
+                    "projectId": "travinhgo-ba688",
                     "configurations": {
-                        "android": "1:812355667397:android:ad6146a72cf7d86f10b7ac",
-                        "ios": "1:812355667397:ios:6fbd3822472390ee10b7ac"
+                        "android": "1:530405312987:android:f2f9e1ca703e1d73447ffe",
+                        "ios": "1:530405312987:ios:34dbadd230b9ed0c447ffe"
                     }
                 }
             }
