@@ -9,6 +9,7 @@ import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/utils/constants.dart';
 
+import '../../main.dart';
 import '../../providers/ocop_type_provider.dart';
 import '../../services/push_notification_service.dart';
 
@@ -20,8 +21,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  // Initialize FCM
-  PushNotificationService pushNotificationService = PushNotificationService();
   // Minimum splash screen duration
   static const splashDuration = Duration(seconds: 2);
   // Maximum time to wait for data loading before moving on
@@ -72,8 +71,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void _startDataLoading() {
     _loadData().then((_) async {
       // Initialize FCM
-      pushNotificationService.requestNotificationPermisstion();
-      pushNotificationService.subscribeToGeneralTopic();
+      await pushNotificationService.requestNotificationPermission();
+      await pushNotificationService.subscribeToGeneralTopic();
       pushNotificationService.firebaseInit(context);
       
       if (mounted) {
