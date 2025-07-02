@@ -10,6 +10,7 @@ import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/utils/constants.dart';
 
 import '../../main.dart';
+import '../../providers/favorite_provider.dart';
 import '../../providers/ocop_type_provider.dart';
 import '../../services/push_notification_service.dart';
 
@@ -23,6 +24,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   // Minimum splash screen duration
   static const splashDuration = Duration(seconds: 2);
+
   // Maximum time to wait for data loading before moving on
   static const maxLoadingTime = Duration(seconds: 5);
 
@@ -74,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen> {
       await pushNotificationService.requestNotificationPermission();
       await pushNotificationService.subscribeToGeneralTopic();
       pushNotificationService.firebaseInit(context);
-      
+
       if (mounted) {
         setState(() => _isDataLoaded = true);
         _checkNavigationConditions();
@@ -149,9 +151,10 @@ class _SplashScreenState extends State<SplashScreen> {
       final destinationTypeProvider =
           Provider.of<DestinationTypeProvider>(context, listen: false);
       final tagProvider = Provider.of<TagProvider>(context, listen: false);
-      final ocopTypeProvider = Provider.of<OcopTypeProvider>(context, listen: false);
-      
-
+      final ocopTypeProvider =
+          Provider.of<OcopTypeProvider>(context, listen: false);
+      final favoriteProvider =
+          Provider.of<FavoriteProvider>(context, listen: false);
 
       // Start all loading operations in parallel
       final markersFuture = markerProvider.fetchMarkers();
@@ -159,10 +162,22 @@ class _SplashScreenState extends State<SplashScreen> {
           destinationTypeProvider.fetchDestinationType();
       final tagsFuture = tagProvider.fetchDestinationType();
       final ocopTypeFuture = ocopTypeProvider.fetchOcopType();
-
+      final favoriteFuture = favoriteProvider.fetchFavorites();
 
       // Wait for all data to load
-      await Future.wait([markersFuture, destinationTypesFuture, tagsFuture, ocopTypeFuture]);
+      await Future.wait([
+        markersFuture,
+        destinationTypesFuture,
+        tagsFuture,
+        ocopTypeFuture,
+        favoriteFuture
+      ]);
+      debugPrint('______________________________________________________________');
+      for (var fav in favoriteProvider.favorites) {
+        debugPrint(fav.itemId.toString());
+      }
+      debugPrint('______________________________________________________________');
+
 
       // Associate markers with destination types
       final markers = markerProvider.markers;
