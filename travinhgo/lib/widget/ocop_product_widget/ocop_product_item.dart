@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/widget/ocop_product_widget/rating_star_widget.dart';
 
+import '../../providers/favorite_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
 
@@ -15,6 +15,8 @@ class OcopProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final favoriteProvider = FavoriteProvider.of(context);
+
     return GestureDetector(
       onTap: () {
         context.pushNamed(
@@ -43,16 +45,37 @@ class OcopProductItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 175,
-                      height: 190,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
-                          image: DecorationImage(
-                              image: NetworkImage(ocopProduct.productImage[0]),
-                              fit: BoxFit.cover)),
-                    ),
+                  Stack(
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 175,
+                          height: 190,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.0),
+                              image: DecorationImage(
+                                  image: NetworkImage(ocopProduct.productImage[0]),
+                                  fit: BoxFit.cover)),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 12,
+                        child: GestureDetector(
+                          onTap: () {
+                            favoriteProvider
+                                .toggleOcopFavorite(ocopProduct);
+                          },
+                          child: Icon(
+                            favoriteProvider.isExist(ocopProduct.id)
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: Colors.red,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(
                     height: 2,

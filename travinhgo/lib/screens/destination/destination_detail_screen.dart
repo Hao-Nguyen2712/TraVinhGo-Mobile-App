@@ -8,6 +8,7 @@ import 'package:travinhgo/widget/data_field_row.dart';
 import 'package:travinhgo/widget/description_fm.dart';
 
 import '../../providers/destination_type_provider.dart';
+import '../../providers/favorite_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
@@ -89,6 +90,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
+    final favoriteProvider = FavoriteProvider.of(context);
 
     void _toggleExpanded() {
       setState(() {
@@ -212,6 +214,23 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                             : Colors.grey,
                                       ),
                                     )),
+                          ),
+                        ),
+                        Positioned(
+                          top: 210,
+                          right: 16,
+                          child: GestureDetector(
+                            onTap: () {
+                              favoriteProvider
+                                  .toggleDestinationFavorite(destinationDetail);
+                            },
+                            child: Icon(
+                              favoriteProvider.isExist(destinationDetail.id)
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: Colors.red,
+                              size: 40,
+                            ),
                           ),
                         ),
                       ],

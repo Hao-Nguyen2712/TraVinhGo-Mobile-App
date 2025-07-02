@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
+import 'package:travinhgo/providers/favorite_provider.dart';
 
 import '../../utils/string_helper.dart';
 
@@ -11,8 +12,10 @@ class LocalSpecialtyItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final favoriteProvider = FavoriteProvider.of(context);
+
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         context.pushNamed(
           'LocalSpecialtyDetail',
           pathParameters: {'id': localSpecialty.id},
@@ -29,16 +32,38 @@ class LocalSpecialtyItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image
+            // Image with Favorite Icon
             ClipRRect(
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
-              child: Image.network(
-                localSpecialty.images.first,
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              child: Stack(
+                children: [
+                  Image.network(
+                    localSpecialty.images.first,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        favoriteProvider
+                            .toggleLocalSpecialtiesFavorite(localSpecialty);
+                      },
+                      child: Icon(
+                        favoriteProvider.isExist(localSpecialty.id)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: Colors.red,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             // Name + Icon

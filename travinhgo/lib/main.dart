@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/providers/card_provider.dart';
+import 'package:travinhgo/providers/favorite_provider.dart';
 import 'package:travinhgo/providers/map_provider.dart';
 import 'package:travinhgo/providers/notification_provider.dart';
 import 'package:travinhgo/providers/ocop_type_provider.dart';
@@ -145,6 +146,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(create: (_) => OcopTypeProvider()),
           ChangeNotifierProvider(create: (_) => UserProvider()),
           ChangeNotifierProvider(create: (_) => NotificationProvider()),
+          ChangeNotifierProvider(create: (_) => FavoriteProvider()),
         ],
         child: MaterialApp.router(
           title: "TraVinhGo",

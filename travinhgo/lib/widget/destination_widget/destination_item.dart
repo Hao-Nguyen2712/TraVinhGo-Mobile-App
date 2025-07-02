@@ -5,6 +5,7 @@ import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/screens/destination/destination_detail_screen.dart';
 import 'package:travinhgo/utils/constants.dart';
 
+import '../../providers/favorite_provider.dart';
 import '../../utils/string_helper.dart';
 
 class DestinationItem extends StatelessWidget {
@@ -15,49 +16,73 @@ class DestinationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
+    final favoriteProvider = FavoriteProvider.of(context);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => DestinationDetailScreen(
-                id: destination.id,
-                )));
+                      id: destination.id,
+                    )));
       },
       child: Stack(
         children: [
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: kcontentColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Color.fromRGBO(0, 0, 0, 0.1),
-                  blurRadius: 10, 
-                  spreadRadius: 2, 
-                  offset: Offset(0, 4), 
-                )
-              ]
-            ),
+                borderRadius: BorderRadius.circular(20),
+                color: kcontentColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromRGBO(0, 0, 0, 0.1),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                    offset: Offset(0, 4),
+                  )
+                ]),
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 175,
-                      height: 190,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
-                          image: DecorationImage(
-                              image: NetworkImage(destination.images[0]),
-                              fit: BoxFit.cover)),
-                    ),
+                  Stack(
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 175,
+                          height: 190,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.0),
+                              image: DecorationImage(
+                                  image: NetworkImage(destination.images[0]),
+                                  fit: BoxFit.cover)),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 12,
+                        child: GestureDetector(
+                          onTap: () {
+                            favoriteProvider
+                                .toggleDestinationFavorite(destination);
+                          },
+                          child: Icon(
+                            favoriteProvider.isExist(destination.id)
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: Colors.red,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4,),
+                  const SizedBox(
+                    height: 4,
+                  ),
                   Text(
                     StringHelper.toTitleCase(destination.name),
                     maxLines: 2,
@@ -93,7 +118,8 @@ class DestinationItem extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '(53 reviewer)',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w400),
                       )
                     ],
                   ),
@@ -112,7 +138,9 @@ class DestinationItem extends StatelessWidget {
                         width: 25,
                         height: 25,
                       ),
-                      const SizedBox(width: 6,),
+                      const SizedBox(
+                        width: 6,
+                      ),
                       Expanded(
                         child: Text(
                           destination.address.toString(),

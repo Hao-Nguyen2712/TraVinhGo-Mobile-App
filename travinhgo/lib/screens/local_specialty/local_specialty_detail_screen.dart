@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 
+import '../../providers/favorite_provider.dart';
 import '../../providers/tag_provider.dart';
 import '../../services/local_specialtie_service.dart';
 import '../../utils/constants.dart';
@@ -74,6 +75,8 @@ class _LocalSpecialtyDetailScreenState
   @override
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
+    final favoriteProvider = FavoriteProvider.of(context);
+
     void _toggleExpanded() {
       setState(() {
         _isExpanded = !_isExpanded;
@@ -184,6 +187,23 @@ class _LocalSpecialtyDetailScreenState
                                               : Colors.grey,
                                         ),
                                       )),
+                            ),
+                          ),
+                          Positioned(
+                            top: 210,
+                            right: 16,
+                            child: GestureDetector(
+                              onTap: () {
+                                favoriteProvider
+                                    .toggleLocalSpecialtiesFavorite(localSpecialtyDetail);
+                              },
+                              child: Icon(
+                                favoriteProvider.isExist(localSpecialtyDetail.id)
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: Colors.red,
+                                size: 40,
+                              ),
                             ),
                           ),
                         ],

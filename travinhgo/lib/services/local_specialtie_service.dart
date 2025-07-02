@@ -75,4 +75,29 @@ class LocalSpecialtieService {
       return null;
     }
   }
+
+  Future<List<LocalSpecialties>> getLocalSpecialtiesByIds(List<String> ids) async {
+    try{
+      var endPoint = '${_baseUrl}GetLocalSpecialtiByIds';
+
+      final response = await dio.post(endPoint,
+          data: ids,
+          options: Options(headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          }));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data['data'];
+        List<LocalSpecialties> localSpecialties =
+        data.map((item) => LocalSpecialties.fromJson(item)).toList();
+        return localSpecialties;
+      } else {
+        return [];
+      }
+
+    }catch(e) {
+      debugPrint('Error during get local specialties list: $e');
+      return [];
+    }
+  }
 }

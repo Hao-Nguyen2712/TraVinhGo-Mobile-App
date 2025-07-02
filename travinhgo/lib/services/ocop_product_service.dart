@@ -40,9 +40,9 @@ class OcopProductService {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
-        List<OcopProduct> destinations =
+        List<OcopProduct> ocopProducts =
             data.map((item) => OcopProduct.fromJson(item)).toList();
-        return destinations;
+        return ocopProducts;
       } else {
         return [];
       }
@@ -71,6 +71,31 @@ class OcopProductService {
     } catch (e) {
       debugPrint('Error during get ocop product list: $e');
       return null;
+    }
+  }
+
+  Future<List<OcopProduct>> getOcopProductsByIds(List<String> ids) async {
+    try{
+      var endPoint = '${_baseUrl}GetOcopProductsByIds';
+
+      final response = await dio.post(endPoint,
+          data: ids,
+          options: Options(headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          }));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data['data'];
+        List<OcopProduct> ocopProducts =
+        data.map((item) => OcopProduct.fromJson(item)).toList();
+        return ocopProducts;
+      } else {
+        return [];
+      }
+
+    }catch(e) {
+      debugPrint('Error during get ocop product list: $e');
+      return [];
     }
   }
 }

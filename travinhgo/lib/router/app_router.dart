@@ -14,6 +14,7 @@ import 'package:travinhgo/utils/router_logger.dart';
 import '../main.dart';
 import '../screens/destination/destination_detail_screen.dart';
 import '../screens/event_festival/event_fesftival_detail_screen.dart';
+import '../screens/favorite/favorite_screen.dart';
 import '../screens/feedback/feedback_form_screen.dart';
 import '../screens/local_specialty/local_specialty_detail_screen.dart';
 import '../screens/ocop_product/ocop_product_detail_screen.dart';
@@ -273,8 +274,7 @@ class AppRouter {
             name: 'favorites',
             builder: (context, state) => const AuthRequiredScreen(
               message: 'Please login to use this feature',
-              child:
-                  Scaffold(body: Center(child: Text("Favorites Coming Soon"))),
+              child: FavoriteScreen(),
             ),
           ),
           GoRoute(

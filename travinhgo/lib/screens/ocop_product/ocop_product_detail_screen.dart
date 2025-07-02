@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
 
+import '../../providers/favorite_provider.dart';
 import '../../providers/tag_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
@@ -73,6 +74,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
+    final favoriteProvider = FavoriteProvider.of(context);
     void _toggleExpanded() {
       setState(() {
         _isExpanded = !_isExpanded;
@@ -182,6 +184,23 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                               : Colors.grey,
                                         ),
                                       )),
+                            ),
+                          ),
+                          Positioned(
+                            top: 210,
+                            right: 16,
+                            child: GestureDetector(
+                              onTap: () {
+                                favoriteProvider
+                                    .toggleOcopFavorite(ocopProductDetail);
+                              },
+                              child: Icon(
+                                favoriteProvider.isExist(ocopProductDetail.id)
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: Colors.red,
+                                size: 40,
+                              ),
                             ),
                           ),
                         ],
