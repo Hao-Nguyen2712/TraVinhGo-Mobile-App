@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,9 @@ import 'package:travinhgo/widget/data_field_row.dart';
 import 'package:travinhgo/widget/description_fm.dart';
 
 import '../../providers/destination_type_provider.dart';
+import '../../Models/interaction/item_type.dart';
 import '../../providers/favorite_provider.dart';
+import '../../providers/interaction_log_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
@@ -35,6 +39,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   late List<String> allImageDestination;
 
+  Timer? _interactionTimer;
+
   var ratingData = [
     {'stars': 5, 'percent': 88},
     {'stars': 4, 'percent': 47},
@@ -45,8 +51,25 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   @override
   void initState() {
-    fetchDestination(widget.id);
     super.initState();
+    fetchDestination(widget.id);
+
+    // Đặt timer 8 giây để log interaction
+    _interactionTimer = Timer(Duration(seconds: 8), () {
+      // Gọi provider để add log
+      final interactionLogProvider = InteractionLogProvider.of(context, listen: false);
+      interactionLogProvider.addInteracLog(
+        widget.id,
+        ItemType.Destination,
+        8,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _interactionTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> preloadImages(List<String> urls) async {

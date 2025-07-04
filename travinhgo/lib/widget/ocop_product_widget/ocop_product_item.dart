@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/widget/ocop_product_widget/rating_star_widget.dart';
 
+import '../../Models/interaction/item_type.dart';
 import '../../providers/favorite_provider.dart';
 import '../../utils/constants.dart';
+import '../../providers/interaction_provider.dart';
 import '../../utils/string_helper.dart';
 
 class OcopProductItem extends StatelessWidget {
@@ -16,9 +18,11 @@ class OcopProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final favoriteProvider = FavoriteProvider.of(context);
+    final interactionProvider = InteractionProvider.of(context);
 
     return GestureDetector(
       onTap: () {
+        interactionProvider.addInterac(ocopProduct.id,ItemType.OcopProduct);
         context.pushNamed(
           'OcopProductDetail',
           pathParameters: {'id': ocopProduct.id},
