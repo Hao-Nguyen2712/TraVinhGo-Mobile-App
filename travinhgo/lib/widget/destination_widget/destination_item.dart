@@ -5,7 +5,9 @@ import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/screens/destination/destination_detail_screen.dart';
 import 'package:travinhgo/utils/constants.dart';
 
+import '../../Models/interaction/item_type.dart';
 import '../../providers/favorite_provider.dart';
+import '../../providers/interaction_provider.dart';
 import '../../utils/string_helper.dart';
 
 class DestinationItem extends StatelessWidget {
@@ -17,9 +19,11 @@ class DestinationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     final favoriteProvider = FavoriteProvider.of(context);
+    final interactionProvider = InteractionProvider.of(context);
 
     return GestureDetector(
       onTap: () {
+        interactionProvider.addInterac(destination.id,ItemType.Destination);
         Navigator.push(
             context,
             MaterialPageRoute(
