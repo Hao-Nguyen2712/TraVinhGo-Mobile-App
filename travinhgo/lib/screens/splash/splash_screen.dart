@@ -13,6 +13,8 @@ import 'dart:developer' as developer;
 
 import '../../main.dart';
 import '../../providers/favorite_provider.dart';
+import '../../providers/interaction_log_provider.dart';
+import '../../providers/interaction_provider.dart';
 import '../../providers/ocop_type_provider.dart';
 import '../../services/push_notification_service.dart';
 import '../../providers/ocop_product_provider.dart';
@@ -161,6 +163,10 @@ class _SplashScreenState extends State<SplashScreen> {
       final ocopProductProvider =
           Provider.of<OcopProductProvider>(context, listen: false);
       final mapProvider = Provider.of<MapProvider>(context, listen: false);
+      final interactionProvider =
+          Provider.of<InteractionProvider>(context, listen: false);
+      final interactionLogProvider =
+          Provider.of<InteractionLogProvider>(context, listen: false);
 
       // Start all loading operations in parallel
       developer.log(

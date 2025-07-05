@@ -3,19 +3,20 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/cupertino.dart';
+
+import '../Models/interaction/interaction_log.dart';
+import '../utils/env_config.dart';
 import 'auth_service.dart';
 
-import '../Models/interaction/interaction.dart';
-import '../utils/env_config.dart';
+class InteractionLogService {
+  static final InteractionLogService _instance =
+      InteractionLogService._internal();
 
-class InteractionService {
-  static final InteractionService _instance = InteractionService._internal();
-
-  factory InteractionService() {
+  factory InteractionLogService() {
     return _instance;
   }
 
-  InteractionService._internal() {
+  InteractionLogService._internal() {
     dio.options.connectTimeout = const Duration(minutes: 3);
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
@@ -26,19 +27,19 @@ class InteractionService {
     };
   }
 
-  final String _baseUrl = '${EnvConfig.apiBaseUrl}/Interaction/';
+  final String _baseUrl = '${EnvConfig.apiBaseUrl}/InteractionLogs/';
 
   final Dio dio = Dio();
 
-  Future<bool> sendInteraction(
-      List<InteractionRequest> interactionRequests) async {
+  Future<bool> sendInteractionLog(
+      List<InteractionLogRequest> interactionLogRequests) async {
     try {
-      var endPoint = '${_baseUrl}AddInteraction';
+      var endPoint = '${_baseUrl}AddInteractionLog';
       var sessionId = await AuthService().getSessionId();
 
       // change data to json list
       final List<Map<String, dynamic>> requestBody =
-      interactionRequests.map((e) => e.toJson()).toList();
+          interactionLogRequests.map((e) => e.toJson()).toList();
 
       final response = await dio.post(
         endPoint,
@@ -58,7 +59,7 @@ class InteractionService {
         return false;
       }
     } catch (e) {
-      debugPrint('Error during sending interaction: $e');
+      debugPrint('Error during sending interaction log: $e');
       return false;
     }
   }

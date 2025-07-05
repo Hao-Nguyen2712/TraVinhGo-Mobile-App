@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/providers/card_provider.dart';
 import 'package:travinhgo/providers/favorite_provider.dart';
+import 'package:travinhgo/providers/interaction_log_provider.dart';
+import 'package:travinhgo/providers/interaction_provider.dart';
 import 'package:travinhgo/providers/map_provider.dart';
 import 'package:travinhgo/providers/notification_provider.dart';
 import 'package:travinhgo/providers/ocop_type_provider.dart';
@@ -134,10 +136,36 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    // Lấy context thông qua navigatorKey, vì context của State này có thể không hợp lệ khi app background
+    final BuildContext? ctx = navigatorKey.currentContext;
+    if (ctx == null) return;
+
+    final interactionProvider = Provider.of<InteractionProvider>(ctx, listen: false);
+    final interactionLogProvider = Provider.of<InteractionLogProvider>(ctx, listen: false);
+
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      // App vào nền hoặc chuẩn bị bị kill → gửi log còn lại lên server
+      await interactionProvider.sendAllLogs();
+      await interactionLogProvider.sendAllInteracLog();
+    }
+
+    if (state == AppLifecycleState.resumed) {
+      // Khi quay lại app, thử gửi lại log nếu còn tồn
+      await interactionProvider.restoreLogsFromLocal();
+      await interactionProvider.sendAllLogs();
+      await interactionLogProvider.restoreLogsFromLocal();
+      await interactionLogProvider.sendAllInteracLog();
+    }
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) => MultiProvider(
         providers: [
+          Provider(create: (_) => InteractionProvider()),
+          Provider(create: (_) => InteractionLogProvider()),
           ChangeNotifierProvider.value(value: _authProvider),
           ChangeNotifierProvider(create: (_) => CardProvider()),
           ChangeNotifierProvider(create: (_) => SettingProvider()),
