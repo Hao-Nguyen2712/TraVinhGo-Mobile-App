@@ -9,6 +9,7 @@ import 'package:travinhgo/widget/category_grid.dart';
 import 'package:travinhgo/widget/category_item.dart';
 import 'package:travinhgo/widget/home_header.dart';
 import 'package:travinhgo/widget/image_slider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../main.dart';
 
@@ -21,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _handledInitialMessage = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -99,7 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 child: TextField(
                                   decoration: InputDecoration(
-                                    hintText: "Search here",
+                                    hintText: AppLocalizations.of(context)!
+                                        .searchHere,
                                     hintStyle: const TextStyle(
                                         fontSize: 20, color: Color(0xFFA29C9C)),
                                     border: InputBorder.none,

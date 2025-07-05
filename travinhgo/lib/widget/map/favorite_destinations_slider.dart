@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../Models/Maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
@@ -154,7 +155,9 @@ class _FavoriteDestinationsSliderState
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        destination.name ?? 'Unknown Place',
+                                        destination.name ??
+                                            AppLocalizations.of(context)!
+                                                .unnamedLocation,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -168,7 +171,8 @@ class _FavoriteDestinationsSliderState
                                       SizedBox(height: 5),
                                       Text(
                                         destination.description ??
-                                            'No description available',
+                                            AppLocalizations.of(context)!
+                                                .noDescriptionAvailable,
                                         style: TextStyle(
                                           fontSize: 11,
                                           color: Colors.grey.withAlpha(230),

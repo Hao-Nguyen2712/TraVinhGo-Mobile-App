@@ -3,10 +3,45 @@ import 'package:provider/provider.dart';
 
 import '../../providers/map_provider.dart';
 import '../../utils/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Widget for displaying category filter buttons on the map
 class CategoryButtons extends StatelessWidget {
   const CategoryButtons({Key? key}) : super(key: key);
+
+  String _getLocalizedCategoryName(BuildContext context, String categoryName) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (categoryName) {
+      case "All":
+        return l10n.all;
+      case "OCOP":
+        return l10n.ocop;
+      case "Hotels":
+        return l10n.categoryHotels;
+      case "Restaurants":
+        return l10n.categoryRestaurants;
+      case "Cafes":
+        return l10n.categoryCafes;
+      case "Fuel":
+        return l10n.categoryFuel;
+      case "ATMs":
+        return l10n.categoryAtms;
+      case "Banks":
+        return l10n.categoryBanks;
+      case "Schools":
+        return l10n.categorySchools;
+      case "Hospitals":
+        return l10n.categoryHospitals;
+      case "Police":
+        return l10n.categoryPolice;
+      case "Bus Stops":
+        return l10n.categoryBusStops;
+      case "Stores":
+        return l10n.categoryStores;
+      default:
+        return categoryName;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +68,14 @@ class CategoryButtons extends StatelessWidget {
               itemBuilder: (context, index) {
                 final isSelected =
                     selectedIndex == index && provider.isCategoryActive;
+                final localizedName =
+                    _getLocalizedCategoryName(context, categoryList[index]);
 
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
                     label: Text(
-                      categoryList[index],
+                      localizedName,
                       style: TextStyle(
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.w500,

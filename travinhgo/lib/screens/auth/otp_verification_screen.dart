@@ -11,6 +11,7 @@ import 'package:travinhgo/router/app_router.dart'; // Import to access redirect 
 import 'package:travinhgo/utils/constants.dart'; // Fix import path
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String? phoneNumber;
@@ -163,7 +164,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                 // Title
                 Text(
-                  isGoogleAuth ? 'Check your email' : 'Check your message',
+                  isGoogleAuth
+                      ? AppLocalizations.of(context)!.checkYourEmail
+                      : AppLocalizations.of(context)!.checkYourMessage,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -180,8 +183,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     children: [
                       Text(
                         isGoogleAuth
-                            ? 'We have sent a one-time password (OTP) to:'
-                            : 'We have sent a one-time password (OTP) to confirm your phone number.',
+                            ? AppLocalizations.of(context)!.otpSentTo
+                            : AppLocalizations.of(context)!
+                                .otpSentToConfirmPhone,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.grey.shade600,
@@ -209,7 +213,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Please check your inbox to continue.',
+                          AppLocalizations.of(context)!.checkInboxToContinue,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.grey.shade600,
@@ -237,9 +241,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.ok,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -294,7 +298,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     if (otpCode.isEmpty || otpCode.length < 6) {
       debugPrint("Log_Auth_flow: OTP - Invalid OTP code entered");
       setState(() {
-        _otpError = 'Please enter a valid OTP code';
+        _otpError = AppLocalizations.of(context)!.enterValidOtp;
       });
       return;
     }
@@ -339,7 +343,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           debugPrint("OTP: Showing success dialog");
           await StatusDialogs.showSuccessDialog(
             context: context,
-            message: "Authentication successful!",
+            message: AppLocalizations.of(context)!.authSuccessful,
             onOkPressed: () {
               debugPrint("OTP: Success dialog dismissed, navigating back");
               Navigator.of(context).pop(); // Dismiss dialog
@@ -359,12 +363,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           debugPrint("OTP: Showing error dialog");
           await StatusDialogs.showErrorDialog(
             context: context,
-            message: authProvider.error ?? 'Authentication failed!',
+            message:
+                authProvider.error ?? AppLocalizations.of(context)!.authFailed,
             onOkPressed: () {
               debugPrint("OTP: Error dialog dismissed");
               Navigator.of(context).pop(); // Dismiss dialog
               setState(() {
-                _otpError = 'Invalid OTP. Please try again.';
+                _otpError = AppLocalizations.of(context)!.invalidOtp;
               });
             },
           );
@@ -375,7 +380,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
       if (mounted) {
         setState(() {
-          _otpError = 'Error: ${e.toString()}';
+          _otpError = AppLocalizations.of(context)!.errorPrefix(e.toString());
           _otpSubmitted = false;
         });
       }
@@ -554,8 +559,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         _startResendTimer();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('OTP code resent successfully'),
+            SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.otpResentSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
@@ -563,8 +569,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       } else {
         if (mounted) {
           setState(() {
-            _otpError =
-                authProvider.error ?? 'Failed to resend OTP. Please try again.';
+            _otpError = authProvider.error ??
+                AppLocalizations.of(context)!.failedToResendOtp;
           });
         }
       }
@@ -591,14 +597,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       final pastedText = clipboardData?.text;
 
       if (pastedText == null || pastedText.isEmpty) {
-        _showPasteError("Clipboard is empty");
+        _showPasteError(AppLocalizations.of(context)!.clipboardEmpty);
         return;
       }
 
       _processPastedOtp(pastedText);
     } catch (e) {
       debugPrint("OTP: Error pasting OTP: $e");
-      _showPasteError("Error accessing clipboard");
+      _showPasteError(AppLocalizations.of(context)!.clipboardAccessError);
     }
   }
 
@@ -662,7 +668,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             // Show a brief indicator that OTP was auto-filled
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('OTP code auto-filled'),
+                content: Text(AppLocalizations.of(context)!.otpAutoFilled),
                 backgroundColor: const Color(0xFF158247),
                 behavior: SnackBarBehavior.floating,
                 margin: const EdgeInsets.all(16),
@@ -868,7 +874,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       children: [
                         // Title
                         Text(
-                          'OTP Verification',
+                          AppLocalizations.of(context)!.otpVerification,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -881,8 +887,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         // Subtitle
                         Text(
                           widget.googleEmail != null
-                              ? 'Please check your email for OTP'
-                              : 'Please check your message for OTP',
+                              ? AppLocalizations.of(context)!.checkEmailForOtp
+                              : AppLocalizations.of(context)!
+                                  .checkMessageForOtp,
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
@@ -896,7 +903,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'OTP Code',
+                              AppLocalizations.of(context)!.otpCode,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -914,7 +921,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                     size: 20,
                                     color: Color(0xFF158247),
                                   ),
-                                  tooltip: 'Paste OTP',
+                                  tooltip:
+                                      AppLocalizations.of(context)!.pasteOtp,
                                   constraints: const BoxConstraints(),
                                   padding: const EdgeInsets.all(8),
                                   visualDensity: VisualDensity.compact,
@@ -928,7 +936,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                     size: 20,
                                     color: Colors.grey,
                                   ),
-                                  tooltip: 'Clear',
+                                  tooltip: AppLocalizations.of(context)!.clear,
                                   constraints: const BoxConstraints(),
                                   padding: const EdgeInsets.all(8),
                                   visualDensity: VisualDensity.compact,
@@ -1080,9 +1088,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                       child: CircularProgressIndicator(
                                           color: Colors.white,
                                           strokeWidth: 2.5))
-                                  : const Text(
-                                      'Verify',
-                                      style: TextStyle(
+                                  : Text(
+                                      AppLocalizations.of(context)!.verify,
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
@@ -1102,7 +1110,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                   ? _resendCode
                                   : null,
                               child: Text(
-                                'Resend code',
+                                AppLocalizations.of(context)!.resendCode,
                                 style: TextStyle(
                                   color: (_timeLeft == 0 && !_isLoading)
                                       ? const Color(0xFF158247)
@@ -1168,7 +1176,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       const SizedBox(height: 24),
                       // Loading text
                       Text(
-                        'Verifying...',
+                        AppLocalizations.of(context)!.verifying,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -1178,7 +1186,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       const SizedBox(height: 8),
                       // Subtext
                       Text(
-                        'Please wait while we verify your code',
+                        AppLocalizations.of(context)!.verifyingYourCode,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,

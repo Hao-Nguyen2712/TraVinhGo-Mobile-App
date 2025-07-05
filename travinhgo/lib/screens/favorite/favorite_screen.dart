@@ -4,6 +4,7 @@ import 'favorite_tab/favorite_all_tab.dart';
 import 'favorite_tab/favorite_destination_tab.dart';
 import 'favorite_tab/favorite_local_tab.dart';
 import 'favorite_tab/favorite_ocop_tab.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -15,7 +16,14 @@ class FavoriteScreen extends StatefulWidget {
 class _FavoriteScreenState extends State<FavoriteScreen> {
   int _selectedTab = 0;
 
-  final List<String> _tabs = ["All", "Destination", "Ocop", "Local"];
+  late final List<String> _tabs;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context)!;
+    _tabs = [l10n.all, l10n.destination, l10n.ocop, l10n.local];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +38,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               snap: true,
               backgroundColor: Colors.white,
               automaticallyImplyLeading: false,
-              title: const Text(
-                'Favorite',
-                style: TextStyle(
+              title: Text(
+                AppLocalizations.of(context)!.favoriteTitle,
+                style: const TextStyle(
                   color: Color(0xFF219653),
                   fontWeight: FontWeight.w600,
                   fontSize: 20,
@@ -44,11 +52,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
             SliverToBoxAdapter(
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
                 child: Row(
                   children: List.generate(
                     _tabs.length,
-                        (index) => Padding(
+                    (index) => Padding(
                       padding: const EdgeInsets.only(right: 12.0),
                       child: _buildTab(index),
                     ),
@@ -86,12 +94,12 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           ),
           boxShadow: isSelected
               ? [
-            BoxShadow(
-              color: Colors.green.withOpacity(0.18),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ]
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.18),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
               : [],
         ),
         child: Text(

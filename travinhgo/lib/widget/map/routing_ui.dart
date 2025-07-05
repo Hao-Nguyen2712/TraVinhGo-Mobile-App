@@ -4,6 +4,7 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../providers/map_provider.dart';
 import '../../providers/map_provider.dart' show TransportMode;
 import 'map_ui_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Widget panel chọn địa điểm cho tính năng định tuyến
 class LocationSelectionPanel extends StatelessWidget {
@@ -58,7 +59,7 @@ class LocationSelectionPanel extends StatelessWidget {
                       context,
                       icon: Icons.swap_vert,
                       onPressed: () => provider.swapDepartureAndDestination(),
-                      tooltip: "Đổi vị trí",
+                      tooltip: AppLocalizations.of(context)!.swapLocations,
                     ),
                   ],
                 ),
@@ -70,7 +71,7 @@ class LocationSelectionPanel extends StatelessWidget {
                   context: context,
                   icon: Icons.location_on,
                   iconColor: Colors.green,
-                  title: "Điểm đi",
+                  title: AppLocalizations.of(context)!.departurePoint,
                   locationName: provider.departureName ?? "Không xác định",
                   locationAddress: provider.departureAddress,
                   onTap: () {
@@ -91,7 +92,7 @@ class LocationSelectionPanel extends StatelessWidget {
                   context: context,
                   icon: Icons.location_on,
                   iconColor: Colors.red,
-                  title: "Điểm đến",
+                  title: AppLocalizations.of(context)!.destinationPoint,
                   locationName: provider.destinationName ?? "Không xác định",
                   locationAddress: provider.destinationAddress,
                   onTap: () {
@@ -118,7 +119,7 @@ class LocationSelectionPanel extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Chọn điểm khởi hành:",
+                          AppLocalizations.of(context)!.selectDeparturePoint,
                           style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -126,7 +127,7 @@ class LocationSelectionPanel extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          "Chạm vào vị trí trên bản đồ hoặc nhập địa điểm vào ô tìm kiếm",
+                          AppLocalizations.of(context)!.tapOrSearchDeparture,
                           style:
                               TextStyle(fontSize: 13, color: Colors.blue[800]),
                         ),
@@ -205,7 +206,7 @@ class LocationSelectionPanel extends StatelessWidget {
                   },
                   autofocus: true,
                   decoration: InputDecoration(
-                    hintText: "Nhập điểm đi...",
+                    hintText: AppLocalizations.of(context)!.enterDeparturePoint,
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
                     border: InputBorder.none,
@@ -488,8 +489,9 @@ class _RoutingUIState extends State<RoutingUI> {
     int? duration = provider.routeDurations[mode];
 
     // Always show the duration if available, otherwise show the label
-    String displayText =
-        duration != null ? MapUiUtils.formatDuration(duration) : label;
+    String displayText = duration != null
+        ? MapUiUtils.formatDuration(duration)
+        : MapUiUtils.getTransportModeLabel(mode, AppLocalizations.of(context)!);
 
     return Expanded(
       child: GestureDetector(
@@ -763,13 +765,15 @@ class _RoutingUIState extends State<RoutingUI> {
               SizedBox(width: 8),
               Text(
                 "${MapUiUtils.formatDuration(provider.routeDurationInSeconds!)}",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
                 MapUiUtils.getEstimatedArrivalTime(
-                    provider.routeDurationInSeconds!),
-                style: TextStyle(
+                    provider.routeDurationInSeconds!,
+                    AppLocalizations.of(context)!),
+                style: const TextStyle(
                     color: Colors.teal,
                     fontWeight: FontWeight.bold,
                     fontSize: 16),
@@ -905,9 +909,9 @@ class _RoutingUIState extends State<RoutingUI> {
                   size: 20),
               SizedBox(width: 6),
               Text(
-                MapUiUtils.getTransportModeLabel(
-                    provider.selectedTransportMode),
-                style: TextStyle(
+                MapUiUtils.getTransportModeLabel(provider.selectedTransportMode,
+                    AppLocalizations.of(context)!),
+                style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.teal),

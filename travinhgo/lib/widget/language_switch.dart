@@ -3,16 +3,18 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/setting_provider.dart';
 
 class LanguageSwitch extends StatelessWidget {
-  const LanguageSwitch({Key? key}) : super(key: key);
+  const LanguageSwitch({super.key});
 
   @override
   Widget build(BuildContext context) {
     final settingProvider = Provider.of<SettingProvider>(context);
-    final isVietnamese = settingProvider.currentLanguage == 'vi';
+    final isVietnamese = settingProvider.locale.languageCode == 'vi';
 
     return GestureDetector(
       onTap: () {
-        settingProvider.toggleLanguage();
+        final newLocale =
+            isVietnamese ? const Locale('en') : const Locale('vi');
+        settingProvider.setLocale(newLocale);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -89,7 +91,7 @@ class LanguageSwitch extends StatelessWidget {
                 height: 26,
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
-                  color: Color(0xFF158247),
+                  color: const Color(0xFF158247),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFF158247), width: 1),
                 ),

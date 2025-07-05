@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/event_festival/event_and_festival.dart';
 import 'package:travinhgo/services/event_festival_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../providers/tag_provider.dart';
 import '../../utils/constants.dart';
@@ -48,7 +49,7 @@ class _EventFesftivalDetailScreenState
     if (data == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No event and festival found')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.noEventFound)),
         );
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -253,7 +254,7 @@ class _EventFesftivalDetailScreenState
                                         : Colors.white,
                                   ),
                                   child: Text(
-                                    "Information",
+                                    AppLocalizations.of(context)!.information,
                                     style: TextStyle(
                                         color: this.currentIndexTab == 0
                                             ? Colors.white
@@ -284,7 +285,7 @@ class _EventFesftivalDetailScreenState
                                         : Colors.white,
                                   ),
                                   child: Text(
-                                    "Content",
+                                    AppLocalizations.of(context)!.content,
                                     style: TextStyle(
                                         color: this.currentIndexTab == 1
                                             ? Colors.white
@@ -315,7 +316,7 @@ class _EventFesftivalDetailScreenState
                                         : Colors.white,
                                   ),
                                   child: Text(
-                                    "Pictures",
+                                    AppLocalizations.of(context)!.pictures,
                                     style: TextStyle(
                                         color: this.currentIndexTab == 2
                                             ? Colors.white

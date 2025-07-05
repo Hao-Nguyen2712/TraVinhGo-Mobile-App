@@ -6,6 +6,7 @@ import 'package:travinhgo/services/local_specialtie_service.dart';
 import 'package:travinhgo/widget/local_specialty_widget/local_specialty_item.dart';
 
 import '../../utils/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LocalSpecialtyScreen extends StatefulWidget {
   const LocalSpecialtyScreen({super.key});
@@ -65,7 +66,7 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
           floating: true,
           snap: true,
           backgroundColor: Colors.white,
-          title: const Text('Local Specialty'),
+          title: Text(AppLocalizations.of(context)!.localSpecialty),
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
@@ -101,8 +102,9 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
                     });
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search local specialty',
-                    prefixIcon: Icon(Icons.search),
+                    hintText:
+                        AppLocalizations.of(context)!.searchLocalSpecialty,
+                    prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(60),
                       borderSide: BorderSide.none,

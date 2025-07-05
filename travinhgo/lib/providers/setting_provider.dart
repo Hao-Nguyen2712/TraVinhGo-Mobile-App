@@ -1,45 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SettingProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  String _currentLanguage = 'vi'; // Default language is Vietnamese
+  Locale _locale = const Locale('vi'); // Default to Vietnamese
 
-  String get currentLanguage => _currentLanguage;
+  Locale get locale => _locale;
 
-  // Constructor to load saved language preference
   SettingProvider() {
     _loadSavedLanguage();
   }
 
-  // Load saved language preference
   Future<void> _loadSavedLanguage() async {
-    final savedLanguage = await _secureStorage.read(key: 'language_code');
-    if (savedLanguage != null) {
-      _currentLanguage = savedLanguage;
+    final savedLanguageCode = await _secureStorage.read(key: 'language_code');
+    if (savedLanguageCode != null) {
+      _locale = Locale(savedLanguageCode);
       notifyListeners();
     }
   }
 
-  // Toggle language between Vietnamese and English
-  Future<void> toggleLanguage() async {
-    _currentLanguage = _currentLanguage == 'vi' ? 'en' : 'vi';
-
-    // Save the language preference
-    await _secureStorage.write(key: 'language_code', value: _currentLanguage);
-
+  void setLocale(Locale locale) {
+    if (!AppLocalizations.supportedLocales.contains(locale)) return;
+    _locale = locale;
+    _secureStorage.write(key: 'language_code', value: locale.languageCode);
     notifyListeners();
-  }
-
-  // Set specific language
-  Future<void> setLanguage(String languageCode) async {
-    if (languageCode != _currentLanguage) {
-      _currentLanguage = languageCode;
-
-      // Save the language preference
-      await _secureStorage.write(key: 'language_code', value: _currentLanguage);
-
-      notifyListeners();
-    }
   }
 }

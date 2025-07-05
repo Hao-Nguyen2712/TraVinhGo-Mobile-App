@@ -8,6 +8,7 @@ import '../../providers/ocop_product_provider.dart';
 
 import '../../utils/constants.dart';
 import '../../widget/ocop_product_widget/ocop_product_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OcopProductScreen extends StatefulWidget {
   const OcopProductScreen({super.key});
@@ -51,7 +52,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
           floating: true,
           snap: true,
           backgroundColor: Colors.white,
-          title: const Text('Ocop Product'),
+          title: Text(AppLocalizations.of(context)!.ocopProduct),
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
@@ -87,7 +88,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                       });
                     },
                     decoration: InputDecoration(
-                      hintText: 'Search ocop product',
+                      hintText: AppLocalizations.of(context)!.searchOcopProduct,
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(60),
@@ -150,8 +151,8 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
           SliverToBoxAdapter(
             child: Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text('Error: ' + error),
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Text(AppLocalizations.of(context)!.errorPrefix(error)),
               ),
             ),
           )

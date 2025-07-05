@@ -5,6 +5,7 @@ import 'package:here_sdk/search.dart' show Suggestion;
 
 import '../../providers/map_provider.dart';
 import 'map_ui_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Search bar widget with suggestions dropdown
 class SearchBar extends StatefulWidget {
@@ -112,8 +113,8 @@ class _SearchBarState extends State<SearchBar> {
                   enableInteractiveSelection: true,
 
                   decoration: InputDecoration(
-                    hintText: 'Tìm kiếm',
-                    hintStyle: TextStyle(color: Colors.grey),
+                    hintText: AppLocalizations.of(context)!.searchHere,
+                    hintStyle: const TextStyle(color: Colors.grey),
                     prefixIcon: Icon(
                       Icons.search_rounded,
                       color: Colors.green.withAlpha(230),
@@ -161,11 +162,12 @@ class _SearchBarState extends State<SearchBar> {
                           final suggestion = suggestions[index];
                           return ListTile(
                             dense: true,
-                            leading: Icon(Icons.location_on_outlined,
+                            leading: const Icon(Icons.location_on_outlined,
                                 color: Colors.black),
                             title: Text(
-                              suggestion.title ?? "Địa điểm không tên",
-                              style: TextStyle(fontSize: 14),
+                              suggestion.title ??
+                                  AppLocalizations.of(context)!.unnamedLocation,
+                              style: const TextStyle(fontSize: 14),
                             ),
                             onTap: () {
                               provider.selectSearchSuggestion(suggestion);

@@ -8,6 +8,7 @@ import '../../utils/constants.dart';
 import '../../widget/status_dialog.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -51,7 +52,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = 'Error loading profile: ${e.toString()}';
+          _errorMessage =
+              AppLocalizations.of(context)!.errorLoadingProfile(e.toString());
         });
       }
     }
@@ -66,20 +68,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Log Out',
+          AppLocalizations.of(context)!.logOut,
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
-          'Are you sure you want to log out?',
+          AppLocalizations.of(context)!.logOutConfirmation,
           style: GoogleFonts.montserrat(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
-              'Cancel',
+              AppLocalizations.of(context)!.cancel,
               style: GoogleFonts.montserrat(
                 color: Colors.grey[600],
               ),
@@ -104,12 +106,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Column(
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 20),
-                            Text('Logging out...'),
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 20),
+                            Text(AppLocalizations.of(context)!.loggingOut),
                           ],
                         ),
                       ),
@@ -129,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             child: Text(
-              'Log Out',
+              AppLocalizations.of(context)!.logOut,
               style: GoogleFonts.montserrat(
                 color: Colors.red,
                 fontWeight: FontWeight.bold,
@@ -150,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Profile',
+          AppLocalizations.of(context)!.profile,
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
             fontSize: 20,
@@ -211,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Could not load profile data',
+            AppLocalizations.of(context)!.couldNotLoadProfile,
             style: GoogleFonts.montserrat(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -220,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            _errorMessage ?? 'An unknown error occurred',
+            _errorMessage ?? AppLocalizations.of(context)!.unknownError,
             style: GoogleFonts.montserrat(
               fontSize: 14,
               color: Colors.grey[600],
@@ -239,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             child: Text(
-              'Try Again',
+              AppLocalizations.of(context)!.tryAgain,
               style: GoogleFonts.montserrat(
                 fontWeight: FontWeight.w500,
               ),
@@ -255,8 +257,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profile = userProvider.userProfile;
 
     if (profile == null) {
-      return const Center(
-        child: Text('No profile data available'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noProfileData),
       );
     }
 
@@ -304,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         _buildMenuItem(
           icon: Icons.chat_bubble_outline,
-          title: 'Feedback',
+          title: AppLocalizations.of(context)!.feedbackTitle,
           onTap: () {
             context.pushNamed(
               'Feedback',
@@ -314,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Divider(height: 1, indent: 16, endIndent: 16),
         _buildMenuItem(
           icon: Icons.settings,
-          title: 'Setting',
+          title: AppLocalizations.of(context)!.setting,
           onTap: () {
             Navigator.push(
               context,
@@ -327,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Divider(height: 1, indent: 16, endIndent: 16),
         _buildMenuItem(
           icon: Icons.logout,
-          title: 'Log out',
+          title: AppLocalizations.of(context)!.logOut,
           onTap: _handleLogout,
         ),
       ],

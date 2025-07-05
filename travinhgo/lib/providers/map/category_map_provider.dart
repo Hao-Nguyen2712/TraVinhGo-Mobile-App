@@ -13,7 +13,6 @@ import 'boundary_map_provider.dart';
 /// with their corresponding user-friendly names and PlaceCategory IDs
 class CategoryType {
   final String name; // User-friendly name for UI display
-  final String vietnameseName; // Vietnamese translation of the category name
   final String categoryId; // PlaceCategory ID for HERE SDK
   final String markerAsset; // Path to the marker asset
   final String iconAsset; // Path to the icon asset for category buttons
@@ -22,7 +21,6 @@ class CategoryType {
 
   const CategoryType({
     required this.name,
-    required this.vietnameseName,
     required this.categoryId,
     required this.markerAsset,
     required this.iconAsset,
@@ -73,7 +71,6 @@ class CategoryMapProvider {
   final List<CategoryType> availableCategories = [
     CategoryType(
       name: "All",
-      vietnameseName: "Tất cả",
       categoryId: "", // Empty for "All" category
       markerAsset: "assets/images/markers/marker.png",
       iconAsset: "assets/images/navigations/map.png",
@@ -81,7 +78,6 @@ class CategoryMapProvider {
     ),
     CategoryType(
       name: "OCOP",
-      vietnameseName: "OCOP",
       categoryId: "ocop_products", // Custom ID for OCOP products
       markerAsset: "assets/images/map/ocop.png",
       iconAsset: "assets/images/map/ocop.png",
@@ -89,77 +85,66 @@ class CategoryMapProvider {
     ),
     CategoryType(
       name: "Hotels",
-      vietnameseName: "Khách sạn",
       categoryId: PlaceCategory.accommodationHotelMotel,
       markerAsset: "assets/images/markers/hotel.png",
       iconAsset: "assets/images/markers/hotel.png",
     ),
     CategoryType(
       name: "Restaurants",
-      vietnameseName: "Nhà hàng",
       categoryId: PlaceCategory.eatAndDrinkRestaurant,
       markerAsset: "assets/images/markers/restaurant.png",
       iconAsset: "assets/images/markers/restaurant.png",
     ),
     CategoryType(
       name: "Cafes",
-      vietnameseName: "Quán cà phê",
       categoryId: PlaceCategory.eatAndDrinkCoffeeTea,
       markerAsset: "assets/images/markers/coffee-shop.png",
       iconAsset: "assets/images/markers/coffee-shop.png",
     ),
     CategoryType(
       name: "Fuel",
-      vietnameseName: "Trạm xăng",
       categoryId: PlaceCategory.businessAndServicesFuelingStation,
       markerAsset: "assets/images/markers/gas-station.png",
       iconAsset: "assets/images/markers/gas-station.png",
     ),
     CategoryType(
       name: "ATMs",
-      vietnameseName: "ATM",
       categoryId: PlaceCategory.businessAndServicesAtm,
       markerAsset: "assets/images/markers/atm.png",
       iconAsset: "assets/images/markers/atm.png",
     ),
     CategoryType(
       name: "Banks",
-      vietnameseName: "Ngân hàng",
       categoryId: PlaceCategory.businessAndServicesBanking,
       markerAsset: "assets/images/markers/bank.png",
       iconAsset: "assets/images/markers/bank.png",
     ),
     CategoryType(
       name: "Schools",
-      vietnameseName: "Trường học",
       categoryId: PlaceCategory.facilitiesEducation,
       markerAsset: "assets/images/markers/education.png",
       iconAsset: "assets/images/markers/education.png",
     ),
     CategoryType(
       name: "Hospitals",
-      vietnameseName: "Bệnh viện",
       categoryId: PlaceCategory.facilitiesHospitalHealthcare,
       markerAsset: "assets/images/markers/hospital.png",
       iconAsset: "assets/images/markers/hospital.png",
     ),
     CategoryType(
       name: "Police",
-      vietnameseName: "Đồn công an",
       categoryId: PlaceCategory.businessAndServicesPoliceFireEmergency,
       markerAsset: "assets/images/markers/police-station.png",
       iconAsset: "assets/images/markers/police-station.png",
     ),
     CategoryType(
       name: "Bus Stops",
-      vietnameseName: "Trạm Xe Buýt",
       categoryId: PlaceCategory.transportPublic,
       markerAsset: "assets/images/markers/bus.png",
       iconAsset: "assets/images/markers/bus.png",
     ),
     CategoryType(
       name: "Stores",
-      vietnameseName: "Cửa hàng",
       categoryId: PlaceCategory.shoppingConvenienceStore,
       markerAsset: "assets/images/markers/supermarket.png",
       iconAsset: "assets/images/markers/supermarket.png",
@@ -168,7 +153,7 @@ class CategoryMapProvider {
 
   // Categories for filter buttons - populated from availableCategories Vietnamese names
   List<String> get categories =>
-      availableCategories.map((cat) => cat.vietnameseName).toList();
+      availableCategories.map((cat) => cat.name).toList();
 
   // Constructor
   CategoryMapProvider(this.baseMapProvider, this.markerMapProvider,
@@ -465,7 +450,7 @@ class CategoryMapProvider {
     // Create rich metadata for POI display
     Metadata metadata = Metadata();
     metadata.setString("place_name", place.title ?? "Unknown Place");
-    metadata.setString("place_category", categoryType.vietnameseName);
+    metadata.setString("place_category", categoryType.name);
 
     // Store address information
     if (place.address != null) {

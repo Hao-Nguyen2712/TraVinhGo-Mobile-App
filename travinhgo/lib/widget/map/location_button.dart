@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/map_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Location buttons for current location and Tra Vinh center
 class LocationButton extends StatelessWidget {
@@ -37,9 +38,9 @@ class LocationButton extends StatelessWidget {
                   ],
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.gps_fixed, color: Colors.blue),
+                  icon: const Icon(Icons.gps_fixed, color: Colors.blue),
                   onPressed: () => provider.getCurrentPosition(),
-                  tooltip: "My location",
+                  tooltip: AppLocalizations.of(context)!.myLocation,
                 ),
               ),
 
@@ -75,8 +76,8 @@ class LocationButton extends StatelessWidget {
                     provider.toggleCenterMarker();
                   },
                   tooltip: provider.isCenterMarkerVisible
-                      ? "Remove Tra Vinh center marker"
-                      : "Show Tra Vinh center",
+                      ? AppLocalizations.of(context)!.removeCenterMarker
+                      : AppLocalizations.of(context)!.showCenterMarker,
                 ),
               ),
             ],

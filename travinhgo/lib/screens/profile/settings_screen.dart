@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -17,7 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Setting',
+          AppLocalizations.of(context)!.setting,
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.bold,
           ),
@@ -32,13 +33,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Change Password
           _buildMenuItem(
             icon: Icons.sync_alt,
-            title: 'Change Password',
+            title: AppLocalizations.of(context)!.changePassword,
             hasChevron: true,
             onTap: () {
               // Navigate to change password screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Change Password feature coming soon')),
+                SnackBar(
+                    content: Text(AppLocalizations.of(context)!
+                        .changePasswordComingSoon)),
               );
             },
           ),
@@ -56,7 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  'Dark mode',
+                  AppLocalizations.of(context)!.darkMode,
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -73,8 +75,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(_isDarkMode
-                            ? 'Dark mode enabled'
-                            : 'Dark mode disabled'),
+                            ? AppLocalizations.of(context)!.darkModeEnabled
+                            : AppLocalizations.of(context)!.darkModeDisabled),
                       ),
                     );
                   },

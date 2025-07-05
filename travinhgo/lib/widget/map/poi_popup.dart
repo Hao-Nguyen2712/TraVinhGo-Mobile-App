@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/map_provider.dart';
 import 'package:travinhgo/widget/ocop_product_widget/rating_star_widget.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// POI information popup widget
 class PoiPopup extends StatelessWidget {
@@ -20,7 +21,8 @@ class PoiPopup extends StatelessWidget {
     }
 
     final metadata = mapProvider.lastPoiMetadata;
-    final String name = mapProvider.lastPoiName ?? 'Unknown Location';
+    final String name = mapProvider.lastPoiName ??
+        AppLocalizations.of(context)!.unknownLocation;
     final double rating =
         double.tryParse(metadata?.getString('product_rating') ?? '0.0') ?? 0.0;
     final imagesString = metadata?.getString('product_images');
@@ -110,8 +112,8 @@ class PoiPopup extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        _buildActionButton(
-                            context, Icons.directions, "Direct", true, () {
+                        _buildActionButton(context, Icons.directions,
+                            AppLocalizations.of(context)!.direct, true, () {
                           if (mapProvider.lastPoiCoordinates != null) {
                             mapProvider.startRouting(
                               mapProvider.lastPoiCoordinates!,
@@ -121,13 +123,13 @@ class PoiPopup extends StatelessWidget {
                           }
                         }),
                         const SizedBox(width: 8),
-                        _buildActionButton(
-                            context, Icons.play_arrow, "Start", false, () {
+                        _buildActionButton(context, Icons.play_arrow,
+                            AppLocalizations.of(context)!.start, false, () {
                           // Could be used for turn-by-turn navigation start
                         }),
                         const SizedBox(width: 8),
-                        _buildActionButton(
-                            context, Icons.info_outline, "Detail", false, () {
+                        _buildActionButton(context, Icons.info_outline,
+                            AppLocalizations.of(context)!.detail, false, () {
                           if (isOcop && ocopProductId != null) {
                             GoRouter.of(context)
                                 .push('/ocop-product-detail/$ocopProductId');
@@ -136,10 +138,10 @@ class PoiPopup extends StatelessWidget {
                           // Handle other detail navigations if needed
                         }),
                         const SizedBox(width: 8),
-                        _buildActionButton(context, Icons.share, "Share", false,
-                            () {
-                          final textToShare =
-                              'Check out this place: $name\nLocation: $address';
+                        _buildActionButton(context, Icons.share,
+                            AppLocalizations.of(context)!.share, false, () {
+                          final textToShare = AppLocalizations.of(context)!
+                              .shareText(name, address);
                           Share.share(textToShare);
                         }),
                       ],

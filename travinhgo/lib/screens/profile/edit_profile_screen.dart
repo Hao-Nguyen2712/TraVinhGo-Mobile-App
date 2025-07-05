@@ -8,6 +8,7 @@ import '../../utils/constants.dart';
 import '../../widget/status_dialog.dart';
 import 'package:intl/intl.dart';
 import '../../services/address_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -211,9 +212,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         if (!validExtensions.contains(extension)) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text(
-                      'Invalid image format. Please select a JPG, PNG, GIF, or WEBP file.')),
+              SnackBar(
+                  content:
+                      Text(AppLocalizations.of(context)!.invalidImageFormat)),
             );
           }
           return;
@@ -225,14 +226,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  'Profile picture selected. It will be uploaded when you save.')),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.profilePictureSelected)),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error selecting image: $e')),
+        SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.imagePickerError(e.toString()))),
       );
     }
   }
@@ -292,7 +295,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // Validation functions
   String? _validateFullName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Full name is required';
+      return AppLocalizations.of(context)!.fullName;
     }
     return null;
   }
@@ -306,7 +309,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final emailRegExp =
         RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegExp.hasMatch(value)) {
-      return 'Enter a valid email address';
+      return AppLocalizations.of(context)!.enterValidEmail;
     }
     return null;
   }
@@ -321,14 +324,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final vietnamesePhoneRegExp =
         RegExp(r'^(0[3|5|7|8|9][0-9]{8}|(\+84|84)[3|5|7|8|9][0-9]{8})$');
     if (!vietnamesePhoneRegExp.hasMatch(value)) {
-      return 'Enter a valid Vietnamese phone number';
+      return AppLocalizations.of(context)!.enterValidPhoneNumber;
     }
     return null;
   }
 
   String? _validateStreetAddress(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Street address is required';
+      return AppLocalizations.of(context)!.streetAddress;
     }
     return null;
   }
@@ -428,28 +431,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // Additional validation for address fields
     if (_streetAddressController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Street address is required')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.streetAddressRequired)),
       );
       return;
     }
 
     if (_selectedProvince == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a province/city')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.provinceCityRequired)),
       );
       return;
     }
 
     if (_selectedDistrict == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a district/county')),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.districtCountyRequired)),
       );
       return;
     }
 
     if (_selectedWard == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a ward/commune')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.wardCommuneRequired)),
       );
       return;
     }
@@ -552,8 +560,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             barrierDismissible: false,
             builder: (context) => StatusDialog(
               isSuccess: true,
-              title: 'Success',
-              message: 'Profile updated successfully',
+              title: AppLocalizations.of(context)!.success,
+              message: AppLocalizations.of(context)!.feedbackSentSuccess,
               onOkPressed: () {
                 Navigator.of(context).pop(); // Close dialog
                 //  Navigator.of(context).pop(); // Return to profile screen
@@ -565,8 +573,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             context: context,
             builder: (context) => StatusDialog(
               isSuccess: false,
-              title: 'Error',
-              message: userProvider.error ?? 'Failed to update profile',
+              title: AppLocalizations.of(context)!.error,
+              message: userProvider.error ??
+                  AppLocalizations.of(context)!.failedToUpdateProfile,
               onOkPressed: () {
                 Navigator.of(context).pop();
               },
@@ -585,8 +594,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           context: context,
           builder: (context) => StatusDialog(
             isSuccess: false,
-            title: 'Error',
-            message: 'An error occurred: ${e.toString()}',
+            title: AppLocalizations.of(context)!.error,
+            message:
+                AppLocalizations.of(context)!.anErrorOccurred(e.toString()),
             onOkPressed: () {
               Navigator.of(context).pop();
             },
@@ -605,7 +615,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Edit Profile',
+          AppLocalizations.of(context)!.editProfile,
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
             fontSize: 20,
@@ -620,7 +630,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           TextButton(
             onPressed: _isLoading ? null : _toggleEditMode,
             child: Text(
-              _editMode ? 'Done' : 'Edit', // Change text based on mode
+              _editMode
+                  ? AppLocalizations.of(context)!.done
+                  : AppLocalizations.of(context)!
+                      .edit, // Change text based on mode
               style: GoogleFonts.montserrat(
                 color: kprimaryColor,
                 fontWeight: FontWeight.w600,
@@ -673,17 +686,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 children: [
                   // Full Name
                   _buildFormField(
-                    label: 'Full Name',
+                    label: AppLocalizations.of(context)!.fullName,
                     controller: _fullNameController,
                     focusNode: _fullNameFocus,
                     enabled: _editMode,
                     validator: _validateFullName,
-                    hint: 'Enter your full name',
+                    hint: AppLocalizations.of(context)!.enterFullName,
                   ),
                   const SizedBox(height: 16),
 
                   // Email (conditionally editable)
-                  _buildLabelText('Email'),
+                  _buildLabelText(AppLocalizations.of(context)!.email),
                   const SizedBox(height: 8),
                   Container(
                     width: double.infinity,
@@ -702,7 +715,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   keyboardType: TextInputType.emailAddress,
                                   style: GoogleFonts.montserrat(fontSize: 16),
                                   decoration: InputDecoration(
-                                    hintText: 'Enter your email',
+                                    hintText: AppLocalizations.of(context)!
+                                        .enterValidEmail,
                                     border: InputBorder.none,
                                     isDense: true,
                                     contentPadding: EdgeInsets.zero,
@@ -716,7 +730,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 )
                               : Text(
                                   _emailController.text.isEmpty
-                                      ? 'No email available'
+                                      ? AppLocalizations.of(context)!
+                                          .noEmailAvailable
                                       : _emailController.text,
                                   style: GoogleFonts.montserrat(fontSize: 16),
                                   overflow: TextOverflow.ellipsis,
@@ -730,19 +745,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 16),
 
                   // Gender
-                  _buildLabelText('Gender'),
+                  _buildLabelText(AppLocalizations.of(context)!.gender),
                   const SizedBox(height: 8),
                   _buildReadOnlyField(
                     value: _selectedGender,
                     onTap: _editMode
                         ? () => _showGenderSelector()
                         : null, // Only enable in edit mode
-                    hint: 'Select your gender',
+                    hint: AppLocalizations.of(context)!.selectGender,
                   ),
                   const SizedBox(height: 16),
 
                   // Date of birth
-                  _buildLabelText('Date of Birth'),
+                  _buildLabelText(AppLocalizations.of(context)!.dateOfBirth),
                   const SizedBox(height: 8),
                   InkWell(
                     onTap: _editMode
@@ -770,7 +785,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               size: 20,
                             )
                           else
-                            Icon(Icons.check, color: Colors.blue),
+                            const Icon(Icons.check, color: Colors.blue),
                         ],
                       ),
                     ),
@@ -778,7 +793,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 16),
 
                   // Phone number - conditionally editable
-                  _buildLabelText('Phone Number'),
+                  _buildLabelText(AppLocalizations.of(context)!.phoneNumber),
                   const SizedBox(height: 8),
                   Container(
                     width: double.infinity,
@@ -797,7 +812,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   keyboardType: TextInputType.phone,
                                   style: GoogleFonts.montserrat(fontSize: 16),
                                   decoration: InputDecoration(
-                                    hintText: 'Enter your phone number',
+                                    hintText: AppLocalizations.of(context)!
+                                        .enterPhoneNumber,
                                     border: InputBorder.none,
                                     isDense: true,
                                     contentPadding: EdgeInsets.zero,
@@ -811,7 +827,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 )
                               : Text(
                                   _phoneController.text.isEmpty
-                                      ? 'No phone number available'
+                                      ? AppLocalizations.of(context)!
+                                          .noPhoneAvailable
                                       : _phoneController.text,
                                   style: GoogleFonts.montserrat(fontSize: 16),
                                   overflow: TextOverflow.ellipsis,
@@ -890,7 +907,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           TextButton(
             onPressed: _pickImage,
             child: Text(
-              'Change Profile Picture',
+              AppLocalizations.of(context)!.changeProfilePicture,
               style: GoogleFonts.montserrat(
                 color: kprimaryColor,
                 fontWeight: FontWeight.w500,
@@ -919,7 +936,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Select Gender',
+              AppLocalizations.of(context)!.selectGenderTitle,
               style: GoogleFonts.montserrat(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -927,7 +944,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: Text('Male'),
+              title: Text(AppLocalizations.of(context)!.male),
               trailing: _selectedGender == 'Male'
                   ? Icon(Icons.check, color: kprimaryColor)
                   : null,
@@ -940,7 +957,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               },
             ),
             ListTile(
-              title: Text('Female'),
+              title: Text(AppLocalizations.of(context)!.female),
               trailing: _selectedGender == 'Female'
                   ? Icon(Icons.check, color: kprimaryColor)
                   : null,
@@ -1073,7 +1090,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLabelText('Address'),
+          _buildLabelText(AppLocalizations.of(context)!.address),
           const SizedBox(height: 8),
 
           // Street Address
@@ -1085,7 +1102,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.grey.shade100,
-              hintText: 'Enter street address',
+              hintText: AppLocalizations.of(context)!.enterStreetAddress,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -1109,7 +1126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SizedBox(height: 16),
 
           // Province Dropdown
-          _buildLabelText('Province/City'),
+          _buildLabelText(AppLocalizations.of(context)!.provinceCity),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
@@ -1128,7 +1145,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: DropdownButton<String>(
                     value: _selectedProvince,
                     hint: Text(
-                      'Select province/city',
+                      AppLocalizations.of(context)!.selectProvinceCity,
                       style: GoogleFonts.montserrat(
                         fontSize: 16,
                         color: Colors.grey,
@@ -1151,7 +1168,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'Province/city is required',
+                      AppLocalizations.of(context)!.provinceCityRequired,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
                         color: Colors.red,
@@ -1164,7 +1181,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SizedBox(height: 16),
 
           // District Dropdown
-          _buildLabelText('District/County'),
+          _buildLabelText(AppLocalizations.of(context)!.districtCounty),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
@@ -1185,7 +1202,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: DropdownButton<String>(
                     value: _selectedDistrict,
                     hint: Text(
-                      'Select district/county',
+                      AppLocalizations.of(context)!.selectDistrictCounty,
                       style: GoogleFonts.montserrat(
                         fontSize: 16,
                         color: Colors.grey,
@@ -1211,7 +1228,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'District/county is required',
+                      AppLocalizations.of(context)!.districtCountyRequired,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
                         color: Colors.red,
@@ -1224,7 +1241,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SizedBox(height: 16),
 
           // Ward Dropdown
-          _buildLabelText('Ward/Commune'),
+          _buildLabelText(AppLocalizations.of(context)!.wardCommune),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
@@ -1245,7 +1262,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: DropdownButton<String>(
                     value: _selectedWard,
                     hint: Text(
-                      'Select ward/commune',
+                      AppLocalizations.of(context)!.selectWardCommune,
                       style: GoogleFonts.montserrat(
                         fontSize: 16,
                         color: Colors.grey,
@@ -1271,7 +1288,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'Ward/commune is required',
+                      AppLocalizations.of(context)!.wardCommuneRequired,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
                         color: Colors.red,
@@ -1286,13 +1303,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } else {
       // Display the combined address in view mode
       return _buildFormField(
-        label: 'Address',
+        label: AppLocalizations.of(context)!.address,
         controller: _addressController,
         focusNode: _addressFocus,
         keyboardType: TextInputType.streetAddress,
         maxLines: 2,
         enabled: false,
-        hint: 'Enter your address',
+        hint: AppLocalizations.of(context)!.enterStreetAddress,
       );
     }
   }

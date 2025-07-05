@@ -9,6 +9,7 @@ import 'package:here_sdk/core.dart'
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:developer' as developer;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../Models/Maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
@@ -264,19 +265,15 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Debug Info"),
+        title: Text(AppLocalizations.of(context)!.debugInfo),
         content: SelectableText(
-          "Error: ${_mapProvider.errorMessage}\n\n"
-          "Make sure:\n"
-          "1. Your API key and secret are correctly registered\n"
-          "2. Internet permissions are enabled in AndroidManifest.xml\n"
-          "3. Your device has internet access\n"
-          "4. HERE SDK is properly initialized",
+          "${AppLocalizations.of(context)!.errorPrefix(_mapProvider.errorMessage!)}\n\n"
+          "${AppLocalizations.of(context)!.mapErrorInstructions}",
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text("OK"),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),

@@ -16,6 +16,7 @@ import '../../providers/interaction_log_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DestinationDetailScreen extends StatefulWidget {
   final String id;
@@ -57,7 +58,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     // Đặt timer 8 giây để log interaction
     _interactionTimer = Timer(Duration(seconds: 8), () {
       // Gọi provider để add log
-      final interactionLogProvider = InteractionLogProvider.of(context, listen: false);
+      final interactionLogProvider =
+          InteractionLogProvider.of(context, listen: false);
       interactionLogProvider.addInteracLog(
         widget.id,
         ItemType.Destination,
@@ -83,7 +85,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     if (data == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No destination found')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.noDestinationFound)),
         );
         Navigator.pop(context);
       }
@@ -278,18 +281,18 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 width: 10,
                               ),
                               Text(
-                                "Destination",
-                                style: TextStyle(fontSize: 16),
+                                AppLocalizations.of(context)!.destination,
+                                style: const TextStyle(fontSize: 16),
                               ),
                               const Spacer(),
-                              Icon(
+                              const Icon(
                                 Icons.favorite_sharp,
                                 color: Colors.red,
                               ),
                               const SizedBox(
                                 width: 10,
                               ),
-                              Text(
+                              const Text(
                                 "82",
                                 style: TextStyle(fontSize: 16),
                               ),
@@ -297,8 +300,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 width: 6,
                               ),
                               Text(
-                                "favorite",
-                                style: TextStyle(fontSize: 16),
+                                AppLocalizations.of(context)!.favorite,
+                                style: const TextStyle(fontSize: 16),
                               ),
                             ],
                           ),
@@ -333,13 +336,13 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           Row(
                             children: [
                               Text(
-                                "Opening hours",
-                                style: TextStyle(fontSize: 16),
+                                AppLocalizations.of(context)!.openingHours,
+                                style: const TextStyle(fontSize: 16),
                               ),
-                              Spacer(),
+                              const Spacer(),
                               Text(
-                                "Opening",
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.opening,
+                                style: const TextStyle(
                                     fontSize: 16, color: kprimaryColor),
                               ),
                               const SizedBox(
@@ -347,13 +350,13 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               ),
                               if (destinationDetail.openingHours != null)
                                 Text(
-                                  '${destinationDetail.openingHours?.openTime.toString() ?? 'N/A'} - ${destinationDetail.openingHours?.closeTime.toString() ?? 'N/A'}',
-                                  style: TextStyle(fontSize: 16),
+                                  '${destinationDetail.openingHours?.openTime.toString() ?? AppLocalizations.of(context)!.notAvailable} - ${destinationDetail.openingHours?.closeTime.toString() ?? AppLocalizations.of(context)!.notAvailable}',
+                                  style: const TextStyle(fontSize: 16),
                                 )
                               else
                                 Text(
-                                  "N/A",
-                                  style: TextStyle(
+                                  AppLocalizations.of(context)!.notAvailable,
+                                  style: const TextStyle(
                                       fontSize: 16, color: Colors.grey),
                                 ),
                             ],
@@ -364,13 +367,13 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                             height: 10,
                           ),
                           DataFieldRow(
-                            title: 'Ticket',
+                            title: AppLocalizations.of(context)!.ticket,
                             value: StringHelper.normalizeName(
                                     destinationDetail.ticket) ??
-                                "N/A",
+                                AppLocalizations.of(context)!.notAvailable,
                           ),
                           DataFieldRow(
-                            title: 'Type',
+                            title: AppLocalizations.of(context)!.type,
                             value: StringHelper.toTitleCase(
                                 destinationTypeProvider
                                     .getDestinationtypeById(
@@ -378,14 +381,14 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                     .name),
                           ),
                           DataFieldRow(
-                            title: 'Address',
+                            title: AppLocalizations.of(context)!.address,
                             value: destinationDetail.address,
                           ),
                           Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Location',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.location,
+                                style: const TextStyle(
                                     fontSize: 24, color: kprimaryColor),
                               )),
                           Divider(
@@ -399,8 +402,9 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Rating (${destinationDetail.avarageRating})',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.rating(
+                                    destinationDetail.avarageRating.toString()),
+                                style: const TextStyle(
                                     fontSize: 24, color: kprimaryColor),
                               )),
                           Column(
