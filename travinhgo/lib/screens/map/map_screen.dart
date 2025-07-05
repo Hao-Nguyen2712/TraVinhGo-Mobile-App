@@ -326,8 +326,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                       ? const Center(child: CircularProgressIndicator())
                       : HereMap(onMapCreated: _onMapCreated),
 
-              // Category buttons
-              const CategoryButtons(),
+              // Category buttons - only show when not in routing mode
+              if (!provider.isRoutingMode) const CategoryButtons(),
 
               // Location button
               const LocationButton(),

@@ -17,6 +17,8 @@ class CategoryType {
   final String categoryId; // PlaceCategory ID for HERE SDK
   final String markerAsset; // Path to the marker asset
   final String iconAsset; // Path to the icon asset for category buttons
+  final String? selectedIconAsset;
+  final bool isTintable;
 
   const CategoryType({
     required this.name,
@@ -24,6 +26,8 @@ class CategoryType {
     required this.categoryId,
     required this.markerAsset,
     required this.iconAsset,
+    this.selectedIconAsset,
+    this.isTintable = false,
   });
 }
 
@@ -33,6 +37,9 @@ class CategoryMapProvider {
   final BaseMapProvider baseMapProvider;
   final MarkerMapProvider markerMapProvider;
   late final BoundaryMapProvider boundaryMapProvider;
+
+  // Callback when OCOP category is selected
+  Function()? onOcopCategorySelected;
 
   // Category state variables
   int selectedCategoryIndex = 0;
@@ -70,6 +77,15 @@ class CategoryMapProvider {
       categoryId: "", // Empty for "All" category
       markerAsset: "assets/images/markers/marker.png",
       iconAsset: "assets/images/navigations/map.png",
+      isTintable: true,
+    ),
+    CategoryType(
+      name: "OCOP",
+      vietnameseName: "OCOP",
+      categoryId: "ocop_products", // Custom ID for OCOP products
+      markerAsset: "assets/images/map/ocop.png",
+      iconAsset: "assets/images/map/ocop.png",
+      isTintable: false,
     ),
     CategoryType(
       name: "Hotels",
@@ -180,6 +196,26 @@ class CategoryMapProvider {
       return "assets/images/navigations/map.png"; // Default icon
     }
     return availableCategories[index].iconAsset;
+  }
+
+  /// Get the category icon based on selection state
+  String getCategoryIconForState(int index, bool isSelected) {
+    if (index < 0 || index >= availableCategories.length) {
+      return "assets/images/navigations/map.png"; // Default icon
+    }
+    final category = availableCategories[index];
+    if (isSelected && category.selectedIconAsset != null) {
+      return category.selectedIconAsset!;
+    }
+    return category.iconAsset;
+  }
+
+  /// Checks if a category's icon is tintable
+  bool isCategoryTintable(int index) {
+    if (index < 0 || index >= availableCategories.length) {
+      return false;
+    }
+    return availableCategories[index].isTintable;
   }
 
   /// Preload all category search results for caching
@@ -337,14 +373,26 @@ class CategoryMapProvider {
     if (index == 0) {
       displayAllCategories();
     } else {
+      // For any selected category (not "All"), show the search radius circle
+      addSearchRadiusCircle();
+
       // Get the selected category
       final selectedCategory = availableCategories[index];
 
-      // Show the search radius circle for specific categories
-      addSearchRadiusCircle();
-
-      // Display places for this category (from cache if available)
-      displayCategoryPlaces(selectedCategory);
+      // Special handling for OCOP category
+      if (selectedCategory.categoryId == "ocop_products") {
+        // Notify the MapProvider to show OCOP products
+        if (onOcopCategorySelected != null) {
+          developer.log('Triggering OCOP callback',
+              name: 'CategoryMapProvider');
+          onOcopCategorySelected!();
+        } else {
+          developer.log('OCOP callback not set', name: 'CategoryMapProvider');
+        }
+      } else {
+        // Display places for other categories
+        displayCategoryPlaces(selectedCategory);
+      }
     }
   }
 
@@ -352,6 +400,17 @@ class CategoryMapProvider {
   void displayAllCategories() {
     // Skip the first category which is "All"
     for (int i = 1; i < availableCategories.length; i++) {
+      // Special handling for OCOP products
+      if (availableCategories[i].categoryId == "ocop_products") {
+        if (onOcopCategorySelected != null) {
+          developer.log('Showing OCOP products as part of All categories',
+              name: 'CategoryMapProvider');
+          onOcopCategorySelected!();
+        }
+        continue; // Skip to next category since we've handled OCOP specially
+      }
+
+      // Handle other regular categories
       displayCategoryPlaces(availableCategories[i], isFromAllCategories: true);
     }
   }

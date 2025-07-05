@@ -38,6 +38,9 @@ class OcopProductService {
             'Content-Type': 'application/json charset=UTF-8',
           }));
 
+      debugPrint(
+          'ocop_api_response: status=${response.statusCode}, data=${response.data}');
+
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
         List<OcopProduct> ocopProducts =
@@ -47,7 +50,7 @@ class OcopProductService {
         return [];
       }
     } catch (e) {
-      debugPrint('Error during get destination list: $e');
+      debugPrint('ocop_api_error: $e');
       return [];
     }
   }
@@ -61,6 +64,9 @@ class OcopProductService {
             'Content-Type': 'application/json charset=UTF-8',
           }));
 
+      debugPrint(
+          'ocop_api_response: status=${response.statusCode}, data=${response.data}');
+
       if (response.statusCode == 200) {
         dynamic data = response.data['data'];
         OcopProduct ocopProductDetail = OcopProduct.fromJson(data);
@@ -69,13 +75,13 @@ class OcopProductService {
         return null;
       }
     } catch (e) {
-      debugPrint('Error during get ocop product list: $e');
+      debugPrint('ocop_api_error: $e');
       return null;
     }
   }
 
   Future<List<OcopProduct>> getOcopProductsByIds(List<String> ids) async {
-    try{
+    try {
       var endPoint = '${_baseUrl}GetOcopProductsByIds';
 
       final response = await dio.post(endPoint,
@@ -84,17 +90,19 @@ class OcopProductService {
             'Content-Type': 'application/json; charset=UTF-8',
           }));
 
+      debugPrint(
+          'ocop_api_response: status=${response.statusCode}, data=${response.data}');
+
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
         List<OcopProduct> ocopProducts =
-        data.map((item) => OcopProduct.fromJson(item)).toList();
+            data.map((item) => OcopProduct.fromJson(item)).toList();
         return ocopProducts;
       } else {
         return [];
       }
-
-    }catch(e) {
-      debugPrint('Error during get ocop product list: $e');
+    } catch (e) {
+      debugPrint('ocop_api_error: $e');
       return [];
     }
   }

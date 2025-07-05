@@ -1,176 +1,213 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:here_sdk/core.dart';
 import 'package:provider/provider.dart';
-import 'dart:developer' as developer;
-
-import '../../providers/map_provider.dart';
-import '../../providers/map_provider.dart' show TransportMode;
+import 'package:travinhgo/providers/map_provider.dart';
+import 'package:travinhgo/widget/ocop_product_widget/rating_star_widget.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// POI information popup widget
 class PoiPopup extends StatelessWidget {
-  const PoiPopup({Key? key}) : super(key: key);
+  const PoiPopup({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MapProvider>(
-      builder: (context, provider, _) {
-        if (!provider.showPoiPopup || provider.lastPoiName == null) {
-          return SizedBox.shrink();
-        }
+    final mapProvider = Provider.of<MapProvider>(context);
 
-        // Extract POI information
-        Map<String, String>? placeInfo = {};
+    if (!mapProvider.showPoiPopup || mapProvider.lastPoiCoordinates == null) {
+      return const SizedBox.shrink();
+    }
 
-        // For predefined locations, the information is already in the provider
-        if (provider.lastPoiName != null) {
-          placeInfo['name'] = provider.lastPoiName!;
-          if (provider.lastPoiCategory != null) {
-            placeInfo['category'] = provider.lastPoiCategory!;
-          }
-          if (provider.lastPoiCoordinates != null) {
-            placeInfo['latitude'] =
-                provider.lastPoiCoordinates!.latitude.toString();
-            placeInfo['longitude'] =
-                provider.lastPoiCoordinates!.longitude.toString();
-          }
-        }
+    final metadata = mapProvider.lastPoiMetadata;
+    final String name = mapProvider.lastPoiName ?? 'Unknown Location';
+    final double rating =
+        double.tryParse(metadata?.getString('product_rating') ?? '0.0') ?? 0.0;
+    final imagesString = metadata?.getString('product_images');
+    final List<String> images = imagesString != null && imagesString.isNotEmpty
+        ? imagesString.split(',')
+        : [];
+    final String address = metadata?.getString('place_address') ??
+        '${mapProvider.lastPoiCoordinates!.latitude.toStringAsFixed(5)}, ${mapProvider.lastPoiCoordinates!.longitude.toStringAsFixed(5)}';
 
-        // Get place name, category, address and coordinates
-        final name = provider.lastPoiName ?? "Unknown Place";
-        final category = provider.lastPoiCategory ?? "";
-        final address = placeInfo['address'] ?? "";
-        final phone = placeInfo['phone'] ?? "";
-        final coordinates = provider.lastPoiCoordinates;
+    final bool isOcop = metadata?.getString("is_ocop_product") == "true";
+    final String? ocopProductId = metadata?.getString("product_id");
 
-        // Dummy rating - would come from actual data in a real app
-        double rating = 4.7;
-
-        return Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 20,
-          left: 0,
-          right: 0,
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with title, rating and close button
-                _buildHeader(name, rating, provider),
-
-                // Action buttons
-                _buildActionButtons(provider),
-
-                // Image gallery
-                _buildImageGallery(),
-
-                // Address information
-                _buildAddressInfo(address, category, phone, coordinates),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // Header with title, rating and close button
-  Widget _buildHeader(String name, double rating, MapProvider provider) {
-    // Determine if this is an embedded POI
-    bool isEmbeddedPoi = provider.lastPoiCategory == "Embedded POI" ||
-        provider.lastPoiCategory == "HERE POI";
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
-      child: Row(
+    return Positioned(
+      bottom: 20,
+      left: 10,
+      right: 10,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          // Show an appropriate icon based on POI type
-          if (isEmbeddedPoi)
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Icon(Icons.place, color: Colors.blue, size: 24),
+          Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 4),
-                // Rating bar - only show for custom markers, not embedded POIs
-                if (!isEmbeddedPoi)
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title and Rating
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        rating.toString(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (rating > 0) ...[
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    rating.toStringAsFixed(1),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  if (isOcop)
+                                    RatingStarWidget(rating.round())
+                                  else
+                                    // Generic star rating for non-OCOP
+                                    ...List.generate(5, (index) {
+                                      return Icon(
+                                        index < rating.floor()
+                                            ? Icons.star
+                                            : Icons.star_border,
+                                        color: Colors.amber,
+                                        size: 16,
+                                      );
+                                    }),
+                                ],
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      SizedBox(width: 4),
-                      ...List.generate(
-                        5,
-                        (index) => Icon(
-                          index < rating.floor()
-                              ? Icons.star
-                              : (index == rating.floor() && rating % 1 > 0)
-                                  ? Icons.star_half
-                                  : Icons.star_border,
-                          color: Colors.amber,
-                          size: 16,
-                        ),
-                      ),
+                      const SizedBox(width: 40), // Space for close button
                     ],
                   ),
-                // For embedded POIs, show a different indicator
-                if (isEmbeddedPoi)
-                  Text(
-                    provider.lastPoiCategory ?? "Point of Interest",
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
+                  const SizedBox(height: 16),
+
+                  // Action Buttons
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        _buildActionButton(
+                            context, Icons.directions, "Direct", true, () {
+                          if (mapProvider.lastPoiCoordinates != null) {
+                            mapProvider.startRouting(
+                              mapProvider.lastPoiCoordinates!,
+                              name,
+                            );
+                            mapProvider.closePoiPopup();
+                          }
+                        }),
+                        const SizedBox(width: 8),
+                        _buildActionButton(
+                            context, Icons.play_arrow, "Start", false, () {
+                          // Could be used for turn-by-turn navigation start
+                        }),
+                        const SizedBox(width: 8),
+                        _buildActionButton(
+                            context, Icons.info_outline, "Detail", false, () {
+                          if (isOcop && ocopProductId != null) {
+                            GoRouter.of(context)
+                                .push('/ocop-product-detail/$ocopProductId');
+                            mapProvider.closePoiPopup();
+                          }
+                          // Handle other detail navigations if needed
+                        }),
+                        const SizedBox(width: 8),
+                        _buildActionButton(context, Icons.share, "Share", false,
+                            () {
+                          final textToShare =
+                              'Check out this place: $name\nLocation: $address';
+                          Share.share(textToShare);
+                        }),
+                      ],
                     ),
                   ),
-              ],
+
+                  // Image Gallery
+                  if (images.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: images.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: CachedNetworkImage(
+                                imageUrl: images[index],
+                                width: 160,
+                                height: 120,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  width: 160,
+                                  height: 120,
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                      child: CircularProgressIndicator()),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  width: 160,
+                                  height: 120,
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.error,
+                                      color: Colors.red),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 16),
+                  _buildInfoRow(Icons.location_on_outlined, address),
+                ],
+              ),
             ),
           ),
-          InkWell(
-            onTap: () => provider.closePoiPopup(),
+          // Close Button
+          Positioned(
+            top: 8,
+            right: 8,
             child: Container(
-              width: 24,
-              height: 24,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.black.withOpacity(0.5),
                 shape: BoxShape.circle,
               ),
-              child: Center(
-                child: Text(
-                  "×",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    height: 1.0,
-                  ),
-                ),
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                iconSize: 20,
+                onPressed: () => mapProvider.closePoiPopup(),
+                splashRadius: 20,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(4),
               ),
             ),
           ),
@@ -179,235 +216,40 @@ class PoiPopup extends StatelessWidget {
     );
   }
 
-  // Action buttons row
-  Widget _buildActionButtons(MapProvider provider) {
+  Widget _buildActionButton(BuildContext context, IconData icon, String label,
+      bool isPrimary, VoidCallback onPressed) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+    final backgroundColor =
+        isPrimary ? primaryColor : Colors.lightBlue.withOpacity(0.1);
+    final foregroundColor = isPrimary ? Colors.white : primaryColor;
+
+    return ActionChip(
+      avatar: Icon(icon, color: foregroundColor, size: 20),
+      label: Text(label),
+      onPressed: onPressed,
+      backgroundColor: backgroundColor,
+      labelStyle:
+          TextStyle(color: foregroundColor, fontWeight: FontWeight.bold),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Direction button
-          _buildActionButton(
-            icon: Icons.directions,
-            label: "Direct",
-            color: Colors.teal,
-            onTap: () {
-              // Start routing mode with the POI as destination
-              if (provider.lastPoiCoordinates != null &&
-                  provider.lastPoiName != null) {
-                // Close the POI popup first
-                provider.closePoiPopup();
-
-                // Start routing with the POI as destination
-                provider.startRouting(
-                    provider.lastPoiCoordinates!, provider.lastPoiName!);
-
-                // Set car as the default transport mode for better visibility
-                provider.setTransportMode(TransportMode.car);
-
-                // Set Tra Vinh center as departure point and calculate route
-                provider.useTraVinhCenterAsDeparture();
-
-                // Log the route creation
-                developer.log(
-                    'Creating route from Tra Vinh center to ${provider.lastPoiName}',
-                    name: 'PoiPopup');
-              }
-            },
-          ),
-          // Start button
-          _buildActionButton(
-            icon: Icons.arrow_upward_sharp,
-            label: "Start",
-            color: Colors.green,
-            onTap: () {
-              // Navigation functionality can be added here
-            },
-          ),
-          // Detail button
-          _buildActionButton(
-            icon: Icons.info_outline,
-            label: "Detail",
-            color: Colors.blue,
-            onTap: () {
-              // Show detailed information
-            },
-          ),
-          // Share button
-          _buildActionButton(
-            icon: Icons.share,
-            label: "Share",
-            color: Colors.deepOrange,
-            onTap: () {
-              // Share functionality
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Image gallery
-  Widget _buildImageGallery() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 12),
-        Container(
-          height: 120,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              // Sample images - Replace with actual POI images when available
-              _buildGalleryImage("assets/images/sample/destination1.jpg"),
-              _buildGalleryImage("assets/images/sample/destination2.jpg"),
-              _buildGalleryImage("assets/images/sample/destination3.jpg"),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Address information
-  Widget _buildAddressInfo(
-      String address, String category, String phone, var coordinates) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Show actual address if available
-          if (address.isNotEmpty)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    address,
-                    style: TextStyle(
-                      color: Colors.grey[800],
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
+          Icon(icon, color: Colors.grey[600], size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.grey[800], fontSize: 14),
             ),
-
-          // Show category if available
-          if (category.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.category, size: 16, color: Colors.grey[600]),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      category,
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Show phone if available
-          if (phone.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.phone, size: 16, color: Colors.grey[600]),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      phone,
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Show coordinates if available
-          if (coordinates != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.my_location, size: 16, color: Colors.grey[600]),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '${coordinates.latitude.toStringAsFixed(6)}, ${coordinates.longitude.toStringAsFixed(6)}',
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  // Helper method to create action buttons
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 24),
           ),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12),
-          )
         ],
-      ),
-    );
-  }
-
-  // Helper method to create gallery images
-  Widget _buildGalleryImage(String imagePath) {
-    return Container(
-      width: 140,
-      margin: EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        image: DecorationImage(
-          image: AssetImage(imagePath),
-          fit: BoxFit.cover,
-        ),
       ),
     );
   }

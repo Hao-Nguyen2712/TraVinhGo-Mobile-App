@@ -8,6 +8,8 @@ import 'dart:developer' as developer;
 
 import 'base_map_provider.dart';
 import 'marker_map_provider.dart';
+import 'search_map_provider.dart';
+import '../map_provider.dart';
 
 /// Transport mode options for routing
 enum TransportMode { car, pedestrian, bicycle, scooter, motorcycle }
@@ -17,11 +19,15 @@ class NavigationMapProvider {
   // Reference to other providers
   final BaseMapProvider baseMapProvider;
   final MarkerMapProvider markerMapProvider;
+  late SearchMapProvider _searchMapProvider;
 
   // Routing related variables
   here_sdk.RoutingEngine? _routingEngine;
   here_sdk.Route? _currentRoute;
   List<MapPolyline> _routePolylines = [];
+
+  // Callback when route calculation is completed
+  Function? onRouteCalculated;
 
   // Transport mode options
   TransportMode _selectedTransportMode = TransportMode.car;
@@ -40,8 +46,10 @@ class NavigationMapProvider {
   // Routing points
   GeoCoordinates? departureCoordinates;
   String? departureName;
+  String? departureAddress;
   GeoCoordinates? destinationCoordinates;
   String? destinationName;
+  String? destinationAddress;
 
   // Route info
   int? routeLengthInMeters;
@@ -57,6 +65,7 @@ class NavigationMapProvider {
   // Constructor
   NavigationMapProvider(this.baseMapProvider, this.markerMapProvider) {
     initializeRoutingEngine();
+    _searchMapProvider = SearchMapProvider(baseMapProvider, markerMapProvider);
   }
 
   /// Initialize the routing engine
@@ -111,6 +120,9 @@ class NavigationMapProvider {
     // Add destination marker
     addDestinationMarker(coordinates);
 
+    // Get address for destination using reverse geocoding
+    updateAddressFromCoordinates(coordinates, false);
+
     // Automatically use Tra Vinh center as departure point
     useTraVinhCenterAsDeparture();
   }
@@ -125,8 +137,10 @@ class NavigationMapProvider {
     // Clear routing data
     departureCoordinates = null;
     departureName = null;
+    departureAddress = null;
     destinationCoordinates = null;
     destinationName = null;
+    destinationAddress = null;
 
     // Clear route info
     routeLengthInMeters = null;
@@ -151,10 +165,26 @@ class NavigationMapProvider {
 
   /// Adds a departure marker for routing
   void addDepartureMarker(GeoCoordinates coordinates, String name) {
+    // Remove old departure marker before adding a new one
+    markerMapProvider.clearMarkers([MarkerMapProvider.MARKER_TYPE_DEPARTURE]);
+
+    // Remove Tra Vinh center marker if it is visible
+    if (baseMapProvider is MapProvider) {
+      final mapProvider = baseMapProvider as dynamic;
+      if (mapProvider.centerMarker != null) {
+        markerMapProvider.removeMarker(mapProvider.centerMarker!);
+        mapProvider.centerMarker = null;
+        mapProvider.isCenterMarkerVisible = false;
+      }
+    }
+
     // Format coordinates for display if name is "Selected location"
     if (name == "Selected location") {
       name =
-          "Vị trí: ${coordinates.latitude.toStringAsFixed(5)}, ${coordinates.longitude.toStringAsFixed(5)}";
+          "Location: ${coordinates.latitude.toStringAsFixed(5)}, ${coordinates.longitude.toStringAsFixed(5)}";
+
+      // Asynchronously update with real address
+      updateAddressFromCoordinates(coordinates, true);
     }
 
     // Set departure point data
@@ -365,6 +395,11 @@ class NavigationMapProvider {
 
       // Zoom to show the entire route
       _zoomToRoute();
+
+      // Call the callback to notify MapProvider to update UI
+      if (onRouteCalculated != null) {
+        onRouteCalculated!();
+      }
     }
   }
 
@@ -540,6 +575,11 @@ class NavigationMapProvider {
       departureName = destinationName;
       destinationName = tempName;
 
+      // Swap addresses
+      String? tempAddress = departureAddress;
+      departureAddress = destinationAddress;
+      destinationAddress = tempAddress;
+
       // Clear markers
       markerMapProvider.clearMarkers([
         MarkerMapProvider.MARKER_TYPE_DEPARTURE,
@@ -559,18 +599,14 @@ class NavigationMapProvider {
     }
   }
 
-  /// Shows the departure input UI
-  void showDepartureInput() {
-    isShowingDepartureInput = true;
-  }
-
-  /// Hides the departure input UI
+  /// Hide departure input mode
   void hideDepartureInput() {
     isShowingDepartureInput = false;
-    // If we have valid departure and destination points, calculate route
-    if (departureCoordinates != null && destinationCoordinates != null) {
-      calculateRoute();
-    }
+  }
+
+  /// Show departure input mode
+  void showDepartureInput() {
+    isShowingDepartureInput = true;
   }
 
   /// Cleanup navigation resources
@@ -586,5 +622,44 @@ class NavigationMapProvider {
 
     developer.log('Navigation resources cleaned up',
         name: 'NavigationMapProvider');
+  }
+
+  /// Update addresses for both departure and destination points using reverse geocoding
+  Future<void> updateAddressesFromCoordinates() async {
+    if (departureCoordinates != null) {
+      await updateAddressFromCoordinates(departureCoordinates!, true);
+    }
+
+    if (destinationCoordinates != null) {
+      await updateAddressFromCoordinates(destinationCoordinates!, false);
+    }
+  }
+
+  /// Update address for a single point (departure or destination) using reverse geocoding
+  Future<void> updateAddressFromCoordinates(
+      GeoCoordinates coordinates, bool isDeparture) async {
+    try {
+      String? address =
+          await _searchMapProvider.getAddressFromCoordinates(coordinates);
+
+      if (address != null && address.isNotEmpty) {
+        developer.log('Got address from coordinates: $address',
+            name: 'NavigationMapProvider');
+
+        if (isDeparture) {
+          departureAddress = address;
+        } else {
+          destinationAddress = address;
+        }
+
+        // Notify listeners that address has been updated
+        if (onRouteCalculated != null) {
+          onRouteCalculated!();
+        }
+      }
+    } catch (e) {
+      developer.log('Error getting address from coordinates: $e',
+          name: 'NavigationMapProvider');
+    }
   }
 }

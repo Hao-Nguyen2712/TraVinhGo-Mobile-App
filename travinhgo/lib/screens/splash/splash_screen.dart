@@ -7,12 +7,15 @@ import 'package:travinhgo/models/marker/marker.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
+import 'package:travinhgo/providers/map_provider.dart';
 import 'package:travinhgo/utils/constants.dart';
+import 'dart:developer' as developer;
 
 import '../../main.dart';
 import '../../providers/favorite_provider.dart';
 import '../../providers/ocop_type_provider.dart';
 import '../../services/push_notification_service.dart';
+import '../../providers/ocop_product_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -155,14 +158,21 @@ class _SplashScreenState extends State<SplashScreen> {
           Provider.of<OcopTypeProvider>(context, listen: false);
       final favoriteProvider =
           Provider.of<FavoriteProvider>(context, listen: false);
+      final ocopProductProvider =
+          Provider.of<OcopProductProvider>(context, listen: false);
+      final mapProvider = Provider.of<MapProvider>(context, listen: false);
 
       // Start all loading operations in parallel
+      developer.log(
+          'data_ocop: Starting to load all data including OCOP products',
+          name: 'SplashScreen');
       final markersFuture = markerProvider.fetchMarkers();
       final destinationTypesFuture =
           destinationTypeProvider.fetchDestinationType();
       final tagsFuture = tagProvider.fetchDestinationType();
       final ocopTypeFuture = ocopTypeProvider.fetchOcopType();
       final favoriteFuture = favoriteProvider.fetchFavorites();
+      final ocopProductsFuture = ocopProductProvider.fetchOcopProducts();
 
       // Wait for all data to load
       await Future.wait([
@@ -170,14 +180,22 @@ class _SplashScreenState extends State<SplashScreen> {
         destinationTypesFuture,
         tagsFuture,
         ocopTypeFuture,
-        favoriteFuture
+        favoriteFuture,
+        ocopProductsFuture,
       ]);
-      debugPrint('______________________________________________________________');
+
+      // Initialize the OCOP map provider
+      developer.log('data_ocop: Initializing OcopMapProvider with loaded data',
+          name: 'SplashScreen');
+      mapProvider.initializeOcopProvider(ocopProductProvider);
+
+      debugPrint(
+          '______________________________________________________________');
       for (var fav in favoriteProvider.favorites) {
         debugPrint(fav.itemId.toString());
       }
-      debugPrint('______________________________________________________________');
-
+      debugPrint(
+          '______________________________________________________________');
 
       // Associate markers with destination types
       final markers = markerProvider.markers;
@@ -207,8 +225,12 @@ class _SplashScreenState extends State<SplashScreen> {
           return [];
         },
       );
+
+      developer.log('data_ocop: All data loaded successfully in splash screen',
+          name: 'SplashScreen');
     } catch (e) {
-      debugPrint('Error during data loading: $e');
+      developer.log('data_ocop: Error during data loading: $e',
+          name: 'SplashScreen');
       // We still return normally to allow navigation to continue
     }
   }

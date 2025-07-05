@@ -52,4 +52,6 @@ class EnvConfig {
 
   /// Get the HERE API secret
   static String get hereApiSecret => getString('Here_Access_KeySecret');
+
+  static String get apiKey => getString('Here_Api_Key');
 }

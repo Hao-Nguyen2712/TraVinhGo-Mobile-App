@@ -19,6 +19,7 @@ import 'package:travinhgo/services/push_notification_service.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
+import 'package:travinhgo/providers/ocop_product_provider.dart';
 
 // Import HERE SDK directly in main.dart
 import 'package:here_sdk/core.dart';
@@ -29,7 +30,8 @@ import 'firebase_options.dart';
 // Global navigator key for accessing navigation from anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-final PushNotificationService pushNotificationService = PushNotificationService();
+final PushNotificationService pushNotificationService =
+    PushNotificationService();
 
 // Global flag to track if splash screen has been shown
 bool hasShownSplashScreen = false;
@@ -147,6 +149,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(create: (_) => UserProvider()),
           ChangeNotifierProvider(create: (_) => NotificationProvider()),
           ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+          ChangeNotifierProvider(create: (_) => OcopProductProvider()),
         ],
         child: MaterialApp.router(
           title: "TraVinhGo",
