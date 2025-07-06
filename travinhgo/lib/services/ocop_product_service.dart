@@ -31,7 +31,7 @@ class OcopProductService {
 
   Future<List<OcopProduct>> getOcopProduct() async {
     try {
-      var endPoint = '${_baseUrl}GetAllOcopProduct';
+      var endPoint = '${_baseUrl}GetActiveOcopProduct';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -57,7 +57,7 @@ class OcopProductService {
 
   Future<OcopProduct?> getOcopProductById(String id) async {
     try {
-      var endPoint = '${_baseUrl}GetOcopProductById/${id}';
+      var endPoint = '${_baseUrl}GetOcopProductWithTypeById/${id}';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {

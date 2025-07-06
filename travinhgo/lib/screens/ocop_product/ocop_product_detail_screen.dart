@@ -286,6 +286,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               height: 10,
                             ),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!
@@ -294,10 +295,10 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 ),
                                 const Spacer(),
                                 SizedBox(
-                                  width: 200,
+                                  width: 190,
                                   child: Text(
                                     StringHelper.toUpperCase(
-                                        "cty tnhh tra vinh farm"),
+                                        ocopProductDetail.company.name),
                                     style: TextStyle(
                                         fontSize: 18, color: kprimaryColor),
                                     maxLines: 2,
