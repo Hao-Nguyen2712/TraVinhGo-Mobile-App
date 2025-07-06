@@ -59,13 +59,13 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
           child: CustomScrollView(slivers: [
         SliverAppBar(
           floating: true,
           snap: true,
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           title: Text(AppLocalizations.of(context)!.localSpecialty),
           centerTitle: true,
           leading: IconButton(
@@ -110,7 +110,7 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: kSearchBackgroundColor,
+                    fillColor: Theme.of(context).colorScheme.surfaceVariant,
                   ),
                 );
               },

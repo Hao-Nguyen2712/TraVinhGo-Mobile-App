@@ -17,10 +17,10 @@ class RatingStarWidget extends StatelessWidget {
         ...List.generate(5, (index) {
           if (index < point) {
             return Icon(Icons.star,
-                color: CupertinoColors.systemYellow, size: 14);
+                color: Theme.of(context).colorScheme.secondary, size: 14);
           } else {
             return Icon(Icons.star_border,
-                color: CupertinoColors.systemYellow, size: 14);
+                color: Theme.of(context).colorScheme.secondary, size: 14);
           }
         }),
       ],

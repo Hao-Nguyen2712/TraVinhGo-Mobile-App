@@ -9,6 +9,8 @@ class LocationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<MapProvider>(
       builder: (context, provider, _) {
         // Don't show location button in routing mode
@@ -27,18 +29,18 @@ class LocationButton extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: colorScheme.shadow.withOpacity(0.2),
                       blurRadius: 6,
                       offset: Offset(0, 2),
                     ),
                   ],
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.gps_fixed, color: Colors.blue),
+                  icon: Icon(Icons.gps_fixed, color: colorScheme.primary),
                   onPressed: () => provider.getCurrentPosition(),
                   tooltip: AppLocalizations.of(context)!.myLocation,
                 ),
@@ -51,11 +53,11 @@ class LocationButton extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: colorScheme.shadow.withOpacity(0.2),
                       blurRadius: 6,
                       offset: Offset(0, 2),
                     ),
@@ -66,8 +68,8 @@ class LocationButton extends StatelessWidget {
                     Icons.location_city,
                     // Change color based on marker visibility
                     color: provider.isCenterMarkerVisible
-                        ? Colors.red
-                        : Colors.green,
+                        ? colorScheme.error
+                        : colorScheme.primary,
                   ),
                   onPressed: () {
                     // First move to Tra Vinh center

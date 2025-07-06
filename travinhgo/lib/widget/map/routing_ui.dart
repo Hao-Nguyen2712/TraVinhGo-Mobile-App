@@ -21,14 +21,15 @@ class LocationSelectionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: colorScheme.shadow.withOpacity(0.1),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -70,7 +71,7 @@ class LocationSelectionPanel extends StatelessWidget {
                 _buildRoutePoint(
                   context: context,
                   icon: Icons.location_on,
-                  iconColor: Colors.green,
+                  iconColor: Theme.of(context).colorScheme.primary,
                   title: AppLocalizations.of(context)!.departurePoint,
                   locationName: provider.departureName ?? "Không xác định",
                   locationAddress: provider.departureAddress,
@@ -84,14 +85,19 @@ class LocationSelectionPanel extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: 4.0, horizontal: 40.0),
-                  child: Divider(height: 1, color: Colors.grey[300]),
+                  child: Divider(
+                      height: 1,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.5)),
                 ),
 
                 // Destination point
                 _buildRoutePoint(
                   context: context,
                   icon: Icons.location_on,
-                  iconColor: Colors.red,
+                  iconColor: Theme.of(context).colorScheme.error,
                   title: AppLocalizations.of(context)!.destinationPoint,
                   locationName: provider.destinationName ?? "Không xác định",
                   locationAddress: provider.destinationAddress,
@@ -109,10 +115,11 @@ class LocationSelectionPanel extends StatelessWidget {
               provider.searchSuggestions.isEmpty)
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: Colors.blue[50],
+              color: colorScheme.primaryContainer,
               child: Row(
                 children: [
-                  Icon(Icons.touch_app, color: Colors.blue[800], size: 22),
+                  Icon(Icons.touch_app,
+                      color: colorScheme.onPrimaryContainer, size: 22),
                   SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -123,13 +130,14 @@ class LocationSelectionPanel extends StatelessWidget {
                           style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue[800]),
+                              color: colorScheme.onPrimaryContainer),
                         ),
                         SizedBox(height: 4),
                         Text(
                           AppLocalizations.of(context)!.tapOrSearchDeparture,
-                          style:
-                              TextStyle(fontSize: 13, color: Colors.blue[800]),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: colorScheme.onPrimaryContainer),
                         ),
                       ],
                     ),
@@ -147,13 +155,14 @@ class LocationSelectionPanel extends StatelessWidget {
       {required IconData icon,
       required VoidCallback onPressed,
       String? tooltip}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: colorScheme.shadow.withOpacity(0.1),
             blurRadius: 4,
             offset: Offset(0, 2),
           ),
@@ -162,7 +171,7 @@ class LocationSelectionPanel extends StatelessWidget {
       child: IconButton(
         icon: Icon(icon, size: 22),
         onPressed: onPressed,
-        color: Colors.black54,
+        color: colorScheme.onSurfaceVariant,
         tooltip: tooltip,
         padding: EdgeInsets.all(8),
         constraints: BoxConstraints(),
@@ -182,6 +191,7 @@ class LocationSelectionPanel extends StatelessWidget {
     bool isEditable = true,
     bool isDeparture = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Determine if the text field should be shown
     final bool showTextField = isDeparture && provider.isShowingDepartureInput;
 
@@ -230,7 +240,7 @@ class LocationSelectionPanel extends StatelessWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: colorScheme.onSurfaceVariant,
                           fontSize: 14,
                         ),
                       ),
@@ -250,7 +260,7 @@ class LocationSelectionPanel extends StatelessWidget {
                           child: Text(
                             locationAddress,
                             style: TextStyle(
-                              color: Colors.grey[700],
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 14,
                             ),
                             maxLines: 2,
@@ -264,7 +274,8 @@ class LocationSelectionPanel extends StatelessWidget {
         if (isEditable && !showTextField)
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(Icons.edit, color: Colors.grey[400], size: 20),
+            child: Icon(Icons.edit,
+                color: colorScheme.onSurfaceVariant.withOpacity(0.7), size: 20),
           ),
       ],
     );
@@ -319,10 +330,12 @@ class LocationAddressHelper {
   // Function to show the full address dialog
   static void showFullAddressDialog(BuildContext context, String title,
       String locationName, String fullAddress, MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: colorScheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -330,7 +343,9 @@ class LocationAddressHelper {
             children: [
               Icon(
                 title == "Điểm đi" ? Icons.trip_origin : Icons.place,
-                color: title == "Điểm đi" ? Color(0xFF4CAF50) : Colors.red,
+                color: title == "Điểm đi"
+                    ? colorScheme.primary
+                    : colorScheme.error,
                 size: 24,
               ),
               SizedBox(width: 10),
@@ -359,7 +374,7 @@ class LocationAddressHelper {
                 "Địa chỉ đầy đủ:",
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[700],
+                  color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -367,15 +382,16 @@ class LocationAddressHelper {
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[300]!),
+                  border:
+                      Border.all(color: colorScheme.outline.withOpacity(0.5)),
                 ),
                 child: Text(
                   fullAddress,
                   style: TextStyle(
                     fontSize: 15,
-                    color: Colors.black87,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -386,7 +402,7 @@ class LocationAddressHelper {
               child: Text(
                 "Đóng",
                 style: TextStyle(
-                  color: Color(0xFF4CAF50),
+                  color: colorScheme.primary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -400,13 +416,13 @@ class LocationAddressHelper {
                 child: Text(
                   "Chỉ đường",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: colorScheme.onPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFF4CAF50),
+                  backgroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -484,6 +500,7 @@ class _RoutingUIState extends State<RoutingUI> {
     String label,
   ) {
     bool isSelected = provider.selectedTransportMode == mode;
+    final colorScheme = Theme.of(context).colorScheme;
 
     // Get the duration for this transport mode from the provider's stored durations
     int? duration = provider.routeDurations[mode];
@@ -499,11 +516,12 @@ class _RoutingUIState extends State<RoutingUI> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 4),
           decoration: BoxDecoration(
-            color:
-                isSelected ? Colors.teal.withOpacity(0.1) : Colors.transparent,
+            color: isSelected
+                ? colorScheme.primary.withOpacity(0.1)
+                : Colors.transparent,
             border: Border(
               bottom: BorderSide(
-                color: isSelected ? Colors.teal : Colors.transparent,
+                color: isSelected ? colorScheme.primary : Colors.transparent,
                 width: 3,
               ),
             ),
@@ -512,14 +530,18 @@ class _RoutingUIState extends State<RoutingUI> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.teal : Colors.grey,
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
                 size: 28,
               ),
               SizedBox(height: 4),
               Text(
                 displayText,
                 style: TextStyle(
-                  color: isSelected ? Colors.black : Colors.grey,
+                  color: isSelected
+                      ? colorScheme.onSurface
+                      : colorScheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   fontSize: 14,
                 ),
@@ -591,12 +613,19 @@ class _RoutingUIState extends State<RoutingUI> {
                         maxHeight:
                             240), // Increased max height to show more results
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withOpacity(0.5)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .shadow
+                              .withOpacity(0.1),
                           blurRadius: 8,
                           offset: Offset(0, 2),
                         ),
@@ -614,7 +643,10 @@ class _RoutingUIState extends State<RoutingUI> {
                           contentPadding:
                               EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                           leading: Icon(Icons.location_on_outlined,
-                              size: 18, color: Colors.grey[700]),
+                              size: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
                           title: Text(
                             suggestion.title ?? "Unnamed location",
                             style: TextStyle(fontSize: 14),
@@ -640,7 +672,7 @@ class _RoutingUIState extends State<RoutingUI> {
   Widget _buildCollapsedPanel(MapProvider provider) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.0),
           topRight: Radius.circular(24.0),
@@ -654,7 +686,10 @@ class _RoutingUIState extends State<RoutingUI> {
             height: 4,
             margin: const EdgeInsets.symmetric(vertical: 6.0),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withOpacity(0.5),
               borderRadius: BorderRadius.circular(12.0),
             ),
           ),
@@ -676,7 +711,7 @@ class _RoutingUIState extends State<RoutingUI> {
   Widget _buildDraggablePanel(MapProvider provider) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.0),
           topRight: Radius.circular(24.0),
@@ -690,7 +725,10 @@ class _RoutingUIState extends State<RoutingUI> {
             height: 4,
             margin: const EdgeInsets.symmetric(vertical: 6.0),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withOpacity(0.5),
               borderRadius: BorderRadius.circular(12.0),
             ),
           ),
@@ -730,7 +768,9 @@ class _RoutingUIState extends State<RoutingUI> {
       padding: const EdgeInsets.symmetric(horizontal: 2.0),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
+          bottom: BorderSide(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              width: 1),
         ),
       ),
       child: Row(
@@ -748,12 +788,13 @@ class _RoutingUIState extends State<RoutingUI> {
 
   /// Route summary (time and distance)
   Widget _buildRouteSummary(MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -761,7 +802,7 @@ class _RoutingUIState extends State<RoutingUI> {
           // Time and arrival
           Row(
             children: [
-              Icon(Icons.access_time, color: Colors.teal),
+              Icon(Icons.access_time, color: colorScheme.primary),
               SizedBox(width: 8),
               Text(
                 "${MapUiUtils.formatDuration(provider.routeDurationInSeconds!)}",
@@ -773,8 +814,8 @@ class _RoutingUIState extends State<RoutingUI> {
                 MapUiUtils.getEstimatedArrivalTime(
                     provider.routeDurationInSeconds!,
                     AppLocalizations.of(context)!),
-                style: const TextStyle(
-                    color: Colors.teal,
+                style: TextStyle(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16),
               ),
@@ -784,12 +825,12 @@ class _RoutingUIState extends State<RoutingUI> {
           // Distance and route info
           Row(
             children: [
-              Icon(Icons.straighten, color: Colors.blue.shade700, size: 20),
+              Icon(Icons.straighten, color: colorScheme.secondary, size: 20),
               SizedBox(width: 8),
               Text(
                 MapUiUtils.formatDistance(provider.routeLengthInMeters!),
                 style: TextStyle(
-                    color: Colors.grey[800],
+                    color: colorScheme.onSurface,
                     fontWeight: FontWeight.w500,
                     fontSize: 16),
               ),
@@ -797,17 +838,18 @@ class _RoutingUIState extends State<RoutingUI> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.bolt, color: Colors.blue, size: 16),
+                    Icon(Icons.bolt,
+                        color: colorScheme.onSecondaryContainer, size: 16),
                     SizedBox(width: 4),
                     Text(
                       "Đường nhanh nhất",
                       style: TextStyle(
-                          color: Colors.blue.shade700,
+                          color: colorScheme.onSecondaryContainer,
                           fontSize: 12,
                           fontWeight: FontWeight.bold),
                     ),
@@ -823,12 +865,13 @@ class _RoutingUIState extends State<RoutingUI> {
 
   /// From/To location info
   Widget _buildRoutePointsInfo(MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -839,14 +882,14 @@ class _RoutingUIState extends State<RoutingUI> {
               Container(
                 width: 8,
                 height: 8,
-                decoration:
-                    BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                    color: colorScheme.secondary, shape: BoxShape.circle),
               ),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
                   provider.departureName ?? "Trung tâm Trà Vinh",
-                  style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+                  style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -858,7 +901,7 @@ class _RoutingUIState extends State<RoutingUI> {
             margin: EdgeInsets.only(left: 4),
             height: 20,
             width: 1,
-            color: Colors.grey[300],
+            color: colorScheme.outline.withOpacity(0.5),
           ),
           // To location
           Row(
@@ -866,8 +909,8 @@ class _RoutingUIState extends State<RoutingUI> {
               Container(
                 width: 8,
                 height: 8,
-                decoration:
-                    BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                    color: colorScheme.error, shape: BoxShape.circle),
               ),
               SizedBox(width: 8),
               Expanded(
@@ -876,7 +919,7 @@ class _RoutingUIState extends State<RoutingUI> {
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87),
+                      color: colorScheme.onSurface),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -890,6 +933,7 @@ class _RoutingUIState extends State<RoutingUI> {
 
   /// Action buttons (start, save, etc.)
   Widget _buildActionButtons(MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -897,7 +941,7 @@ class _RoutingUIState extends State<RoutingUI> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.teal.withOpacity(0.1),
+            color: colorScheme.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -905,16 +949,16 @@ class _RoutingUIState extends State<RoutingUI> {
               Icon(
                   MapUiUtils.getTransportModeIcon(
                       provider.selectedTransportMode),
-                  color: Colors.teal,
+                  color: colorScheme.primary,
                   size: 20),
               SizedBox(width: 6),
               Text(
                 MapUiUtils.getTransportModeLabel(provider.selectedTransportMode,
                     AppLocalizations.of(context)!),
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal),
+                    color: colorScheme.primary),
               ),
             ],
           ),
@@ -924,8 +968,8 @@ class _RoutingUIState extends State<RoutingUI> {
         ElevatedButton(
           onPressed: () {/* Start navigation - future implementation */},
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.teal,
-            foregroundColor: Colors.white,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
@@ -945,9 +989,9 @@ class _RoutingUIState extends State<RoutingUI> {
         // Save button
         IconButton(
           onPressed: () {/* Save route - future implementation */},
-          icon: Icon(Icons.bookmark_border, color: Colors.blue),
+          icon: Icon(Icons.bookmark_border, color: colorScheme.secondary),
           style: IconButton.styleFrom(
-            backgroundColor: Colors.blue.withOpacity(0.1),
+            backgroundColor: colorScheme.secondary.withOpacity(0.1),
             shape: CircleBorder(),
           ),
           tooltip: "Lưu",

@@ -18,7 +18,7 @@ class EventFestivalInformationTab extends StatelessWidget {
       child: Column(
         children: [
           Divider(
-            color: Colors.grey.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
             thickness: 0.4,
             height: 10,
           ),
@@ -30,8 +30,7 @@ class EventFestivalInformationTab extends StatelessWidget {
           ),
           DataFieldRow(
             title: 'Category',
-            value: StringHelper.toTitleCase(
-                eventAndFestival.category),
+            value: StringHelper.toTitleCase(eventAndFestival.category),
           ),
           DataFieldRow(
             title: 'Address',
@@ -41,7 +40,8 @@ class EventFestivalInformationTab extends StatelessWidget {
           ),
           DataFieldRow(
             title: 'Start date',
-            value: StringHelper.formatDate(eventAndFestival.startDate.toString()),
+            value:
+                StringHelper.formatDate(eventAndFestival.startDate.toString()),
           ),
           DataFieldRow(
             title: 'End date',

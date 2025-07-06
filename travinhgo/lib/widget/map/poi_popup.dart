@@ -34,6 +34,7 @@ class PoiPopup extends StatelessWidget {
 
     final bool isOcop = metadata?.getString("is_ocop_product") == "true";
     final String? ocopProductId = metadata?.getString("product_id");
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Positioned(
       bottom: 20,
@@ -77,7 +78,7 @@ class PoiPopup extends StatelessWidget {
                                   Text(
                                     rating.toStringAsFixed(1),
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color: colorScheme.onSurfaceVariant,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -91,7 +92,7 @@ class PoiPopup extends StatelessWidget {
                                         index < rating.floor()
                                             ? Icons.star
                                             : Icons.star_border,
-                                        color: Colors.amber,
+                                        color: colorScheme.secondary,
                                         size: 16,
                                       );
                                     }),
@@ -169,16 +170,16 @@ class PoiPopup extends StatelessWidget {
                                 placeholder: (context, url) => Container(
                                   width: 160,
                                   height: 120,
-                                  color: Colors.grey[200],
+                                  color: colorScheme.surfaceVariant,
                                   child: const Center(
                                       child: CircularProgressIndicator()),
                                 ),
                                 errorWidget: (context, url, error) => Container(
                                   width: 160,
                                   height: 120,
-                                  color: Colors.grey[200],
-                                  child: const Icon(Icons.error,
-                                      color: Colors.red),
+                                  color: colorScheme.surfaceVariant,
+                                  child: Icon(Icons.error,
+                                      color: colorScheme.error),
                                 ),
                               ),
                             ),
@@ -189,7 +190,7 @@ class PoiPopup extends StatelessWidget {
                   ],
 
                   const SizedBox(height: 16),
-                  _buildInfoRow(Icons.location_on_outlined, address),
+                  _buildInfoRow(context, Icons.location_on_outlined, address),
                 ],
               ),
             ),
@@ -200,11 +201,11 @@ class PoiPopup extends StatelessWidget {
             right: 8,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: colorScheme.scrim,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: Icon(Icons.close, color: colorScheme.onInverseSurface),
                 iconSize: 20,
                 onPressed: () => mapProvider.closePoiPopup(),
                 splashRadius: 20,
@@ -220,11 +221,11 @@ class PoiPopup extends StatelessWidget {
 
   Widget _buildActionButton(BuildContext context, IconData icon, String label,
       bool isPrimary, VoidCallback onPressed) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
+    final colorScheme = Theme.of(context).colorScheme;
     final backgroundColor =
-        isPrimary ? primaryColor : Colors.lightBlue.withOpacity(0.1);
-    final foregroundColor = isPrimary ? Colors.white : primaryColor;
+        isPrimary ? colorScheme.primary : colorScheme.secondaryContainer;
+    final foregroundColor =
+        isPrimary ? colorScheme.onPrimary : colorScheme.onSecondaryContainer;
 
     return ActionChip(
       avatar: Icon(icon, color: foregroundColor, size: 20),
@@ -237,18 +238,19 @@ class PoiPopup extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.grey[600], size: 20),
+          Icon(icon, color: colorScheme.onSurfaceVariant, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: Colors.grey[800], fontSize: 14),
+              style: TextStyle(color: colorScheme.onSurface, fontSize: 14),
             ),
           ),
         ],

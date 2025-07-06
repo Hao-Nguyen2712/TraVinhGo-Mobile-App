@@ -14,10 +14,12 @@ class NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       elevation: 4,
-      color: isNew ? KnewNotificationBackgroundColor : Colors.white,
+      color: isNew ? colorScheme.secondaryContainer : colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -29,10 +31,10 @@ class NotificationItem extends StatelessWidget {
             Text(
               textAlign: TextAlign.left,
               StringHelper.toTitleCase(userNotification.title),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -45,9 +47,10 @@ class NotificationItem extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-                textAlign: TextAlign.left,
-                StringHelper.formatDateTime(userNotification.createdAt.toString()),
-                style: TextStyle(fontSize: 14),
+              textAlign: TextAlign.left,
+              StringHelper.formatDateTime(
+                  userNotification.createdAt.toString()),
+              style: TextStyle(fontSize: 14),
             ),
           ],
         ),

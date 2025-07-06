@@ -252,14 +252,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastDate: DateTime.now(),
       builder: (BuildContext context, Widget? child) {
         return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: ColorScheme.light(
-              primary: kprimaryColor,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-            dialogBackgroundColor: Colors.white,
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  onPrimary: Theme.of(context).colorScheme.onPrimary,
+                  surface: Theme.of(context).colorScheme.surface,
+                  onSurface: Theme.of(context).colorScheme.onSurface,
+                ),
+            dialogBackgroundColor: Theme.of(context).colorScheme.surface,
           ),
           child: child!,
         );
@@ -609,9 +608,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -619,7 +618,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
             fontSize: 20,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         leading: IconButton(
@@ -635,7 +634,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   : AppLocalizations.of(context)!
                       .edit, // Change text based on mode
               style: GoogleFonts.montserrat(
-                color: kprimaryColor,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
               ),
@@ -656,7 +655,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final profile = userProvider.userProfile;
 
     if (profile == null) {
-      return const Center(
+      return Center(
         child: Text('No profile data available'),
       );
     }
@@ -703,7 +702,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 16),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -738,7 +737,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ),
                         ),
                         if (!_editMode) // Only show check in view mode
-                          Icon(Icons.check, color: Colors.blue),
+                          Icon(Icons.check,
+                              color: Theme.of(context).colorScheme.secondary),
                       ],
                     ),
                   ),
@@ -768,7 +768,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 16),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: Theme.of(context).colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -781,11 +781,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           if (_editMode)
                             Icon(
                               Icons.calendar_today,
-                              color: Colors.grey[600],
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                               size: 20,
                             )
                           else
-                            const Icon(Icons.check, color: Colors.blue),
+                            Icon(Icons.check,
+                                color: Theme.of(context).colorScheme.secondary),
                         ],
                       ),
                     ),
@@ -800,7 +803,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 16),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -835,7 +838,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ),
                         ),
                         if (!_editMode) // Only show check in view mode
-                          Icon(Icons.check, color: Colors.blue),
+                          Icon(Icons.check,
+                              color: Theme.of(context).colorScheme.secondary),
                       ],
                     ),
                   ),
@@ -864,7 +868,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundColor: const Color(0xFFFEE0E7),
+                backgroundColor:
+                    Theme.of(context).colorScheme.secondaryContainer,
                 backgroundImage: _imageFile != null
                     ? FileImage(_imageFile!)
                     : (_avatarUrl.isNotEmpty
@@ -879,12 +884,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: kprimaryColor,
+                      color: Theme.of(context).colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.camera_alt,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       size: 20,
                     ),
                   ),
@@ -899,7 +904,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
@@ -909,7 +914,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Text(
               AppLocalizations.of(context)!.changeProfilePicture,
               style: GoogleFonts.montserrat(
-                color: kprimaryColor,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),
@@ -925,7 +930,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -946,7 +951,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ListTile(
               title: Text(AppLocalizations.of(context)!.male),
               trailing: _selectedGender == 'Male'
-                  ? Icon(Icons.check, color: kprimaryColor)
+                  ? Icon(Icons.check,
+                      color: Theme.of(context).colorScheme.primary)
                   : null,
               onTap: () {
                 setState(() {
@@ -959,7 +965,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ListTile(
               title: Text(AppLocalizations.of(context)!.female),
               trailing: _selectedGender == 'Female'
-                  ? Icon(Icons.check, color: kprimaryColor)
+                  ? Icon(Icons.check,
+                      color: Theme.of(context).colorScheme.primary)
                   : null,
               onTap: () {
                 setState(() {
@@ -981,7 +988,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       style: GoogleFonts.montserrat(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.black,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -1016,7 +1023,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.montserrat(fontSize: 16),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade100,
+            fillColor: Theme.of(context).colorScheme.surfaceVariant,
             prefixText: prefixText,
             hintText: enabled ? hint : null,
             border: OutlineInputBorder(
@@ -1025,14 +1032,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: kprimaryColor, width: 2),
+              borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
             ),
             // Only show check icon when not in edit mode
-            suffixIcon: !enabled ? Icon(Icons.check, color: Colors.blue) : null,
+            suffixIcon: !enabled
+                ? Icon(Icons.check,
+                    color: Theme.of(context).colorScheme.secondary)
+                : null,
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
@@ -1055,7 +1066,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(8),
           border: onTap != null && _editMode
               ? Border.all(color: Colors.transparent)
@@ -1072,12 +1083,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               value.isEmpty && _editMode ? hint ?? '' : value,
               style: GoogleFonts.montserrat(
                 fontSize: 16,
-                color: value.isEmpty && _editMode ? Colors.grey : Colors.black,
+                color: value.isEmpty && _editMode
+                    ? Theme.of(context).colorScheme.onSurfaceVariant
+                    : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const Spacer(),
             // Only show check icon in view mode (not edit mode)
-            if (!_editMode) Icon(Icons.check, color: Colors.blue),
+            if (!_editMode)
+              Icon(Icons.check, color: Theme.of(context).colorScheme.secondary),
           ],
         ),
       ),
@@ -1101,7 +1115,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: GoogleFonts.montserrat(fontSize: 16),
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.grey.shade100,
+              fillColor: Theme.of(context).colorScheme.surfaceVariant,
               hintText: AppLocalizations.of(context)!.enterStreetAddress,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -1109,7 +1123,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: kprimaryColor, width: 2),
+                borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -1132,10 +1147,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
               border: _formSubmitted && _selectedProvince == null
-                  ? Border.all(color: Colors.red, width: 1)
+                  ? Border.all(
+                      color: Theme.of(context).colorScheme.error, width: 1)
                   : null,
             ),
             child: Column(
@@ -1148,7 +1164,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       AppLocalizations.of(context)!.selectProvinceCity,
                       style: GoogleFonts.montserrat(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     isExpanded: true,
@@ -1171,7 +1187,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       AppLocalizations.of(context)!.provinceCityRequired,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
-                        color: Colors.red,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ),
@@ -1187,12 +1203,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
               border: _formSubmitted &&
                       _selectedProvince != null &&
                       _selectedDistrict == null
-                  ? Border.all(color: Colors.red, width: 1)
+                  ? Border.all(
+                      color: Theme.of(context).colorScheme.error, width: 1)
                   : null,
             ),
             child: Column(
@@ -1205,7 +1222,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       AppLocalizations.of(context)!.selectDistrictCounty,
                       style: GoogleFonts.montserrat(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     isExpanded: true,
@@ -1231,7 +1248,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       AppLocalizations.of(context)!.districtCountyRequired,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
-                        color: Colors.red,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ),
@@ -1247,12 +1264,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
               border: _formSubmitted &&
                       _selectedDistrict != null &&
                       _selectedWard == null
-                  ? Border.all(color: Colors.red, width: 1)
+                  ? Border.all(
+                      color: Theme.of(context).colorScheme.error, width: 1)
                   : null,
             ),
             child: Column(
@@ -1265,7 +1283,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       AppLocalizations.of(context)!.selectWardCommune,
                       style: GoogleFonts.montserrat(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     isExpanded: true,
@@ -1291,7 +1309,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       AppLocalizations.of(context)!.wardCommuneRequired,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
-                        color: Colors.red,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ),

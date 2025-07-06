@@ -24,9 +24,9 @@ class LoginButtonWidget extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                color: Colors.black54,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 24),
@@ -44,8 +44,8 @@ class LoginButtonWidget extends StatelessWidget {
                     '/login?returnTo=${Uri.encodeComponent(currentLocation)}');
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kprimaryColor,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

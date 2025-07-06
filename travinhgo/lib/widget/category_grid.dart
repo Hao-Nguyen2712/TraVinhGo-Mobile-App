@@ -7,6 +7,18 @@ class CategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final categoryColors = [
+      colorScheme.primaryContainer,
+      colorScheme.secondaryContainer,
+      colorScheme.tertiaryContainer,
+      colorScheme.errorContainer,
+      colorScheme.primaryContainer.withOpacity(0.7),
+      colorScheme.secondaryContainer.withOpacity(0.7),
+      colorScheme.tertiaryContainer.withOpacity(0.7),
+      colorScheme.errorContainer.withOpacity(0.7),
+    ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: GridView.count(
@@ -19,49 +31,49 @@ class CategoryGrid extends StatelessWidget {
         children: [
           CategoryItem(
             iconName: "coconut-tree",
-            ColorName: 0xFFFFDAB9,
+            color: categoryColors[0],
             title: AppLocalizations.of(context)!.introduce,
             index: 5,
           ),
           CategoryItem(
             iconName: "plantingtree",
-            ColorName: 0xFFD4F4DD,
+            color: categoryColors[1],
             title: AppLocalizations.of(context)!.ocop,
             index: 4,
           ),
           CategoryItem(
             iconName: "lightbulb",
-            ColorName: 0xFFD6EFFF,
+            color: categoryColors[2],
             title: AppLocalizations.of(context)!.tipTravel,
             index: 0,
           ),
           CategoryItem(
             iconName: "destination",
-            ColorName: 0xFFFFE4E1,
+            color: categoryColors[3],
             title: AppLocalizations.of(context)!.destination,
             index: 1,
           ),
           CategoryItem(
             iconName: "food",
-            ColorName: 0xFFFFFACD,
+            color: categoryColors[4],
             title: AppLocalizations.of(context)!.localSpecialty,
             index: 2,
           ),
           CategoryItem(
             iconName: "hotel",
-            ColorName: 0xFFE0FFFF,
+            color: categoryColors[5],
             title: AppLocalizations.of(context)!.event,
             index: 3,
           ),
           CategoryItem(
             iconName: "dragon-boat",
-            ColorName: 0xFFE6E6FA,
+            color: categoryColors[6],
             title: AppLocalizations.of(context)!.tipTravel,
             index: 0,
           ),
           CategoryItem(
             iconName: "resource-allocation",
-            ColorName: 0xFFF5F5DC,
+            color: categoryColors[7],
             title: AppLocalizations.of(context)!.utilities,
             index: 0,
           ),

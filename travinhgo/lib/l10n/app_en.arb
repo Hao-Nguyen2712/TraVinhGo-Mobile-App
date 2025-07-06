@@ -193,7 +193,10 @@
     "streetAddressRequired": "Street address is required",
     "changePassword": "Change Password",
     "changePasswordComingSoon": "Change Password feature coming soon",
-    "darkMode": "Dark mode",
+    "darkMode": "Dark Mode",
     "darkModeEnabled": "Dark mode enabled",
-    "darkModeDisabled": "Dark mode disabled"
+    "darkModeDisabled": "Dark mode disabled",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
 } 

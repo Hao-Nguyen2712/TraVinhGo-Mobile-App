@@ -195,5 +195,8 @@
     "changePasswordComingSoon": "Tính năng đổi mật khẩu sắp ra mắt",
     "darkMode": "Chế độ tối",
     "darkModeEnabled": "Đã bật chế độ tối",
-    "darkModeDisabled": "Đã tắt chế độ tối"
+    "darkModeDisabled": "Đã tắt chế độ tối",
+    "system": "Hệ thống",
+    "light": "Sáng",
+    "dark": "Tối"
 } 

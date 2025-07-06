@@ -146,24 +146,26 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = CupertinoTheme.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return CupertinoPageScaffold(
-      backgroundColor: kbackgroundColor,
+      backgroundColor: colorScheme.surface,
       navigationBar: CupertinoNavigationBar(
         middle: Text(
           AppLocalizations.of(context)!.feedbackTitle,
-          style: const TextStyle(
-            color: Color(0xFF18813B), // Green color
+          style: TextStyle(
+            color: colorScheme.primary, // Green color
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.of(context).pop(),
-          child: const Icon(CupertinoIcons.back, color: Colors.black),
+          child: Icon(CupertinoIcons.back, color: colorScheme.onSurface),
         ),
-        backgroundColor: CupertinoColors.systemBackground,
+        backgroundColor:
+            CupertinoTheme.of(context).barBackgroundColor.withOpacity(1.0),
         border: null,
       ),
       child: Material(
@@ -178,29 +180,29 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                 const SizedBox(height: 10),
                 Text(
                   AppLocalizations.of(context)!.feedbackQuote,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontStyle: FontStyle.italic,
                     fontSize: 15,
-                    color: Color(0xFF292929),
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   AppLocalizations.of(context)!.addFeedback,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2F2B7C),
+                    color: colorScheme.primary,
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: CupertinoColors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.07),
+                        color: colorScheme.shadow.withOpacity(0.07),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       )
@@ -214,14 +216,15 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                         controller: _controller,
                         minLines: 3,
                         maxLines: 4,
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.black),
+                        style: TextStyle(
+                            fontSize: 16, color: colorScheme.onSurface),
                         decoration: InputDecoration(
                           hintText:
                               AppLocalizations.of(context)!.typeFeedbackHint,
-                          hintStyle: const TextStyle(color: Colors.grey),
+                          hintStyle:
+                              TextStyle(color: colorScheme.onSurfaceVariant),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: colorScheme.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
@@ -239,12 +242,12 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE6F6E9),
+                                color: colorScheme.primaryContainer,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 CupertinoIcons.photo_on_rectangle,
-                                color: Color(0xFF18813B),
+                                color: colorScheme.onPrimaryContainer,
                                 size: 28,
                               ),
                             ),
@@ -267,15 +270,15 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                                   onTap: () =>
                                       setState(() => _selectedImage = null),
                                   child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surface,
                                       shape: BoxShape.circle,
                                     ),
                                     padding: const EdgeInsets.all(2),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.close,
                                       size: 16,
-                                      color: Colors.red,
+                                      color: colorScheme.error,
                                     ),
                                   ),
                                 ),
@@ -288,8 +291,8 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                                 horizontal: 18, vertical: 8),
                             color:
                                 (_controller.text.trim().isEmpty || _isSending)
-                                    ? const Color(0xFFB0ABA7)
-                                    : kprimaryColor,
+                                    ? colorScheme.onSurface.withOpacity(0.5)
+                                    : colorScheme.primary,
                             borderRadius: BorderRadius.circular(8),
                             onPressed:
                                 (_controller.text.trim().isEmpty || _isSending)
@@ -299,8 +302,8 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                                 ? const CupertinoActivityIndicator(radius: 10)
                                 : Text(
                                     AppLocalizations.of(context)!.send,
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: TextStyle(
+                                      color: colorScheme.onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

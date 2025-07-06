@@ -36,13 +36,16 @@ class AuthRequiredScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: kprimaryColor.withOpacity(0.1),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.lock_outline,
                           size: 60,
-                          color: kprimaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -61,9 +64,9 @@ class AuthRequiredScreen extends StatelessWidget {
                       // Message
                       Text(
                         message,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          color: Colors.black54,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -84,8 +87,10 @@ class AuthRequiredScreen extends StatelessWidget {
                                 '/login?returnTo=${Uri.encodeComponent(currentRoute)}');
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kprimaryColor,
-                            foregroundColor: Colors.white,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25),
                             ),
@@ -110,7 +115,7 @@ class AuthRequiredScreen extends StatelessWidget {
                         child: Text(
                           'Back to Home',
                           style: TextStyle(
-                            color: kprimaryColor,
+                            color: Theme.of(context).colorScheme.primary,
                             fontSize: 16,
                           ),
                         ),

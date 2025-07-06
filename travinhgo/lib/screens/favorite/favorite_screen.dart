@@ -27,8 +27,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: kbackgroundColor,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -36,12 +37,12 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
             SliverAppBar(
               floating: true,
               snap: true,
-              backgroundColor: Colors.white,
+              backgroundColor: colorScheme.surface,
               automaticallyImplyLeading: false,
               title: Text(
                 AppLocalizations.of(context)!.favoriteTitle,
-                style: const TextStyle(
-                  color: Color(0xFF219653),
+                style: TextStyle(
+                  color: colorScheme.primary,
                   fontWeight: FontWeight.w600,
                   fontSize: 20,
                 ),
@@ -77,6 +78,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
   Widget _buildTab(int index) {
     final bool isSelected = _selectedTab == index;
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -87,15 +89,15 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.green[700] : Colors.white,
+          color: isSelected ? colorScheme.primary : colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: colorScheme.outline.withOpacity(0.5),
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.18),
+                    color: colorScheme.primary.withOpacity(0.18),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -105,7 +107,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         child: Text(
           _tabs[index],
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
             fontWeight: FontWeight.w500,
             fontSize: 15,
           ),

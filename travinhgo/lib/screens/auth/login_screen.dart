@@ -313,6 +313,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
 
   // Show loading overlay
   void _showLoadingOverlay() {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -326,11 +327,11 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withAlpha(26),
+                      color: colorScheme.shadow.withOpacity(0.1),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
@@ -352,18 +353,18 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                             height: 60,
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                const Color(0xFF0B8C4C).withAlpha(179),
+                                colorScheme.primary.withAlpha(179),
                               ),
                               strokeWidth: 3,
                             ),
                           ),
                           // Inner rotating circle (opposite direction)
-                          const SizedBox(
+                          SizedBox(
                             width: 40,
                             height: 40,
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF0B8C4C),
+                                colorScheme.primary,
                               ),
                               strokeWidth: 5,
                             ),
@@ -372,8 +373,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                           Container(
                             width: 15,
                             height: 15,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF0B8C4C),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -387,7 +388,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                       style: GoogleFonts.montserrat(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF0B8C4C),
+                        color: colorScheme.primary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -397,7 +398,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.montserrat(
                         fontSize: 14,
-                        color: Colors.black54,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -537,6 +538,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
       },
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
+          final colorScheme = Theme.of(context).colorScheme;
           return Scaffold(
             // Allow the screen to resize when keyboard appears
             resizeToAvoidBottomInset: true,
@@ -549,7 +551,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                     ClipPath(
                       clipper: CurvedBottomClipper(),
                       child: Container(
-                        color: const Color(0xFF158247), // Primary green color
+                        color: colorScheme.primary, // Primary green color
                         height: headerHeight,
                         width: double.infinity,
                         child: SafeArea(
@@ -568,14 +570,16 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: _isBackNavigationAvailable
-                                          ? Colors.white
-                                          : Colors.white.withOpacity(0.5),
+                                          ? colorScheme.onPrimary
+                                          : colorScheme.onPrimary
+                                              .withOpacity(0.5),
                                     ),
                                     child: Icon(
                                       Icons.arrow_back_ios_new,
                                       color: _isBackNavigationAvailable
-                                          ? Colors.black54
-                                          : Colors.black26,
+                                          ? colorScheme.onSurfaceVariant
+                                          : colorScheme.onSurfaceVariant
+                                              .withOpacity(0.5),
                                       size: 18,
                                     ),
                                   ),
@@ -603,7 +607,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                       // Use placeholder if logo not available
                                       errorBuilder: (ctx, obj, stack) => Icon(
                                         Icons.landscape,
-                                        color: Colors.white,
+                                        color: colorScheme.onPrimary,
                                         size: 70,
                                       ),
                                     ),
@@ -634,7 +638,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                 style: GoogleFonts.montserrat(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: colorScheme.onSurface,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -644,7 +648,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                 AppLocalizations.of(context)!.signInToContinue,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
-                                  color: Colors.black54,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -663,16 +667,16 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                         text: TextSpan(
                                           text: AppLocalizations.of(context)!
                                               .phoneNumber,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
-                                            color: Colors.black87,
+                                            color: colorScheme.onSurface,
                                           ),
                                           children: [
                                             TextSpan(
                                               text: '*',
                                               style: TextStyle(
-                                                color: Color(0xFF0B8C4C),
+                                                color: colorScheme.primary,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -684,11 +688,11 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
+                                        color: colorScheme.surfaceVariant,
                                         borderRadius: BorderRadius.circular(8),
                                         border: _phoneError != null
                                             ? Border.all(
-                                                color: Colors.red.shade300,
+                                                color: colorScheme.error,
                                                 width: 1.0)
                                             : null,
                                       ),
@@ -741,8 +745,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       _phoneError!,
-                                      style: const TextStyle(
-                                        color: Colors.red,
+                                      style: TextStyle(
+                                        color: colorScheme.error,
                                         fontSize: 12,
                                         fontStyle: FontStyle.italic,
                                       ),
@@ -761,7 +765,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   child: ElevatedButton(
                                     onPressed: _handlePhoneSignIn,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF0B8C4C),
+                                      backgroundColor: colorScheme.primary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(26),
                                       ),
@@ -769,10 +773,10 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     child: Text(
                                       AppLocalizations.of(context)!
                                           .continueButton,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white,
+                                        color: colorScheme.onPrimary,
                                       ),
                                     ),
                                   ),
@@ -789,7 +793,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   children: [
                                     Expanded(
                                       child: Divider(
-                                        color: Colors.grey.shade300,
+                                        color: colorScheme.outline
+                                            .withOpacity(0.5),
                                         thickness: 1,
                                       ),
                                     ),
@@ -800,7 +805,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                         AppLocalizations.of(context)!
                                             .orContinueWith,
                                         style: TextStyle(
-                                          color: Colors.grey.shade600,
+                                          color: colorScheme.onSurfaceVariant,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -808,7 +813,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     ),
                                     Expanded(
                                       child: Divider(
-                                        color: Colors.grey.shade300,
+                                        color: colorScheme.outline
+                                            .withOpacity(0.5),
                                         thickness: 1,
                                       ),
                                     ),
@@ -824,18 +830,20 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   width: 220,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: colorScheme.surface,
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withAlpha(26),
+                                        color:
+                                            colorScheme.shadow.withOpacity(0.1),
                                         spreadRadius: 1,
                                         blurRadius: 10,
                                         offset: const Offset(0, 2),
                                       ),
                                     ],
                                     border: Border.all(
-                                      color: Colors.grey.shade300,
+                                      color:
+                                          colorScheme.outline.withOpacity(0.5),
                                       width: 1,
                                     ),
                                   ),
@@ -851,7 +859,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                       Text(
                                         AppLocalizations.of(context)!.google,
                                         style: GoogleFonts.montserrat(
-                                          color: Colors.black87,
+                                          color: colorScheme.onSurface,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -878,16 +886,16 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                 // Loading overlay - only shown when authProvider.isLoading is true
                 if (authProvider.isLoading)
                   Container(
-                    color: Colors.black.withOpacity(0.5),
+                    color: colorScheme.scrim,
                     child: Center(
                       child: Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withAlpha(26),
+                              color: colorScheme.shadow.withOpacity(0.1),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -909,18 +917,18 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     height: 60,
                                     child: CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        const Color(0xFF0B8C4C).withAlpha(179),
+                                        colorScheme.primary.withAlpha(179),
                                       ),
                                       strokeWidth: 3,
                                     ),
                                   ),
                                   // Inner rotating circle (opposite direction)
-                                  const SizedBox(
+                                  SizedBox(
                                     width: 40,
                                     height: 40,
                                     child: CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Color(0xFF0B8C4C),
+                                        colorScheme.primary,
                                       ),
                                       strokeWidth: 5,
                                     ),
@@ -929,8 +937,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   Container(
                                     width: 15,
                                     height: 15,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF0B8C4C),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -944,7 +952,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                               style: GoogleFonts.montserrat(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF0B8C4C),
+                                color: colorScheme.primary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -955,7 +963,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.montserrat(
                                 fontSize: 14,
-                                color: Colors.black54,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],

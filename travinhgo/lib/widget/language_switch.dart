@@ -22,11 +22,11 @@ class LanguageSwitch extends StatelessWidget {
         width: 90,
         height: 30,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(50),
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.2),
               offset: const Offset(0, 2),
               blurRadius: 4,
             ),
@@ -48,10 +48,10 @@ class LanguageSwitch extends StatelessWidget {
                         height: 12,
                       ),
                       const SizedBox(width: 2),
-                      const Text(
+                      Text(
                         "Vie",
                         style: TextStyle(
-                          color: Color(0xFF158247),
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -63,10 +63,10 @@ class LanguageSwitch extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 6),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         "Eng",
                         style: TextStyle(
-                          color: Color(0xFF158247),
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -91,9 +91,10 @@ class LanguageSwitch extends StatelessWidget {
                 height: 26,
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF158247),
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF158247), width: 1),
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.primary, width: 1),
                 ),
               ),
             ),

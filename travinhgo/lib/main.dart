@@ -18,6 +18,7 @@ import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/services/push_notification_service.dart';
+import 'package:travinhgo/utils/app_theme.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
@@ -189,12 +190,9 @@ class _MyAppState extends State<MyApp> {
             return MaterialApp.router(
               title: "TraVinhGo",
               debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                colorScheme:
-                    ColorScheme.fromSeed(seedColor: const Color(0xFF158247)),
-                useMaterial3: true,
-                textTheme: GoogleFonts.montserratTextTheme(),
-              ),
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: settingProvider.themeMode,
               routerConfig: _appRouter.router,
               restorationScopeId: 'app_scope',
               localizationsDelegates: const [

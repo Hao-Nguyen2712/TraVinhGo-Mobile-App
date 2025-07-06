@@ -26,28 +26,29 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Set the status bar color to match our header
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent, // transparent status bar
-      statusBarIconBrightness: Brightness.light, // light status bar icons
-    ));
-
-    // _handleNotificationNavigation();
     pushNotificationService.firebaseInit(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Set the status bar color to match our header
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // transparent status bar
+      statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark, // light status bar icons
+    ));
     final authProvider = Provider.of<AuthProvider>(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
+    final colorScheme = Theme.of(context).colorScheme;
 
     // No longer using ProtectedScreen - allowing access to all users
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       extendBodyBehindAppBar: true,
       body: Container(
-        color: const Color(0xFF158247),
+        color: colorScheme.primary,
         child: Column(
           children: [
             // Empty space for status bar with green background
@@ -57,8 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
             // Main content with white background
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(0),
                     topRight: Radius.circular(0),
@@ -91,26 +92,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: colorScheme.surface,
                                   borderRadius: BorderRadius.circular(60),
-                                  boxShadow: const [
+                                  boxShadow: [
                                     BoxShadow(
-                                        color: Colors.black26, blurRadius: 5),
+                                        color: colorScheme.shadow
+                                            .withOpacity(0.15),
+                                        blurRadius: 5),
                                   ],
                                 ),
                                 child: TextField(
                                   decoration: InputDecoration(
                                     hintText: AppLocalizations.of(context)!
                                         .searchHere,
-                                    hintStyle: const TextStyle(
-                                        fontSize: 20, color: Color(0xFFA29C9C)),
+                                    hintStyle: TextStyle(
+                                        fontSize: 20,
+                                        color: colorScheme.onSurfaceVariant),
                                     border: InputBorder.none,
                                     icon: Padding(
                                       padding: const EdgeInsets.only(left: 10),
                                       child: Image.asset(
                                         "assets/images/navigations/search.png",
                                         scale: 25,
-                                        color: const Color(0xFFA29C9C),
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),

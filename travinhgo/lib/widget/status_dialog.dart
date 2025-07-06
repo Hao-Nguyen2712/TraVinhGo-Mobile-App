@@ -63,8 +63,14 @@ class _StatusDialogState extends State<StatusDialog>
 
   @override
   Widget build(BuildContext context) {
-    final successColor = const Color(0xFF158247); // Match app primary color
-    final errorColor = const Color(0xFFE93C3C);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final successColor = colorScheme.primary;
+    final errorColor = colorScheme.error;
+    final dialogBackgroundColor = colorScheme.surface;
+    final titleColor = colorScheme.onSurface;
+    final messageColor = colorScheme.onSurfaceVariant;
 
     return ScaleTransition(
       scale: _scaleAnimation,
@@ -78,7 +84,7 @@ class _StatusDialogState extends State<StatusDialog>
           width: 320,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: dialogBackgroundColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -89,7 +95,7 @@ class _StatusDialogState extends State<StatusDialog>
                 offset: const Offset(0, 5),
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: colorScheme.shadow.withOpacity(0.1),
                 blurRadius: 20,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -120,7 +126,9 @@ class _StatusDialogState extends State<StatusDialog>
                   ),
                   child: Icon(
                     widget.isSuccess ? Icons.check : Icons.close,
-                    color: Colors.white,
+                    color: widget.isSuccess
+                        ? colorScheme.onPrimary
+                        : colorScheme.onError,
                     size: 45,
                   ),
                 ),
@@ -133,7 +141,7 @@ class _StatusDialogState extends State<StatusDialog>
                 style: GoogleFonts.montserrat(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: titleColor,
                 ),
               ),
               const SizedBox(height: 16),
@@ -145,7 +153,7 @@ class _StatusDialogState extends State<StatusDialog>
                 style: GoogleFonts.montserrat(
                   fontSize: 16,
                   height: 1.4,
-                  color: Colors.black54,
+                  color: messageColor,
                 ),
               ),
               const SizedBox(height: 32),
@@ -159,7 +167,9 @@ class _StatusDialogState extends State<StatusDialog>
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         widget.isSuccess ? successColor : errorColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: widget.isSuccess
+                        ? colorScheme.onPrimary
+                        : colorScheme.onError,
                     elevation: 2,
                     shadowColor: (widget.isSuccess ? successColor : errorColor)
                         .withOpacity(0.5),
@@ -172,7 +182,6 @@ class _StatusDialogState extends State<StatusDialog>
                     style: GoogleFonts.montserrat(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
                     ),
                   ),
                 ),

@@ -22,7 +22,7 @@ class OcopProductItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        interactionProvider.addInterac(ocopProduct.id,ItemType.OcopProduct);
+        interactionProvider.addInterac(ocopProduct.id, ItemType.OcopProduct);
         context.pushNamed(
           'OcopProductDetail',
           pathParameters: {'id': ocopProduct.id},
@@ -34,10 +34,11 @@ class OcopProductItem extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: kcontentColor,
+                color: Theme.of(context).colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Color.fromRGBO(0, 0, 0, 0.1),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.1),
                     blurRadius: 10,
                     spreadRadius: 2,
                     offset: Offset(0, 4),
@@ -58,7 +59,8 @@ class OcopProductItem extends StatelessWidget {
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20.0),
                               image: DecorationImage(
-                                  image: NetworkImage(ocopProduct.productImage[0]),
+                                  image:
+                                      NetworkImage(ocopProduct.productImage[0]),
                                   fit: BoxFit.cover)),
                         ),
                       ),
@@ -67,14 +69,13 @@ class OcopProductItem extends StatelessWidget {
                         right: 12,
                         child: GestureDetector(
                           onTap: () {
-                            favoriteProvider
-                                .toggleOcopFavorite(ocopProduct);
+                            favoriteProvider.toggleOcopFavorite(ocopProduct);
                           },
                           child: Icon(
                             favoriteProvider.isExist(ocopProduct.id)
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            color: Colors.red,
+                            color: Theme.of(context).colorScheme.error,
                             size: 22,
                           ),
                         ),
@@ -89,7 +90,7 @@ class OcopProductItem extends StatelessWidget {
                     maxLines: 2,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: kprimaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 16,
                         overflow: TextOverflow.ellipsis),
                   ),
@@ -108,23 +109,26 @@ class OcopProductItem extends StatelessWidget {
                             TextSpan(
                               text: StringHelper.formatCurrency(
                                   ocopProduct.productPrice),
-                              style: const TextStyle(
-                                  fontSize: 16, color: kpriceColor),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context).colorScheme.error),
                             ),
-                            const TextSpan(
+                            TextSpan(
                               text: ' vnd',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: kpriceColor,
+                                color: Theme.of(context).colorScheme.error,
                               ),
                             ),
                           ],
                         ),
                       ),
                       const Spacer(),
-                      const Text(
+                      Text(
                         "Buy at",
-                        style: TextStyle(fontSize: 14, color: kprimaryColor),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(width: 4),
                       Image.asset(

@@ -114,16 +114,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kprimaryColor,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DefaultTextStyle(
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
                 fontFamily: 'Aclonica',
               ),
               child: AnimatedTextKit(
@@ -139,8 +139,8 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 20),
             if (!_isDataLoaded)
-              const CircularProgressIndicator(
-                color: Colors.white,
+              CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.onPrimary,
                 strokeWidth: 2,
               ),
           ],

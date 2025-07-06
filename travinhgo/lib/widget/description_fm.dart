@@ -19,7 +19,8 @@ class DescriptionFm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String content = description ?? 'There is no description in this item.';
+    final String content =
+        description ?? 'There is no description in this item.';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,13 +30,12 @@ class DescriptionFm extends StatelessWidget {
             height: 120,
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
-              child: Html(data: content, style: _htmlStyle()),
+              child: Html(data: content, style: _htmlStyle(context)),
             ),
           ),
-          secondChild: Html(data: content, style: _htmlStyle()),
-          crossFadeState: isExpanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
+          secondChild: Html(data: content, style: _htmlStyle(context)),
+          crossFadeState:
+              isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 300),
         ),
         Center(
@@ -48,12 +48,14 @@ class DescriptionFm extends StatelessWidget {
     );
   }
 
-  Map<String, Style> _htmlStyle() {
+  Map<String, Style> _htmlStyle(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return {
       "body": Style(
         fontSize: FontSize(16.0),
         lineHeight: LineHeight(1.5),
-        color: Colors.black87,
+        color: colorScheme.onSurface,
       ),
       "p": Style(margin: Margins.only(bottom: 10)),
       "strong": Style(fontWeight: FontWeight.bold),
@@ -78,25 +80,26 @@ class DescriptionFm extends StatelessWidget {
         fontStyle: FontStyle.italic,
         padding: HtmlPaddings.symmetric(horizontal: 15, vertical: 8),
         margin: Margins.symmetric(vertical: 10),
-        backgroundColor: Colors.grey.shade200,
-        border: Border(left: BorderSide(color: Colors.grey, width: 4)),
+        backgroundColor: colorScheme.surfaceVariant,
+        border: Border(left: BorderSide(color: colorScheme.outline, width: 4)),
       ),
       "ul": Style(margin: Margins.only(left: 20, bottom: 10)),
       "ol": Style(margin: Margins.only(left: 20, bottom: 10)),
       "li": Style(padding: HtmlPaddings.symmetric(vertical: 2)),
       "a": Style(
-        color: Colors.blue,
+        color: colorScheme.primary,
         textDecoration: TextDecoration.underline,
       ),
-      "table": Style(border: Border.all(color: Colors.black12)),
+      "table": Style(
+          border: Border.all(color: colorScheme.outline.withOpacity(0.5))),
       "th": Style(
         padding: HtmlPaddings.all(6),
-        backgroundColor: Colors.grey.shade300,
+        backgroundColor: colorScheme.surfaceVariant,
         fontWeight: FontWeight.bold,
       ),
       "td": Style(
         padding: HtmlPaddings.all(6),
-        border: Border.all(color: Colors.black12),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
       ),
     };
   }

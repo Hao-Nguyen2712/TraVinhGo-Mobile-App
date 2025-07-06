@@ -79,13 +79,15 @@ class CategoryButtons extends StatelessWidget {
                       style: TextStyle(
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.black87,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
                         fontSize: 14,
                       ),
                     ),
-                    backgroundColor: Colors.white,
-                    selectedColor: kprimaryColor,
-                    checkmarkColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    selectedColor: Theme.of(context).colorScheme.primary,
+                    checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                     selected: isSelected,
                     showCheckmark: false,
                     avatar: Image.asset(
@@ -93,7 +95,7 @@ class CategoryButtons extends StatelessWidget {
                       width: 20,
                       height: 20,
                       color: isSelected && provider.isCategoryTintable(index)
-                          ? Colors.white
+                          ? Theme.of(context).colorScheme.onPrimary
                           : null,
                     ),
                     onSelected: (selected) {
@@ -103,7 +105,10 @@ class CategoryButtons extends StatelessWidget {
                       side: BorderSide(
                         color: isSelected
                             ? Colors.transparent
-                            : Colors.grey.withOpacity(0.5),
+                            : Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.5),
                         width: 1,
                       ),
                     ),

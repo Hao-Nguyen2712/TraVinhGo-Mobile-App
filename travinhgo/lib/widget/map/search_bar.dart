@@ -72,6 +72,8 @@ class _SearchBarState extends State<SearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<MapProvider>(
       builder: (context, provider, _) {
         // Don't show the search bar when in routing mode
@@ -92,11 +94,11 @@ class _SearchBarState extends State<SearchBar> {
               // Search input field
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(242), // 0.95 opacity
+                  color: colorScheme.surface.withAlpha(242), // 0.95 opacity
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withAlpha(38), // 0.15 opacity
+                      color: colorScheme.shadow.withAlpha(38), // 0.15 opacity
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     ),
@@ -114,10 +116,10 @@ class _SearchBarState extends State<SearchBar> {
 
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.searchHere,
-                    hintStyle: const TextStyle(color: Colors.grey),
+                    hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     prefixIcon: Icon(
                       Icons.search_rounded,
-                      color: Colors.green.withAlpha(230),
+                      color: colorScheme.primary.withAlpha(230),
                       size: 24,
                     ),
                     suffixIcon: provider.isSearching
@@ -127,7 +129,8 @@ class _SearchBarState extends State<SearchBar> {
                             padding: EdgeInsets.all(6),
                             child: CircularProgressIndicator(strokeWidth: 2))
                         : IconButton(
-                            icon: Icon(Icons.clear, color: Colors.grey),
+                            icon: Icon(Icons.clear,
+                                color: colorScheme.onSurfaceVariant),
                             onPressed: () {
                               _searchController.clear();
                               provider.clearSearchResults();
@@ -149,7 +152,7 @@ class _SearchBarState extends State<SearchBar> {
                     margin: EdgeInsets.only(top: 4),
                     constraints: BoxConstraints(maxHeight: 300),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: ClipRRect(
@@ -162,8 +165,8 @@ class _SearchBarState extends State<SearchBar> {
                           final suggestion = suggestions[index];
                           return ListTile(
                             dense: true,
-                            leading: const Icon(Icons.location_on_outlined,
-                                color: Colors.black),
+                            leading: Icon(Icons.location_on_outlined,
+                                color: colorScheme.onSurface),
                             title: Text(
                               suggestion.title ??
                                   AppLocalizations.of(context)!.unnamedLocation,

@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:travinhgo/providers/setting_provider.dart';
 import '../../utils/constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isDarkMode = false;
-
-  @override
   Widget build(BuildContext context) {
+    final settingProvider = Provider.of<SettingProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -32,6 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           // Change Password
           _buildMenuItem(
+            context, // Pass context
             icon: Icons.sync_alt,
             title: AppLocalizations.of(context)!.changePassword,
             hasChevron: true,
@@ -52,9 +49,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Row(
               children: [
                 Icon(
-                  Icons.dark_mode,
+                  Icons.dark_mode_outlined,
                   size: 24,
-                  color: Colors.grey[700],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 16),
                 Text(
@@ -65,22 +62,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 const Spacer(),
-                Switch(
-                  value: _isDarkMode,
-                  onChanged: (value) {
-                    setState(() {
-                      _isDarkMode = value;
-                    });
-                    // TODO: Implement dark mode toggle
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_isDarkMode
-                            ? AppLocalizations.of(context)!.darkModeEnabled
-                            : AppLocalizations.of(context)!.darkModeDisabled),
-                      ),
-                    );
+                DropdownButton<ThemeMode>(
+                  value: settingProvider.themeMode,
+                  onChanged: (ThemeMode? newValue) {
+                    if (newValue != null) {
+                      settingProvider.setTheme(newValue);
+                    }
                   },
-                  activeColor: kprimaryColor,
+                  items: [
+                    DropdownMenuItem(
+                      value: ThemeMode.system,
+                      child: Text(AppLocalizations.of(context)!.system),
+                    ),
+                    DropdownMenuItem(
+                      value: ThemeMode.light,
+                      child: Text(AppLocalizations.of(context)!.light),
+                    ),
+                    DropdownMenuItem(
+                      value: ThemeMode.dark,
+                      child: Text(AppLocalizations.of(context)!.dark),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -91,7 +93,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildMenuItem({
+  Widget _buildMenuItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
@@ -106,7 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Icon(
               icon,
               size: 24,
-              color: Colors.grey[700],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 16),
             Text(
