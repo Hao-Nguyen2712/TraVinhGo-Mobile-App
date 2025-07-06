@@ -4,6 +4,9 @@ import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:travinhgo/providers/favorite_provider.dart';
 
 import '../../utils/string_helper.dart';
+import '../../Models/interaction/item_type.dart';
+import '../../providers/interaction_provider.dart';
+
 
 class LocalSpecialtyItem extends StatelessWidget {
   final LocalSpecialties localSpecialty;
@@ -13,9 +16,11 @@ class LocalSpecialtyItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final favoriteProvider = FavoriteProvider.of(context);
+    final interactionProvider = InteractionProvider.of(context);
 
     return GestureDetector(
       onTap: () {
+        interactionProvider.addInterac(localSpecialty.id,ItemType.LocalSpecialties);
         context.pushNamed(
           'LocalSpecialtyDetail',
           pathParameters: {'id': localSpecialty.id},

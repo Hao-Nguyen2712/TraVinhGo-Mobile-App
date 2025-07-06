@@ -11,6 +11,8 @@ import 'package:travinhgo/utils/constants.dart';
 
 import '../../main.dart';
 import '../../providers/favorite_provider.dart';
+import '../../providers/interaction_log_provider.dart';
+import '../../providers/interaction_provider.dart';
 import '../../providers/ocop_type_provider.dart';
 import '../../services/push_notification_service.dart';
 
@@ -155,6 +157,10 @@ class _SplashScreenState extends State<SplashScreen> {
           Provider.of<OcopTypeProvider>(context, listen: false);
       final favoriteProvider =
           Provider.of<FavoriteProvider>(context, listen: false);
+      final interactionProvider  =
+      Provider.of<InteractionProvider>(context, listen: false);
+      final interactionLogProvider  =
+      Provider.of<InteractionLogProvider>(context, listen: false);
 
       // Start all loading operations in parallel
       final markersFuture = markerProvider.fetchMarkers();
@@ -170,7 +176,7 @@ class _SplashScreenState extends State<SplashScreen> {
         destinationTypesFuture,
         tagsFuture,
         ocopTypeFuture,
-        favoriteFuture
+        favoriteFuture,
       ]);
       debugPrint('______________________________________________________________');
       for (var fav in favoriteProvider.favorites) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,9 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 
 import '../../providers/favorite_provider.dart';
+import '../../providers/interaction_log_provider.dart';
 import '../../providers/tag_provider.dart';
 import '../../services/local_specialtie_service.dart';
 import '../../utils/constants.dart';
+import '../../Models/interaction/item_type.dart';
 import '../../widget/description_fm.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
 
@@ -31,10 +35,29 @@ class _LocalSpecialtyDetailScreenState
 
   late String desc;
 
+  Timer? _interactionTimer;
+
   @override
   void initState() {
-    fetchocalSpecialty(widget.id);
     super.initState();
+    fetchocalSpecialty(widget.id);
+
+    // Đặt timer 8 giây để log interaction
+    _interactionTimer = Timer(Duration(seconds: 8), () {
+      // Gọi provider để add log
+      final interactionLogProvider = InteractionLogProvider.of(context, listen: false);
+      interactionLogProvider.addInteracLog(
+        widget.id,
+        ItemType.LocalSpecialties,
+        8,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _interactionTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> preloadImages(List<String> urls) async {

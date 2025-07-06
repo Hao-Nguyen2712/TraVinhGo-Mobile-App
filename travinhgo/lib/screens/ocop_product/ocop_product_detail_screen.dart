@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +8,10 @@ import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
 
 import '../../providers/favorite_provider.dart';
+import '../../providers/interaction_log_provider.dart';
 import '../../providers/tag_provider.dart';
 import '../../utils/constants.dart';
+import '../../Models/interaction/item_type.dart';
 import '../../utils/string_helper.dart';
 import '../../widget/data_field_row.dart';
 import '../../widget/description_fm.dart';
@@ -31,10 +35,30 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   bool _isLoading = true;
   bool _isExpanded = false;
 
+  Timer? _interactionTimer;
+
   @override
   void initState() {
-    fetchOcopProduct(widget.id);
     super.initState();
+    fetchOcopProduct(widget.id);
+
+    // Đặt timer 8 giây để log interaction
+    _interactionTimer = Timer(Duration(seconds: 8), () {
+      // Gọi provider để add log
+      final interactionLogProvider =
+          InteractionLogProvider.of(context, listen: false);
+      interactionLogProvider.addInteracLog(
+        widget.id,
+        ItemType.OcopProduct,
+        8,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _interactionTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> preloadImages(List<String> urls) async {
@@ -299,7 +323,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         text: StringHelper.formatCurrency(
                                             ocopProductDetail.productPrice),
                                         style: const TextStyle(
-                                            fontSize: 18, color: Colors.black, fontWeight: FontWeight.w800),
+                                            fontSize: 18,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w800),
                                       ),
                                       const TextSpan(
                                         text: ' vnd',
@@ -339,7 +365,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                             DataFieldRow(
                               title: 'Year Release',
-                              value: ocopProductDetail.ocopYearRelease.toString(),
+                              value:
+                                  ocopProductDetail.ocopYearRelease.toString(),
                             ),
                           ],
                         ),
