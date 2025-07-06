@@ -26,7 +26,7 @@ class DescriptionFm extends StatelessWidget {
       children: [
         AnimatedCrossFade(
           firstChild: SizedBox(
-            height: 120,
+            height: 80,
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
               child: Html(data: content, style: _htmlStyle()),
