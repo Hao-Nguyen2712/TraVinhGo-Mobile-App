@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
@@ -73,7 +74,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
     if (data == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No ocop product found')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.noOcopProductFound)),
         );
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -249,8 +251,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                   width: 10,
                                 ),
                                 Text(
-                                  "Local Specialty",
-                                  style: TextStyle(fontSize: 16),
+                                  AppLocalizations.of(context)!.localSpecialty,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                                 const Spacer(),
                               ],
@@ -287,8 +289,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Place of production",
-                                  style: TextStyle(fontSize: 16),
+                                  AppLocalizations.of(context)!
+                                      .placeOfProduction,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                                 const Spacer(),
                                 SizedBox(
@@ -312,8 +315,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             Row(
                               children: [
                                 Text(
-                                  "Reference Price",
-                                  style: TextStyle(fontSize: 16),
+                                  AppLocalizations.of(context)!.referencePrice,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                                 const Spacer(),
                                 Text.rich(
@@ -327,9 +330,10 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                             color: Colors.black,
                                             fontWeight: FontWeight.w800),
                                       ),
-                                      const TextSpan(
-                                        text: ' vnd',
-                                        style: TextStyle(
+                                      TextSpan(
+                                        text: AppLocalizations.of(context)!
+                                            .currencyVnd,
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           color: Colors.black,
                                         ),
@@ -347,8 +351,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             Row(
                               children: [
                                 Text(
-                                  "Reference Price",
-                                  style: TextStyle(fontSize: 16),
+                                  AppLocalizations.of(context)!.referencePrice,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                                 const Spacer(),
                                 RatingStarWidget(ocopProductDetail.ocopPoint)
@@ -360,11 +364,12 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               height: 10,
                             ),
                             DataFieldRow(
-                              title: 'Year Release',
-                              value: ocopProductDetail.ocopType!.ocopTypeName,
+                              title: AppLocalizations.of(context)!.yearRelease,
+                              value:
+                                  ocopProductDetail.ocopYearRelease.toString(),
                             ),
                             DataFieldRow(
-                              title: 'Year Release',
+                              title: AppLocalizations.of(context)!.yearRelease,
                               value:
                                   ocopProductDetail.ocopYearRelease.toString(),
                             ),

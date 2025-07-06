@@ -7,7 +7,6 @@ import '../../utils/string_helper.dart';
 import '../../Models/interaction/item_type.dart';
 import '../../providers/interaction_provider.dart';
 
-
 class LocalSpecialtyItem extends StatelessWidget {
   final LocalSpecialties localSpecialty;
 
@@ -20,7 +19,8 @@ class LocalSpecialtyItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        interactionProvider.addInterac(localSpecialty.id,ItemType.LocalSpecialties);
+        interactionProvider.addInterac(
+            localSpecialty.id, ItemType.LocalSpecialties);
         context.pushNamed(
           'LocalSpecialtyDetail',
           pathParameters: {'id': localSpecialty.id},
@@ -29,7 +29,7 @@ class LocalSpecialtyItem extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         elevation: 4,
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -63,7 +63,7 @@ class LocalSpecialtyItem extends StatelessWidget {
                         favoriteProvider.isExist(localSpecialty.id)
                             ? Icons.favorite
                             : Icons.favorite_border,
-                        color: Colors.red,
+                        color: Theme.of(context).colorScheme.error,
                         size: 22,
                       ),
                     ),
@@ -77,12 +77,13 @@ class LocalSpecialtyItem extends StatelessWidget {
               child: Row(
                 children: [
                   // Icon (ví dụ dùng icon cục gạch tạm)
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.yellow,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
                     child: Icon(
                       Icons.ramen_dining,
-                      color: Colors.red,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                       size: 18,
                     ),
                   ),
@@ -91,10 +92,10 @@ class LocalSpecialtyItem extends StatelessWidget {
                   Expanded(
                     child: Text(
                       StringHelper.toTitleCase(localSpecialty.foodName),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.green,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),

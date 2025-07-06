@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
@@ -45,7 +46,8 @@ class _LocalSpecialtyDetailScreenState
     // Đặt timer 8 giây để log interaction
     _interactionTimer = Timer(Duration(seconds: 8), () {
       // Gọi provider để add log
-      final interactionLogProvider = InteractionLogProvider.of(context, listen: false);
+      final interactionLogProvider =
+          InteractionLogProvider.of(context, listen: false);
       interactionLogProvider.addInteracLog(
         widget.id,
         ItemType.LocalSpecialties,
@@ -72,7 +74,9 @@ class _LocalSpecialtyDetailScreenState
     if (data == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No destination found')),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.noLocalSpecialtyFound)),
         );
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -105,6 +109,7 @@ class _LocalSpecialtyDetailScreenState
         _isExpanded = !_isExpanded;
       });
     }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -217,11 +222,12 @@ class _LocalSpecialtyDetailScreenState
                             right: 16,
                             child: GestureDetector(
                               onTap: () {
-                                favoriteProvider
-                                    .toggleLocalSpecialtiesFavorite(localSpecialtyDetail);
+                                favoriteProvider.toggleLocalSpecialtiesFavorite(
+                                    localSpecialtyDetail);
                               },
                               child: Icon(
-                                favoriteProvider.isExist(localSpecialtyDetail.id)
+                                favoriteProvider
+                                        .isExist(localSpecialtyDetail.id)
                                     ? Icons.favorite
                                     : Icons.favorite_border,
                                 color: Colors.red,
@@ -251,8 +257,8 @@ class _LocalSpecialtyDetailScreenState
                                   width: 10,
                                 ),
                                 Text(
-                                  "Local Specialty",
-                                  style: TextStyle(fontSize: 16),
+                                  AppLocalizations.of(context)!.localSpecialty,
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                                 const Spacer(),
                               ],
@@ -272,7 +278,7 @@ class _LocalSpecialtyDetailScreenState
                             const SizedBox(
                               height: 8,
                             ),
-                            if(localSpecialtyDetail.description != null)
+                            if (localSpecialtyDetail.description != null)
                               DescriptionFm(
                                 description: localSpecialtyDetail.description,
                                 isExpanded: _isExpanded,
@@ -281,8 +287,9 @@ class _LocalSpecialtyDetailScreenState
                             Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  'Selling Locations',
-                                  style: TextStyle(
+                                  AppLocalizations.of(context)!
+                                      .sellingLocations,
+                                  style: const TextStyle(
                                       fontSize: 24, color: kprimaryColor),
                                 )),
                           ],

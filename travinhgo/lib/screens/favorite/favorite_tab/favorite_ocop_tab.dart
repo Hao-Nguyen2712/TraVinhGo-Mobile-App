@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/ocop_product_widget/ocop_product_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteOcopTab extends StatelessWidget {
   const FavoriteOcopTab({super.key});
@@ -13,8 +14,8 @@ class FavoriteOcopTab extends StatelessWidget {
     final ocops = favoriteProvider.ocopProductList;
 
     if (ocops.isEmpty) {
-      return const Center(
-        child: Text('There are no favorite ocop product.'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noFavoriteOcop),
       );
     }
 

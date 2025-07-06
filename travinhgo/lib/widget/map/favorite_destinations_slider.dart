@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../Models/Maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
@@ -45,8 +46,9 @@ class _FavoriteDestinationsSliderState
       return Container(
         width: width,
         height: height,
-        color: Colors.grey[300],
-        child: Icon(Icons.image, color: Colors.grey[600]),
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        child: Icon(Icons.image,
+            color: Theme.of(context).colorScheme.onSurfaceVariant),
       );
     }
 
@@ -56,12 +58,12 @@ class _FavoriteDestinationsSliderState
       height: height,
       fit: BoxFit.cover,
       placeholder: (context, url) => Container(
-        color: Colors.grey[300],
+        color: Theme.of(context).colorScheme.surfaceVariant,
         child: Center(child: CircularProgressIndicator()),
       ),
       errorWidget: (context, url, error) => Container(
-        color: Colors.grey[300],
-        child: Icon(Icons.error, color: Colors.red),
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        child: Icon(Icons.error, color: Theme.of(context).colorScheme.error),
       ),
     );
   }
@@ -85,7 +87,7 @@ class _FavoriteDestinationsSliderState
                 : (index == rating.floor() && rating % 1 > 0)
                     ? Icons.star_half
                     : Icons.star_border,
-            color: Colors.amber.withAlpha(230),
+            color: Theme.of(context).colorScheme.secondary.withAlpha(230),
             size: 16,
           ),
         ),
@@ -124,11 +126,17 @@ class _FavoriteDestinationsSliderState
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: 8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(250),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surface
+                                .withAlpha(250),
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withAlpha(60),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .shadow
+                                    .withOpacity(0.25),
                                 blurRadius: 10,
                                 spreadRadius: 1,
                                 offset: Offset(0, 3),
@@ -154,7 +162,9 @@ class _FavoriteDestinationsSliderState
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        destination.name ?? 'Unknown Place',
+                                        destination.name ??
+                                            AppLocalizations.of(context)!
+                                                .unnamedLocation,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -168,10 +178,14 @@ class _FavoriteDestinationsSliderState
                                       SizedBox(height: 5),
                                       Text(
                                         destination.description ??
-                                            'No description available',
+                                            AppLocalizations.of(context)!
+                                                .noDescriptionAvailable,
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.grey.withAlpha(230),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                              .withAlpha(230),
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,

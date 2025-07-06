@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../providers/map_provider.dart' show TransportMode;
 
 /// Utility class for map UI related helper methods
@@ -49,7 +50,8 @@ class MapUiUtils {
   }
 
   /// Calculates and formats the estimated arrival time based on current time plus route duration
-  static String getEstimatedArrivalTime(int durationInSeconds) {
+  static String getEstimatedArrivalTime(
+      int durationInSeconds, AppLocalizations l10n) {
     // Get current time
     final now = DateTime.now();
 
@@ -66,24 +68,25 @@ class MapUiUtils {
     String minutes = arrivalTime.minute.toString().padLeft(2, '0');
 
     // Return formatted time with arrival text
-    return "Đến nơi lúc $displayHour:$minutes $period";
+    return l10n.arriveAt("$displayHour:$minutes $period");
   }
 
   /// Helper method to get transport mode label
-  static String getTransportModeLabel(TransportMode mode) {
+  static String getTransportModeLabel(
+      TransportMode mode, AppLocalizations l10n) {
     switch (mode) {
       case TransportMode.car:
-        return "Lái Xe";
+        return l10n.transportCar;
       case TransportMode.motorcycle:
-        return "Xe Máy";
+        return l10n.transportMotorcycle;
       case TransportMode.pedestrian:
-        return "Đi Bộ";
+        return l10n.transportWalk;
       case TransportMode.bicycle:
-        return "Xe Đạp";
+        return l10n.transportBicycle;
       case TransportMode.scooter:
-        return "Xe Scooter";
+        return l10n.transportScooter;
       default:
-        return "Lái Xe";
+        return l10n.transportCar;
     }
   }
 

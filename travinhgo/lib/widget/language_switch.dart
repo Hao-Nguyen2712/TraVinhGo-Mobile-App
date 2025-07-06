@@ -3,16 +3,18 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/setting_provider.dart';
 
 class LanguageSwitch extends StatelessWidget {
-  const LanguageSwitch({Key? key}) : super(key: key);
+  const LanguageSwitch({super.key});
 
   @override
   Widget build(BuildContext context) {
     final settingProvider = Provider.of<SettingProvider>(context);
-    final isVietnamese = settingProvider.currentLanguage == 'vi';
+    final isVietnamese = settingProvider.locale.languageCode == 'vi';
 
     return GestureDetector(
       onTap: () {
-        settingProvider.toggleLanguage();
+        final newLocale =
+            isVietnamese ? const Locale('en') : const Locale('vi');
+        settingProvider.setLocale(newLocale);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -20,11 +22,11 @@ class LanguageSwitch extends StatelessWidget {
         width: 90,
         height: 30,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(50),
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.2),
               offset: const Offset(0, 2),
               blurRadius: 4,
             ),
@@ -46,10 +48,10 @@ class LanguageSwitch extends StatelessWidget {
                         height: 12,
                       ),
                       const SizedBox(width: 2),
-                      const Text(
+                      Text(
                         "Vie",
                         style: TextStyle(
-                          color: Color(0xFF158247),
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -61,10 +63,10 @@ class LanguageSwitch extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 6),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         "Eng",
                         style: TextStyle(
-                          color: Color(0xFF158247),
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -89,9 +91,10 @@ class LanguageSwitch extends StatelessWidget {
                 height: 26,
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
-                  color: Color(0xFF158247),
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF158247), width: 1),
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.primary, width: 1),
                 ),
               ),
             ),

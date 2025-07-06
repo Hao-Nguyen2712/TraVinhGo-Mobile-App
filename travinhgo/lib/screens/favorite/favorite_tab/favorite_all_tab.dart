@@ -5,6 +5,7 @@ import '../../../providers/favorite_provider.dart';
 import '../../../widget/destination_widget/destination_item.dart';
 import '../../../widget/local_specialty_widget/local_specialty_item.dart';
 import '../../../widget/ocop_product_widget/ocop_product_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteAllTab extends StatefulWidget {
   const FavoriteAllTab({super.key});
@@ -36,165 +37,174 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // DESTINATION
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              'Destination',
-              style: TextStyle(
+              AppLocalizations.of(context)!.destination,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
           ),
           destinations.isEmpty
-              ? const Padding(
-            padding: EdgeInsets.only(bottom: 12.0),
-            child: Text('There are no favorite destination.'),
-          )
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                      AppLocalizations.of(context)!.noFavoriteDestinations),
+                )
               : Column(
-            children: [
-              GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: showAllDestinations
-                    ? destinations.length
-                    : (destinations.length > destinationPerRow
-                    ? destinationPerRow
-                    : destinations.length),
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: destinationPerRow,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  childAspectRatio: 0.58,
-                ),
-                itemBuilder: (context, index) {
-                  return DestinationItem(destination: destinations[index]);
-                },
-              ),
-              if (destinations.length > destinationPerRow)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        showAllDestinations = !showAllDestinations;
-                      });
-                    },
-                    child: Text(
-                      showAllDestinations ? 'Less' : 'More',
-                      style: const TextStyle(color: Colors.green),
+                  children: [
+                    GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: showAllDestinations
+                          ? destinations.length
+                          : (destinations.length > destinationPerRow
+                              ? destinationPerRow
+                              : destinations.length),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: destinationPerRow,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: 0.58,
+                      ),
+                      itemBuilder: (context, index) {
+                        return DestinationItem(
+                            destination: destinations[index]);
+                      },
                     ),
-                  ),
+                    if (destinations.length > destinationPerRow)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showAllDestinations = !showAllDestinations;
+                            });
+                          },
+                          child: Text(
+                            showAllDestinations
+                                ? AppLocalizations.of(context)!.less
+                                : AppLocalizations.of(context)!.more,
+                            style: const TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
           // OCOP
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              'Ocop',
-              style: TextStyle(
+              AppLocalizations.of(context)!.ocop,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
           ),
           ocops.isEmpty
-              ? const Padding(
-            padding: EdgeInsets.only(bottom: 12.0),
-            child: Text('There are no favorite ocop product.'),
-          )
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(AppLocalizations.of(context)!.noFavoriteOcop),
+                )
               : Column(
-            children: [
-              GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: showAllOcop
-                    ? ocops.length
-                    : (ocops.length > ocopPerRow
-                    ? ocopPerRow
-                    : ocops.length),
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: ocopPerRow,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  childAspectRatio: 0.58,
-                ),
-                itemBuilder: (context, index) {
-                  return OcopProductItem(ocopProduct: ocops[index]);
-                },
-              ),
-              if (ocops.length > ocopPerRow)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        showAllOcop = !showAllOcop;
-                      });
-                    },
-                    child: Text(
-                      showAllOcop ? 'Less' : 'More',
-                      style: const TextStyle(color: Colors.green),
+                  children: [
+                    GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: showAllOcop
+                          ? ocops.length
+                          : (ocops.length > ocopPerRow
+                              ? ocopPerRow
+                              : ocops.length),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: ocopPerRow,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: 0.58,
+                      ),
+                      itemBuilder: (context, index) {
+                        return OcopProductItem(ocopProduct: ocops[index]);
+                      },
                     ),
-                  ),
+                    if (ocops.length > ocopPerRow)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showAllOcop = !showAllOcop;
+                            });
+                          },
+                          child: Text(
+                            showAllOcop
+                                ? AppLocalizations.of(context)!.less
+                                : AppLocalizations.of(context)!.more,
+                            style: const TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
           // LOCAL SPECIALTY
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              'Local',
-              style: TextStyle(
+              AppLocalizations.of(context)!.local,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
           ),
           locals.isEmpty
-              ? const Padding(
-            padding: EdgeInsets.only(bottom: 12.0),
-            child: Text('There are no favorite local specialte.'),
-          )
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(AppLocalizations.of(context)!.noFavoriteLocal),
+                )
               : Column(
-            children: [
-              GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: showAllLocals
-                    ? locals.length
-                    : (locals.length > localPerRow
-                    ? localPerRow
-                    : locals.length),
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: localPerRow,
-                  childAspectRatio: 1.5,
-                ),
-                itemBuilder: (context, index) {
-                  return LocalSpecialtyItem(localSpecialty: locals[index]);
-                },
-              ),
-              if (locals.length > localPerRow)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        showAllLocals = !showAllLocals;
-                      });
-                    },
-                    child: Text(
-                      showAllLocals ? 'Less' : 'More',
-                      style: const TextStyle(color: Colors.green),
+                  children: [
+                    GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: showAllLocals
+                          ? locals.length
+                          : (locals.length > localPerRow
+                              ? localPerRow
+                              : locals.length),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: localPerRow,
+                        childAspectRatio: 1.5,
+                      ),
+                      itemBuilder: (context, index) {
+                        return LocalSpecialtyItem(
+                            localSpecialty: locals[index]);
+                      },
                     ),
-                  ),
+                    if (locals.length > localPerRow)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showAllLocals = !showAllLocals;
+                            });
+                          },
+                          child: Text(
+                            showAllLocals
+                                ? AppLocalizations.of(context)!.less
+                                : AppLocalizations.of(context)!.more,
+                            style: const TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
         ],
       ),
     );

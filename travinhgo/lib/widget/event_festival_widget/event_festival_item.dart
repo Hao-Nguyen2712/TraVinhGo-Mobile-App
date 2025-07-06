@@ -13,7 +13,7 @@ class EventFestivalItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         context.pushNamed(
           'EventFestivalDetail',
           pathParameters: {'id': eventAndFestival.id},
@@ -22,7 +22,7 @@ class EventFestivalItem extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         elevation: 4,
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -48,12 +48,13 @@ class EventFestivalItem extends StatelessWidget {
               child: Row(
                 children: [
                   // Icon (ví dụ dùng icon cục gạch tạm)
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.yellow,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
                     child: Icon(
                       Icons.ramen_dining,
-                      color: Colors.red,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                       size: 18,
                     ),
                   ),
@@ -64,10 +65,10 @@ class EventFestivalItem extends StatelessWidget {
                       StringHelper.toTitleCase(eventAndFestival.nameEvent),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.green,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),

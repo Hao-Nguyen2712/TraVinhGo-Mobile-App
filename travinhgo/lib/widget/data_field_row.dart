@@ -29,7 +29,6 @@ class DataFieldRow extends StatelessWidget {
                       builder: (context) => AlertDialog(
                         title: Text(title),
                         content: Text(value!),
-
                       ),
                     );
                   }
@@ -46,7 +45,7 @@ class DataFieldRow extends StatelessWidget {
           ],
         ),
         Divider(
-          color: Colors.grey.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
           thickness: 0.4,
           height: 10,
         ),

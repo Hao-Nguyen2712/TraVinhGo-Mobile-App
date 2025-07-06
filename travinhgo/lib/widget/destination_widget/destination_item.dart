@@ -17,13 +17,15 @@ class DestinationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     final favoriteProvider = FavoriteProvider.of(context);
     final interactionProvider = InteractionProvider.of(context);
 
     return GestureDetector(
       onTap: () {
-        interactionProvider.addInterac(destination.id,ItemType.Destination);
+        interactionProvider.addInterac(destination.id, ItemType.Destination);
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -37,10 +39,10 @@ class DestinationItem extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: kcontentColor,
+                color: colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Color.fromRGBO(0, 0, 0, 0.1),
+                    color: colorScheme.shadow.withOpacity(0.1),
                     blurRadius: 10,
                     spreadRadius: 2,
                     offset: Offset(0, 4),
@@ -77,7 +79,7 @@ class DestinationItem extends StatelessWidget {
                             favoriteProvider.isExist(destination.id)
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            color: Colors.red,
+                            color: colorScheme.error,
                             size: 22,
                           ),
                         ),
@@ -92,7 +94,7 @@ class DestinationItem extends StatelessWidget {
                     maxLines: 2,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: kprimaryColor,
+                        color: colorScheme.primary,
                         fontSize: 16,
                         overflow: TextOverflow.ellipsis),
                   ),
@@ -110,13 +112,13 @@ class DestinationItem extends StatelessWidget {
                         double rating = destination.avarageRating;
                         if (index < rating.floor()) {
                           return Icon(Icons.star,
-                              color: CupertinoColors.systemYellow, size: 12);
+                              color: colorScheme.secondary, size: 12);
                         } else if (index < rating && rating - index >= 0.5) {
                           return Icon(Icons.star_half,
-                              color: CupertinoColors.systemYellow, size: 12);
+                              color: colorScheme.secondary, size: 12);
                         } else {
                           return Icon(Icons.star_border,
-                              color: CupertinoColors.systemYellow, size: 12);
+                              color: colorScheme.secondary, size: 12);
                         }
                       }),
                       const SizedBox(width: 4),

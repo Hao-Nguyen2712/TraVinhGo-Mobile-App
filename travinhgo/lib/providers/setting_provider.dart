@@ -1,45 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SettingProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  String _currentLanguage = 'vi'; // Default language is Vietnamese
+  Locale _locale = const Locale('vi'); // Default to Vietnamese
+  ThemeMode _themeMode = ThemeMode.system;
 
-  String get currentLanguage => _currentLanguage;
+  Locale get locale => _locale;
+  ThemeMode get themeMode => _themeMode;
 
-  // Constructor to load saved language preference
   SettingProvider() {
-    _loadSavedLanguage();
+    _loadSettings();
   }
 
-  // Load saved language preference
-  Future<void> _loadSavedLanguage() async {
-    final savedLanguage = await _secureStorage.read(key: 'language_code');
-    if (savedLanguage != null) {
-      _currentLanguage = savedLanguage;
-      notifyListeners();
+  Future<void> _loadSettings() async {
+    final savedLanguageCode = await _secureStorage.read(key: 'language_code');
+    if (savedLanguageCode != null) {
+      _locale = Locale(savedLanguageCode);
     }
-  }
 
-  // Toggle language between Vietnamese and English
-  Future<void> toggleLanguage() async {
-    _currentLanguage = _currentLanguage == 'vi' ? 'en' : 'vi';
-
-    // Save the language preference
-    await _secureStorage.write(key: 'language_code', value: _currentLanguage);
+    final savedTheme = await _secureStorage.read(key: 'theme_mode');
+    switch (savedTheme) {
+      case 'light':
+        _themeMode = ThemeMode.light;
+        break;
+      case 'dark':
+        _themeMode = ThemeMode.dark;
+        break;
+      default:
+        _themeMode = ThemeMode.system;
+        break;
+    }
 
     notifyListeners();
   }
 
-  // Set specific language
-  Future<void> setLanguage(String languageCode) async {
-    if (languageCode != _currentLanguage) {
-      _currentLanguage = languageCode;
+  void setLocale(Locale locale) {
+    if (!AppLocalizations.supportedLocales.contains(locale)) return;
+    _locale = locale;
+    _secureStorage.write(key: 'language_code', value: locale.languageCode);
+    notifyListeners();
+  }
 
-      // Save the language preference
-      await _secureStorage.write(key: 'language_code', value: _currentLanguage);
-
-      notifyListeners();
-    }
+  void setTheme(ThemeMode themeMode) {
+    _themeMode = themeMode;
+    _secureStorage.write(key: 'theme_mode', value: themeMode.name);
+    notifyListeners();
   }
 }

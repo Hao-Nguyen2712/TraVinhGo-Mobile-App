@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/local_specialty_widget/local_specialty_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteLocalTab extends StatelessWidget {
   const FavoriteLocalTab({super.key});
@@ -13,8 +14,8 @@ class FavoriteLocalTab extends StatelessWidget {
     final locals = favoriteProvider.localSpecialteList;
 
     if (locals.isEmpty) {
-      return const Center(
-        child: Text('There are no favorite local specialte.'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noFavoriteLocal),
       );
     }
 

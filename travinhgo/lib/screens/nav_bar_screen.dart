@@ -4,6 +4,7 @@ import '../utils/constants.dart';
 import '../widget/auth_required_screen.dart';
 import 'home/home_screen.dart';
 import 'map/map_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -15,26 +16,40 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   int currentIndex = 2;
 
-  static final List<Widget> screens = [
-    const MapScreen(),
-    // Events screen - Auth required
-    const AuthRequiredScreen(
-      child: Scaffold(body: Center(child: Text("Events Coming Soon"))),
-      message: 'Please login to use this feature',
-    ),
-    // Home screen - Available to all users
-    const HomeScreen(),
-    // Favorites screen - Auth required
-    const AuthRequiredScreen(
-      child: Scaffold(body: Center(child: Text("Favorites Coming Soon"))),
-      message: 'Please login to use this feature',
-    ),
-    // Profile screen - Auth required
-    const AuthRequiredScreen(
-      child: Scaffold(body: Center(child: Text("Profile Coming Soon"))),
-      message: 'Please login to use this feature',
-    ),
-  ];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // It's safer to build the list here because it depends on context for localization
+    screens = [
+      const MapScreen(),
+      // Events screen - Auth required
+      AuthRequiredScreen(
+        child: Scaffold(
+            body: Center(
+                child: Text(AppLocalizations.of(context)!.eventsComingSoon))),
+        message: AppLocalizations.of(context)!.loginToUseFeature,
+      ),
+      // Home screen - Available to all users
+      const HomeScreen(),
+      // Favorites screen - Auth required
+      AuthRequiredScreen(
+        child: Scaffold(
+            body: Center(
+                child:
+                    Text(AppLocalizations.of(context)!.favoritesComingSoon))),
+        message: AppLocalizations.of(context)!.loginToUseFeature,
+      ),
+      // Profile screen - Auth required
+      AuthRequiredScreen(
+        child: Scaffold(
+            body: Center(
+                child: Text(AppLocalizations.of(context)!.profileComingSoon))),
+        message: AppLocalizations.of(context)!.loginToUseFeature,
+      ),
+    ];
+  }
+
+  late final List<Widget> screens;
 
   @override
   Widget build(BuildContext context) {

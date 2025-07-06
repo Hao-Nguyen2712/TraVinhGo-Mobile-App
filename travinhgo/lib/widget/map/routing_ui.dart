@@ -1,8 +1,453 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../providers/map_provider.dart';
 import '../../providers/map_provider.dart' show TransportMode;
 import 'map_ui_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+/// Widget panel chọn địa điểm cho tính năng định tuyến
+class LocationSelectionPanel extends StatelessWidget {
+  final TextEditingController departureController;
+  final FocusNode departureFocusNode;
+  final MapProvider provider;
+
+  const LocationSelectionPanel({
+    Key? key,
+    required this.departureController,
+    required this.departureFocusNode,
+    required this.provider,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Origin and destination inputs
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              children: [
+                // Navigation row with back and swap buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Back button
+                    if (provider.isRoutingMode)
+                      _buildIconButton(
+                        context,
+                        icon: Icons.arrow_back,
+                        onPressed: () => provider.cancelRouting(),
+                      ),
+                    // Swap button
+                    _buildIconButton(
+                      context,
+                      icon: Icons.swap_vert,
+                      onPressed: () => provider.swapDepartureAndDestination(),
+                      tooltip: AppLocalizations.of(context)!.swapLocations,
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 8),
+
+                // Departure point
+                _buildRoutePoint(
+                  context: context,
+                  icon: Icons.location_on,
+                  iconColor: Theme.of(context).colorScheme.primary,
+                  title: AppLocalizations.of(context)!.departurePoint,
+                  locationName: provider.departureName ?? "Không xác định",
+                  locationAddress: provider.departureAddress,
+                  onTap: () {
+                    provider.showDepartureInput();
+                    departureFocusNode.requestFocus();
+                  },
+                  isDeparture: true,
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 4.0, horizontal: 40.0),
+                  child: Divider(
+                      height: 1,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.5)),
+                ),
+
+                // Destination point
+                _buildRoutePoint(
+                  context: context,
+                  icon: Icons.location_on,
+                  iconColor: Theme.of(context).colorScheme.error,
+                  title: AppLocalizations.of(context)!.destinationPoint,
+                  locationName: provider.destinationName ?? "Không xác định",
+                  locationAddress: provider.destinationAddress,
+                  onTap: () {
+                    // Destination is not editable directly from here
+                  },
+                  isEditable: false,
+                ),
+              ],
+            ),
+          ),
+
+          // Instructions for map tap mode
+          if (provider.isShowingDepartureInput &&
+              provider.searchSuggestions.isEmpty)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              color: colorScheme.primaryContainer,
+              child: Row(
+                children: [
+                  Icon(Icons.touch_app,
+                      color: colorScheme.onPrimaryContainer, size: 22),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.selectDeparturePoint,
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimaryContainer),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          AppLocalizations.of(context)!.tapOrSearchDeparture,
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: colorScheme.onPrimaryContainer),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds a styled circular icon button
+  Widget _buildIconButton(BuildContext context,
+      {required IconData icon,
+      required VoidCallback onPressed,
+      String? tooltip}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.1),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Icon(icon, size: 22),
+        onPressed: onPressed,
+        color: colorScheme.onSurfaceVariant,
+        tooltip: tooltip,
+        padding: EdgeInsets.all(8),
+        constraints: BoxConstraints(),
+      ),
+    );
+  }
+
+  /// Builds a single route point (departure or destination) UI
+  Widget _buildRoutePoint({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String locationName,
+    String? locationAddress,
+    required VoidCallback onTap,
+    bool isEditable = true,
+    bool isDeparture = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    // Determine if the text field should be shown
+    final bool showTextField = isDeparture && provider.isShowingDepartureInput;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(icon, color: iconColor, size: 24),
+        const SizedBox(width: 12),
+        Expanded(
+          child: showTextField
+              ?
+              // Show a text field for departure input
+              TextField(
+                  controller: departureController,
+                  focusNode: departureFocusNode,
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      provider.searchDepartureLocations(value);
+                    } else {
+                      provider.clearSearchResults();
+                    }
+                  },
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.enterDeparturePoint,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                  ),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                )
+              :
+              // Show location name as text
+              InkWell(
+                  onTap: isEditable ? onTap : null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        locationName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (locationAddress != null && locationAddress.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0),
+                          child: Text(
+                            locationAddress,
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 14,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+        ),
+        if (isEditable && !showTextField)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Icon(Icons.edit,
+                color: colorScheme.onSurfaceVariant.withOpacity(0.7), size: 20),
+          ),
+      ],
+    );
+  }
+}
+
+/// Lớp tiện ích xử lý địa chỉ
+class LocationAddressHelper {
+  // Hàm trích xuất địa chỉ rút gọn từ tên địa điểm
+  static String? getShortAddress(String? locationName) {
+    if (locationName == null || locationName.isEmpty) {
+      return null;
+    }
+
+    // Kiểm tra nếu có dấu phẩy để tách địa chỉ
+    if (locationName.contains(",")) {
+      List<String> parts = locationName.split(",");
+      if (parts.length > 1) {
+        return "${parts[0].trim()},...";
+      }
+    }
+
+    // Nếu tên quá dài, rút gọn
+    if (locationName.length > 30) {
+      return "${locationName.substring(0, 30)}...";
+    }
+
+    return locationName;
+  }
+
+  // Hàm lấy địa chỉ đầy đủ
+  static String? getFullAddress(String? locationName) {
+    if (locationName == null || locationName.isEmpty) {
+      return null;
+    }
+
+    // Nếu có tên địa điểm đi, giả định địa chỉ đầy đủ
+    if (locationName ==
+        "Trung tâm Bảo tồn Di tích Lịch sử và Văn hóa Trà Vinh (Khu trưng bày Khmer - Việt - Hoa), Phường 1, Thành phố Trà Vinh") {
+      return "26 Đường Nguyễn Thị Minh Khai, Phường 1, Thành phố Trà Vinh, Tỉnh Trà Vinh";
+    }
+
+    if (locationName ==
+        "Chi Cục Thi Hành Án Dân Sự Thành Phố Trà Vinh - Trụ sở tiếp dân khu vực số 3") {
+      return "54 Lê Thánh Tôn, Phường 2, Thành phố Trà Vinh, Tỉnh Trà Vinh";
+    }
+
+    // Trường hợp khác, dùng chính tên địa điểm làm địa chỉ đầy đủ
+    return locationName;
+  }
+
+  // Function to show the full address dialog
+  static void showFullAddressDialog(BuildContext context, String title,
+      String locationName, String fullAddress, MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                title == "Điểm đi" ? Icons.trip_origin : Icons.place,
+                color: title == "Điểm đi"
+                    ? colorScheme.primary
+                    : colorScheme.error,
+                size: 24,
+              ),
+              SizedBox(width: 10),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                locationName,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Địa chỉ đầy đủ:",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                  border:
+                      Border.all(color: colorScheme.outline.withOpacity(0.5)),
+                ),
+                child: Text(
+                  fullAddress,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                "Đóng",
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            if (title == "Điểm đến")
+              TextButton(
+                child: Text(
+                  "Chỉ đường",
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Bắt đầu chỉ đường tới điểm này
+                  if (title == "Điểm đến" &&
+                      provider.destinationCoordinates != null) {
+                    // Nếu đang không ở chế độ chỉ đường, bắt đầu chỉ đường
+                    if (!provider.isRoutingMode) {
+                      provider.startRouting(
+                          provider.destinationCoordinates!, locationName);
+                    }
+                    // Nếu đã ở chế độ chỉ đường, không cần làm gì vì đã đang chỉ đường đến điểm này
+                  }
+                },
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
 
 /// Routing UI components for map navigation
 class RoutingUI extends StatefulWidget {
@@ -55,25 +500,28 @@ class _RoutingUIState extends State<RoutingUI> {
     String label,
   ) {
     bool isSelected = provider.selectedTransportMode == mode;
+    final colorScheme = Theme.of(context).colorScheme;
 
     // Get the duration for this transport mode from the provider's stored durations
     int? duration = provider.routeDurations[mode];
 
     // Always show the duration if available, otherwise show the label
-    String displayText =
-        duration != null ? MapUiUtils.formatDuration(duration) : label;
+    String displayText = duration != null
+        ? MapUiUtils.formatDuration(duration)
+        : MapUiUtils.getTransportModeLabel(mode, AppLocalizations.of(context)!);
 
     return Expanded(
       child: GestureDetector(
         onTap: () => provider.setTransportMode(mode),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: 4),
           decoration: BoxDecoration(
-            color:
-                isSelected ? Colors.teal.withOpacity(0.1) : Colors.transparent,
+            color: isSelected
+                ? colorScheme.primary.withOpacity(0.1)
+                : Colors.transparent,
             border: Border(
               bottom: BorderSide(
-                color: isSelected ? Colors.teal : Colors.transparent,
+                color: isSelected ? colorScheme.primary : Colors.transparent,
                 width: 3,
               ),
             ),
@@ -82,16 +530,20 @@ class _RoutingUIState extends State<RoutingUI> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.teal : Colors.grey,
-                size: 32, // Larger icon size
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+                size: 28,
               ),
-              SizedBox(height: 6),
+              SizedBox(height: 4),
               Text(
                 displayText,
                 style: TextStyle(
-                  color: isSelected ? Colors.black : Colors.grey,
+                  color: isSelected
+                      ? colorScheme.onSurface
+                      : colorScheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 15, // Larger text
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -121,579 +573,28 @@ class _RoutingUIState extends State<RoutingUI> {
           children: [
             // Top location selection panel
             Positioned(
-              top: MediaQuery.of(context).padding.top - 30,
+              top: MediaQuery.of(context).padding.top,
               left: 0,
               right: 0,
-              child: Container(
-                color: Colors.white,
-                // No elevation here to ensure suggestions can overlay
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Origin and destination inputs
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8),
-                      child: Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            children: [
-                              // Navigation row with back and swap buttons
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // Back button
-                                  if (provider.isRoutingMode)
-                                    IconButton(
-                                      icon: Icon(Icons.arrow_back, size: 28),
-                                      onPressed: () => provider.cancelRouting(),
-                                      color: Colors.black54,
-                                      padding: EdgeInsets.fromLTRB(0, 4, 0, 2),
-                                    )
-                                  else
-                                    SizedBox(
-                                        width:
-                                            36), // Empty space to maintain alignment
-
-                                  // Swap button
-                                  IconButton(
-                                    icon: Icon(Icons.swap_vert,
-                                        color: Colors.blue, size: 28),
-                                    onPressed: () =>
-                                        provider.swapDepartureAndDestination(),
-                                    tooltip: "Swap locations",
-                                    padding: EdgeInsets.all(4),
-                                  ),
-                                ],
-                              ),
-
-                              // Origin input row with departure point image
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/markers/departure_point.png',
-                                    width: 24,
-                                    height: 24,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Expanded(
-                                    child: provider.isShowingDepartureInput
-                                        ? Container(
-                                            height: 56, // Increased height
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.green,
-                                                width: 1.5,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: TextField(
-                                              controller: _departureController,
-                                              focusNode: _departureFocusNode,
-                                              autofocus:
-                                                  true, // Auto focus when showing input
-                                              decoration: InputDecoration(
-                                                hintText: "Nhập vị trí của bạn",
-                                                hintStyle: TextStyle(
-                                                    color: Colors.grey),
-                                                border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  borderSide: BorderSide
-                                                      .none, // Remove default border
-                                                ),
-                                                filled: true,
-                                                fillColor: Colors.white,
-                                                contentPadding:
-                                                    EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical:
-                                                            16), // Increased padding
-                                              ),
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.black87),
-                                              onChanged: (text) {
-                                                if (text.length >= 2) {
-                                                  provider
-                                                      .searchDepartureLocations(
-                                                          text);
-                                                } else if (text.isEmpty) {
-                                                  provider.clearSearchResults();
-                                                }
-                                              },
-                                            ),
-                                          )
-                                        : Container(
-                                            height: 56, // Increased height
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: 8),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.green,
-                                                width: 1.5,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                provider.showDepartureInput();
-                                                // Request focus after a short delay to ensure the text field is built
-                                                Future.delayed(
-                                                    Duration(milliseconds: 100),
-                                                    () {
-                                                  _departureFocusNode
-                                                      .requestFocus();
-                                                });
-                                              },
-                                              child: Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 12),
-                                                  child: Text(
-                                                    provider.departureName ??
-                                                        "Vị trí của bạn",
-                                                    style:
-                                                        TextStyle(fontSize: 16),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                  ),
-                                  if (provider.isShowingDepartureInput)
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        // Use current location
-                                        IconButton(
-                                          icon: Icon(Icons.my_location,
-                                              size: 26, color: Colors.blue),
-                                          onPressed: () => provider
-                                              .useTraVinhCenterAsDeparture(),
-                                          padding: EdgeInsets.all(4),
-                                          constraints: BoxConstraints(),
-                                          tooltip: "Use current location",
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              ),
-
-                              Divider(),
-
-                              // Destination row with destination point image
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/images/markers/destination_point.png',
-                                    width: 24,
-                                    height: 24,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Expanded(
-                                    child: Container(
-                                      height: 56, // Increased height
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 8),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.green,
-                                          width: 1.5,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Padding(
-                                          padding: EdgeInsets.only(left: 12),
-                                          child: Text(
-                                            provider.destinationName ??
-                                                "Điểm đến",
-                                            style: TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Instructions for map tap mode
-                    if (provider.isShowingDepartureInput &&
-                        provider.searchSuggestions.isEmpty)
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        color: Colors.blue[50],
-                        child: Row(
-                          children: [
-                            Icon(Icons.touch_app,
-                                color: Colors.blue[800], size: 22),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Chọn điểm khởi hành:",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue[800]),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    "Chạm vào vị trí trên bản đồ hoặc nhập địa điểm vào ô tìm kiếm",
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.blue[800]),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
+              child: LocationSelectionPanel(
+                departureController: _departureController,
+                departureFocusNode: _departureFocusNode,
+                provider: provider,
               ),
             ),
 
             // Bottom route summary panel - shown only when route is calculated
             if (showRouteSummary)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: Offset(0, -2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Transport mode tabs
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                                color: Colors.grey.withOpacity(0.2), width: 1),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            _buildTransportTab(
-                              context,
-                              provider,
-                              TransportMode.car,
-                              Icons.directions_car,
-                              "Car",
-                            ),
-                            _buildTransportTab(
-                              context,
-                              provider,
-                              TransportMode.motorcycle,
-                              Icons.motorcycle,
-                              "Motorcycle",
-                            ),
-                            _buildTransportTab(
-                              context,
-                              provider,
-                              TransportMode.pedestrian,
-                              Icons.directions_walk,
-                              "Walk",
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Route details
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Route summary with time and arrival
-                            Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade200),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Time and arrival
-                                  Row(
-                                    children: [
-                                      Icon(Icons.access_time,
-                                          color: Colors.teal),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        "${MapUiUtils.formatDuration(provider.routeDurationInSeconds!)}",
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        MapUiUtils.getEstimatedArrivalTime(
-                                            provider.routeDurationInSeconds!),
-                                        style: TextStyle(
-                                          color: Colors.teal,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 12),
-
-                                  // Distance and route info
-                                  Row(
-                                    children: [
-                                      Icon(Icons.straighten,
-                                          color: Colors.blue.shade700,
-                                          size: 20),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        MapUiUtils.formatDistance(
-                                            provider.routeLengthInMeters!),
-                                        style: TextStyle(
-                                          color: Colors.grey[800],
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      SizedBox(width: 12),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue.shade50,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.bolt,
-                                                color: Colors.blue, size: 16),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              "Đường nhanh nhất",
-                                              style: TextStyle(
-                                                color: Colors.blue.shade700,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            SizedBox(height: 16),
-
-                            // Route source and destination info
-                            Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade200),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // From location
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          provider.departureName ??
-                                              "Trung tâm Trà Vinh",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[800],
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  // Dotted line between points
-                                  Container(
-                                    margin: EdgeInsets.only(left: 4),
-                                    height: 20,
-                                    width: 1,
-                                    color: Colors.grey[300],
-                                  ),
-
-                                  // To location
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          provider.destinationName ??
-                                              "Điểm đến",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black87,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            SizedBox(height: 16),
-
-                            // Transport label and buttons
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Transport mode icon with label
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.teal.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        MapUiUtils.getTransportModeIcon(
-                                            provider.selectedTransportMode),
-                                        color: Colors.teal,
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 6),
-                                      Text(
-                                        MapUiUtils.getTransportModeLabel(
-                                            provider.selectedTransportMode),
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.teal,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                Spacer(),
-
-                                // Start button
-                                ElevatedButton(
-                                  onPressed: () {
-                                    // Start navigation - future implementation
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.teal,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 18, vertical: 12),
-                                    elevation: 2,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.navigation, size: 20),
-                                      SizedBox(width: 6),
-                                      Text("Bắt đầu",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ),
-
-                                SizedBox(width: 10),
-
-                                // Save button
-                                IconButton(
-                                  onPressed: () {
-                                    // Save route - future implementation
-                                  },
-                                  icon: Icon(Icons.bookmark_border,
-                                      color: Colors.blue),
-                                  style: IconButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.blue.withOpacity(0.1),
-                                    shape: CircleBorder(),
-                                  ),
-                                  tooltip: "Lưu",
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+              SlidingUpPanel(
+                minHeight: 170,
+                maxHeight: 450,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24.0),
+                  topRight: Radius.circular(24.0),
                 ),
+                panel: _buildDraggablePanel(provider),
+                collapsed: _buildCollapsedPanel(provider),
+                body: Container(), // The underlying map is the body
               ),
 
             // Search suggestions for departure (positioned at the end of Stack to ensure it's on top)
@@ -712,12 +613,19 @@ class _RoutingUIState extends State<RoutingUI> {
                         maxHeight:
                             240), // Increased max height to show more results
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withOpacity(0.5)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .shadow
+                              .withOpacity(0.1),
                           blurRadius: 8,
                           offset: Offset(0, 2),
                         ),
@@ -735,7 +643,10 @@ class _RoutingUIState extends State<RoutingUI> {
                           contentPadding:
                               EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                           leading: Icon(Icons.location_on_outlined,
-                              size: 18, color: Colors.grey[700]),
+                              size: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
                           title: Text(
                             suggestion.title ?? "Unnamed location",
                             style: TextStyle(fontSize: 14),
@@ -754,6 +665,338 @@ class _RoutingUIState extends State<RoutingUI> {
           ],
         );
       },
+    );
+  }
+
+  /// Builds the part of the panel that is always visible (collapsed state)
+  Widget _buildCollapsedPanel(MapProvider provider) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.0),
+          topRight: Radius.circular(24.0),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Drag handle
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.symmetric(vertical: 6.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+          ),
+          // Route summary
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+            child: _buildRouteSummary(provider),
+          ),
+          SizedBox(height: 8),
+          // Transport mode tabs
+          _buildTransportModeTabs(provider),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the main draggable panel content
+  Widget _buildDraggablePanel(MapProvider provider) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.0),
+          topRight: Radius.circular(24.0),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Drag handle
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.symmetric(vertical: 6.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+          ),
+          // Route summary
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+            child: _buildRouteSummary(provider),
+          ),
+          SizedBox(height: 8),
+          // Transport mode tabs
+          _buildTransportModeTabs(provider),
+          // Route details
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    SizedBox(height: 16),
+                    _buildRoutePointsInfo(provider),
+                    SizedBox(height: 16),
+                    _buildActionButtons(provider),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Transport mode tabs
+  Widget _buildTransportModeTabs(MapProvider provider) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          _buildTransportTab(context, provider, TransportMode.car,
+              Icons.directions_car, "Car"),
+          _buildTransportTab(context, provider, TransportMode.motorcycle,
+              Icons.motorcycle, "Motorcycle"),
+          _buildTransportTab(context, provider, TransportMode.pedestrian,
+              Icons.directions_walk, "Walk"),
+        ],
+      ),
+    );
+  }
+
+  /// Route summary (time and distance)
+  Widget _buildRouteSummary(MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Time and arrival
+          Row(
+            children: [
+              Icon(Icons.access_time, color: colorScheme.primary),
+              SizedBox(width: 8),
+              Text(
+                "${MapUiUtils.formatDuration(provider.routeDurationInSeconds!)}",
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              Text(
+                MapUiUtils.getEstimatedArrivalTime(
+                    provider.routeDurationInSeconds!,
+                    AppLocalizations.of(context)!),
+                style: TextStyle(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+              ),
+            ],
+          ),
+          SizedBox(height: 4),
+          // Distance and route info
+          Row(
+            children: [
+              Icon(Icons.straighten, color: colorScheme.secondary, size: 20),
+              SizedBox(width: 8),
+              Text(
+                MapUiUtils.formatDistance(provider.routeLengthInMeters!),
+                style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16),
+              ),
+              SizedBox(width: 12),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.bolt,
+                        color: colorScheme.onSecondaryContainer, size: 16),
+                    SizedBox(width: 4),
+                    Text(
+                      "Đường nhanh nhất",
+                      style: TextStyle(
+                          color: colorScheme.onSecondaryContainer,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// From/To location info
+  Widget _buildRoutePointsInfo(MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // From location
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                    color: colorScheme.secondary, shape: BoxShape.circle),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  provider.departureName ?? "Trung tâm Trà Vinh",
+                  style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          // Dotted line between points
+          Container(
+            margin: EdgeInsets.only(left: 4),
+            height: 20,
+            width: 1,
+            color: colorScheme.outline.withOpacity(0.5),
+          ),
+          // To location
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                    color: colorScheme.error, shape: BoxShape.circle),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  provider.destinationName ?? "Điểm đến",
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Action buttons (start, save, etc.)
+  Widget _buildActionButtons(MapProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Transport mode icon with label
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                  MapUiUtils.getTransportModeIcon(
+                      provider.selectedTransportMode),
+                  color: colorScheme.primary,
+                  size: 20),
+              SizedBox(width: 6),
+              Text(
+                MapUiUtils.getTransportModeLabel(provider.selectedTransportMode,
+                    AppLocalizations.of(context)!),
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary),
+              ),
+            ],
+          ),
+        ),
+        Spacer(),
+        // Start button
+        ElevatedButton(
+          onPressed: () {/* Start navigation - future implementation */},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            elevation: 2,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.navigation, size: 20),
+              SizedBox(width: 6),
+              Text("Bắt đầu",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        SizedBox(width: 10),
+        // Save button
+        IconButton(
+          onPressed: () {/* Save route - future implementation */},
+          icon: Icon(Icons.bookmark_border, color: colorScheme.secondary),
+          style: IconButton.styleFrom(
+            backgroundColor: colorScheme.secondary.withOpacity(0.1),
+            shape: CircleBorder(),
+          ),
+          tooltip: "Lưu",
+        ),
+      ],
     );
   }
 }

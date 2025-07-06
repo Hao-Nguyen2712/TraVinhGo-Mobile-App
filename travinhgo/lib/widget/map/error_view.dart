@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/map_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Error view displayed when map fails to load
 class ErrorView extends StatelessWidget {
@@ -11,19 +12,15 @@ class ErrorView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Debug Info"),
+        title: Text(AppLocalizations.of(context)!.debugInfo),
         content: SelectableText(
-          "Error: ${provider.errorMessage}\n\n"
-          "Make sure:\n"
-          "1. Your API key and secret are correctly registered\n"
-          "2. Internet permissions are enabled in AndroidManifest.xml\n"
-          "3. Your device has internet access\n"
-          "4. HERE SDK is properly initialized",
+          "${AppLocalizations.of(context)!.errorPrefix(provider.errorMessage!)}\n\n"
+          "${AppLocalizations.of(context)!.mapErrorInstructions}",
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text("OK"),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -32,16 +29,17 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<MapProvider>(context, listen: false);
+    final provider = Provider.of(context, listen: false);
+    final l10n = AppLocalizations.of(context)!;
 
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Failed to load map: ${provider.errorMessage}',
+            l10n.mapLoadFailed(provider.errorMessage ?? 'Unknown error'),
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
@@ -51,12 +49,12 @@ class ErrorView extends StatelessWidget {
               // Simply notify listeners to trigger UI refresh
               provider.notifyListeners();
             },
-            child: Text('Try Again'),
+            child: Text(l10n.tryAgain),
           ),
           const SizedBox(height: 10),
           TextButton(
             onPressed: () => _showDebugInfo(context, provider),
-            child: Text('Show Debug Info'),
+            child: Text(l10n.showDebugInfo),
           ),
         ],
       ),

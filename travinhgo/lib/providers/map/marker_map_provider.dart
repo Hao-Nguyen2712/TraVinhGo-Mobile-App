@@ -359,6 +359,8 @@ class MarkerMapProvider {
       String? city = marker.metadata?.getString("place_city");
       String? state = marker.metadata?.getString("place_state");
       String? phone = marker.metadata?.getString("place_phone");
+      String? images = marker.metadata?.getString("product_images");
+      String? rating = marker.metadata?.getString("product_rating");
 
       // Get coordinates directly from metadata if available, otherwise use marker coordinates
       double? lat = marker.metadata?.getDouble("place_lat");
@@ -383,6 +385,10 @@ class MarkerMapProvider {
       // Add coordinates
       placeInfo['latitude'] = (lat ?? marker.coordinates.latitude).toString();
       placeInfo['longitude'] = (lon ?? marker.coordinates.longitude).toString();
+
+      // Add OCOP specific data if available
+      if (images != null) placeInfo['images'] = images;
+      if (rating != null) placeInfo['rating'] = rating;
 
       return placeInfo;
     } catch (e) {

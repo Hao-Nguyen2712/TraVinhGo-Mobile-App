@@ -17,6 +17,7 @@ import 'dart:ui' show Color;
 
 import '../Models/Maps/top_favorite_destination.dart';
 import '../services/map_service.dart';
+import 'ocop_product_provider.dart';
 
 import 'map/base_map_provider.dart';
 import 'map/marker_map_provider.dart';
@@ -25,6 +26,7 @@ import 'map/location_map_provider.dart';
 import 'map/search_map_provider.dart';
 import 'map/category_map_provider.dart';
 import 'map/boundary_map_provider.dart';
+import 'map/ocop_map_provider.dart';
 
 // Re-export the TransportMode enum for backward compatibility
 export 'map/navigation_map_provider.dart' show TransportMode;
@@ -39,11 +41,13 @@ class MapProvider extends ChangeNotifier {
   late SearchMapProvider _searchMapProvider;
   late CategoryMapProvider _categoryMapProvider;
   late BoundaryMapProvider _boundaryMapProvider;
+  late OcopMapProvider _ocopMapProvider;
 
   // POI data storage
   String? lastPoiName;
   String? lastPoiCategory;
   GeoCoordinates? lastPoiCoordinates;
+  Metadata? lastPoiMetadata; // Added to store full metadata for OCOP products
   bool showPoiPopup = false; // Flag to control POI popup visibility
   MapMarker? currentCustomMarker; // Reference to the current custom marker
   MapMarker? centerMarker; // Reference to the Tra Vinh center marker
@@ -64,6 +68,32 @@ class MapProvider extends ChangeNotifier {
     _categoryMapProvider = CategoryMapProvider(
         _baseMapProvider, _markerMapProvider,
         boundaryProvider: _boundaryMapProvider);
+
+    // Register callback to update UI when route calculation is completed
+    _navigationMapProvider.onRouteCalculated = () => notifyListeners();
+
+    // Register callback for OCOP category selection
+    _categoryMapProvider.onOcopCategorySelected = () {
+      if (_ocopMapProvider != null) {
+        developer.log(
+            'data_ocop: OCOP category selected via filter, displaying products',
+            name: 'MapProvider');
+        // Always display products when the category is selected.
+        // The deselection logic is handled within CategoryMapProvider.
+        displayOcopProducts();
+      }
+    };
+  }
+
+  // Add getter for OCOP map provider
+  OcopMapProvider get ocopMapProvider => _ocopMapProvider;
+
+  // Method to initialize the OCOP map provider (called after splash screen)
+  void initializeOcopProvider(OcopProductProvider ocopProductProvider) {
+    _ocopMapProvider = OcopMapProvider(
+        _baseMapProvider, _markerMapProvider, ocopProductProvider);
+    developer.log('data_ocop: OcopMapProvider initialized',
+        name: 'MapProvider');
   }
 
   // Forward property access to sub-providers for backward compatibility
@@ -103,6 +133,7 @@ class MapProvider extends ChangeNotifier {
   GeoCoordinates? get destinationCoordinates =>
       _navigationMapProvider.destinationCoordinates;
   String? get destinationName => _navigationMapProvider.destinationName;
+  String? get destinationAddress => _navigationMapProvider.destinationAddress;
   int? get routeLengthInMeters => _navigationMapProvider.routeLengthInMeters;
   int? get routeDurationInSeconds =>
       _navigationMapProvider.routeDurationInSeconds;
@@ -110,6 +141,10 @@ class MapProvider extends ChangeNotifier {
       _navigationMapProvider.selectedTransportMode;
   Map<TransportMode, int> get routeDurations =>
       _navigationMapProvider.routeDurations;
+  String? get departureAddress => _navigationMapProvider.departureAddress;
+
+  // Properties from OcopMapProvider
+  bool get isOcopDisplayed => _ocopMapProvider.isOcopDisplayed;
 
   // Other state variables
   int currentDestinationIndex = 0;
@@ -131,6 +166,14 @@ class MapProvider extends ChangeNotifier {
 
       // Load the "All" category by default
       updateSelectedCategory(0);
+
+      // Display OCOP products if provider is initialized
+      if (_ocopMapProvider != null) {
+        developer.log(
+            'data_ocop: Displaying OCOP products on map initialization',
+            name: 'MapProvider');
+        _ocopMapProvider.displayOcopProducts();
+      }
 
       notifyListeners();
     });
@@ -228,7 +271,7 @@ class MapProvider extends ChangeNotifier {
   bool _handleMarkerTap(MapMarker tappedMarker) {
     // Check if this is a marker with metadata
     if (tappedMarker.metadata != null) {
-      // Get place information from marker metadata
+      // Get place information from marker metadata for all markers
       Map<String, String>? placeInfo =
           _markerMapProvider.getPlaceInfoFromMarker(tappedMarker);
 
@@ -239,7 +282,8 @@ class MapProvider extends ChangeNotifier {
         }
 
         // Show POI popup with the place information
-        showCategoryMarkerPopup(placeInfo, tappedMarker.coordinates);
+        showCategoryMarkerPopup(
+            placeInfo, tappedMarker.coordinates, tappedMarker.metadata);
         return true;
       }
     }
@@ -265,8 +309,12 @@ class MapProvider extends ChangeNotifier {
     PickedPlace topmostPickedPlace = cartoPOIList.first;
 
     // Extract information
+    String poiName = (topmostPickedPlace.name != null &&
+            topmostPickedPlace.name!.trim().isNotEmpty)
+        ? topmostPickedPlace.name!
+        : 'Lat: ${topmostPickedPlace.coordinates.latitude.toStringAsFixed(6)}, Lon: ${topmostPickedPlace.coordinates.longitude.toStringAsFixed(6)}';
     Map<String, String> placeInfo = {
-      'name': topmostPickedPlace.name ?? "Unnamed Place",
+      'name': poiName,
       'category':
           topmostPickedPlace.placeCategoryId.toString() ?? "Unnamed Category",
     };
@@ -279,7 +327,7 @@ class MapProvider extends ChangeNotifier {
     // Try to extract more information if available
     try {
       // Log detailed information about the picked POI for debugging
-      developer.log('Picked POI details: ${topmostPickedPlace.toString()}',
+      developer.log('Picked POI details: [0m${topmostPickedPlace.toString()}',
           name: 'MapProvider');
 
       // Try to get place categories if available
@@ -302,11 +350,13 @@ class MapProvider extends ChangeNotifier {
 
   /// Shows a popup with information about a place from a category marker or embedded POI
   void showCategoryMarkerPopup(
-      Map<String, String> placeInfo, GeoCoordinates coordinates) {
+      Map<String, String> placeInfo, GeoCoordinates coordinates,
+      [Metadata? metadata]) {
     // Set the POI info
     lastPoiName = placeInfo['name'];
     lastPoiCategory = placeInfo['category'];
     lastPoiCoordinates = coordinates;
+    lastPoiMetadata = metadata; // Store full metadata
     showPoiPopup = true;
 
     // Move camera to the POI location with closer zoom for better visibility
@@ -323,6 +373,25 @@ class MapProvider extends ChangeNotifier {
   /// Closes the POI popup
   void closePoiPopup() {
     showPoiPopup = false;
+    lastPoiMetadata = null; // Clear metadata when closing
+    notifyListeners();
+  }
+
+  /// Toggles display of OCOP products on the map
+  void toggleOcopProductDisplay() {
+    _ocopMapProvider.toggleOcopProductDisplay();
+    notifyListeners();
+  }
+
+  /// Display OCOP products on the map
+  void displayOcopProducts() {
+    _ocopMapProvider.displayOcopProducts();
+    notifyListeners();
+  }
+
+  /// Clear OCOP products from the map
+  void clearOcopProducts() {
+    _ocopMapProvider.clearOcopMarkers();
     notifyListeners();
   }
 
@@ -335,6 +404,16 @@ class MapProvider extends ChangeNotifier {
   /// Get category icon by index
   String getCategoryIcon(int index) {
     return _categoryMapProvider.getCategoryIcon(index);
+  }
+
+  /// Get the category icon based on selection state
+  String getCategoryIconForState(int index, bool isSelected) {
+    return _categoryMapProvider.getCategoryIconForState(index, isSelected);
+  }
+
+  /// Checks if a category's icon is tintable
+  bool isCategoryTintable(int index) {
+    return _categoryMapProvider.isCategoryTintable(index);
   }
 
   /// Gets the current user position
@@ -429,9 +508,13 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Starts routing mode
+  /// Sets up the routing mode
   void startRouting(GeoCoordinates coordinates, String name) {
     _navigationMapProvider.startRouting(coordinates, name);
+
+    // Update addresses using reverse geocoding
+    _navigationMapProvider.updateAddressesFromCoordinates();
+
     notifyListeners();
   }
 
@@ -459,7 +542,7 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Shows the departure input UI
+  /// Shows the departure input field
   void showDepartureInput() {
     _navigationMapProvider.showDepartureInput();
     notifyListeners();
@@ -546,11 +629,15 @@ class MapProvider extends ChangeNotifier {
     _categoryMapProvider.cleanupCategoryResources();
     _boundaryMapProvider.cleanupBoundaryResources();
     _baseMapProvider.cleanupMapResources();
+    if (_ocopMapProvider != null) {
+      _ocopMapProvider.clearOcopMarkers();
+    }
 
     // Clear POI data
     lastPoiName = null;
     lastPoiCategory = null;
     lastPoiCoordinates = null;
+    lastPoiMetadata = null;
     showPoiPopup = false;
     currentCustomMarker = null;
   }
@@ -558,5 +645,11 @@ class MapProvider extends ChangeNotifier {
   /// Completely disposes HERE SDK resources
   Future<void> disposeHERESDK() async {
     await _baseMapProvider.disposeHERESDK();
+  }
+
+  /// Update addresses for both departure and destination points
+  Future<void> updateAddresses() async {
+    await _navigationMapProvider.updateAddressesFromCoordinates();
+    notifyListeners();
   }
 }

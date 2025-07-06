@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/destination/destination.dart';
 import '../../providers/destination_type_provider.dart';
@@ -42,15 +43,13 @@ class _DestinationScreenState extends State<DestinationScreen> {
         );
       }
     }
-    
+
     setState(() {
       _destinations = data;
       _destinationNames = data.map((e) => e.name).toList();
       _isLoading = false;
     });
   }
-  
-  
 
   List<Destination> get _filteredDestinations {
     return _destinations.where((destination) {
@@ -78,7 +77,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                     floating: true,
                     snap: true,
                     backgroundColor: Colors.white,
-                    title: const Text('Destination'),
+                    title: Text(AppLocalizations.of(context)!.destination),
                     centerTitle: true,
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new),
@@ -114,8 +113,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
                               });
                             },
                             decoration: InputDecoration(
-                              hintText: 'Search destination',
-                              prefixIcon: Icon(Icons.search),
+                              hintText: AppLocalizations.of(context)!
+                                  .searchDestination,
+                              prefixIcon: const Icon(Icons.search),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(60),
                                 borderSide: BorderSide.none,
@@ -166,7 +166,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                                                 : Colors.black),
                                     const SizedBox(width: 5),
                                     Text(
-                                      "All",
+                                      AppLocalizations.of(context)!.all,
                                       style: TextStyle(
                                         color:
                                             _selectedDestinationTypeId == null

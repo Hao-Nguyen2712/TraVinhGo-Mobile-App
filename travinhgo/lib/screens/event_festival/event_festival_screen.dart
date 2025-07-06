@@ -7,6 +7,7 @@ import '../../services/event_festival_service.dart';
 import '../../utils/constants.dart';
 import '../../widget/event_festival_widget/event_festival_item.dart';
 import '../../widget/local_specialty_widget/local_specialty_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EventFestivalScreen extends StatefulWidget {
   const EventFestivalScreen({super.key});
@@ -65,7 +66,7 @@ class _EventFestivalScreenState extends State<EventFestivalScreen> {
           floating: true,
           snap: true,
           backgroundColor: Colors.white,
-          title: const Text('Event And Festival'),
+          title: Text(AppLocalizations.of(context)!.eventAndFestival),
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
@@ -101,7 +102,8 @@ class _EventFestivalScreenState extends State<EventFestivalScreen> {
                       });
                     },
                     decoration: InputDecoration(
-                      hintText: 'Search event or festival',
+                      hintText:
+                          AppLocalizations.of(context)!.searchEventOrFestival,
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(60),

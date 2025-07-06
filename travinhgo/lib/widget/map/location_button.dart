@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/map_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Location buttons for current location and Tra Vinh center
 class LocationButton extends StatelessWidget {
@@ -8,6 +9,8 @@ class LocationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<MapProvider>(
       builder: (context, provider, _) {
         // Don't show location button in routing mode
@@ -26,20 +29,20 @@ class LocationButton extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: colorScheme.shadow.withOpacity(0.2),
                       blurRadius: 6,
                       offset: Offset(0, 2),
                     ),
                   ],
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.gps_fixed, color: Colors.blue),
+                  icon: Icon(Icons.gps_fixed, color: colorScheme.primary),
                   onPressed: () => provider.getCurrentPosition(),
-                  tooltip: "My location",
+                  tooltip: AppLocalizations.of(context)!.myLocation,
                 ),
               ),
 
@@ -50,11 +53,11 @@ class LocationButton extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: colorScheme.shadow.withOpacity(0.2),
                       blurRadius: 6,
                       offset: Offset(0, 2),
                     ),
@@ -65,8 +68,8 @@ class LocationButton extends StatelessWidget {
                     Icons.location_city,
                     // Change color based on marker visibility
                     color: provider.isCenterMarkerVisible
-                        ? Colors.red
-                        : Colors.green,
+                        ? colorScheme.error
+                        : colorScheme.primary,
                   ),
                   onPressed: () {
                     // First move to Tra Vinh center
@@ -75,8 +78,8 @@ class LocationButton extends StatelessWidget {
                     provider.toggleCenterMarker();
                   },
                   tooltip: provider.isCenterMarkerVisible
-                      ? "Remove Tra Vinh center marker"
-                      : "Show Tra Vinh center",
+                      ? AppLocalizations.of(context)!.removeCenterMarker
+                      : AppLocalizations.of(context)!.showCenterMarker,
                 ),
               ),
             ],

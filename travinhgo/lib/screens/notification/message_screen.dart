@@ -5,6 +5,7 @@ import '../../Models/notification/notification.dart';
 import '../../providers/notification_provider.dart';
 import '../../services/notification_service.dart';
 import '../../widget/notification_widget/notification_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({super.key});
@@ -54,7 +55,6 @@ class _MessageScreenState extends State<MessageScreen> {
     super.dispose();
   }
 
-
   Future<void> fetchNotificationMessage() async {
     final data = await NotificationService().getNotifications();
 
@@ -76,7 +76,8 @@ class _MessageScreenState extends State<MessageScreen> {
               floating: true,
               snap: true,
               backgroundColor: Colors.white,
-              title: Text('Notification(${notificationProvider.userNotification.length.toString()})'),
+              title: Text(AppLocalizations.of(context)!.notificationTitle(
+                  notificationProvider.userNotification.length)),
               centerTitle: true,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
@@ -86,7 +87,8 @@ class _MessageScreenState extends State<MessageScreen> {
                   if (router.canPop()) {
                     router.pop();
                   } else {
-                    router.go('/home'); // hoặc router.goNamed('Home') nếu bạn dùng tên route
+                    router.go(
+                        '/home'); // hoặc router.goNamed('Home') nếu bạn dùng tên route
                   }
                 },
               ),
@@ -108,9 +110,10 @@ class _MessageScreenState extends State<MessageScreen> {
                               crossAxisCount: 1, childAspectRatio: 2.6),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          final isNew = index < notificationProvider.userNotification.length;
+                          final isNew = index <
+                              notificationProvider.userNotification.length;
                           final listNew = notificationProvider.userNotification;
-                          
+
                           return NotificationItem(
                             userNotification: _userNotification[index],
                             isNew: isNew,

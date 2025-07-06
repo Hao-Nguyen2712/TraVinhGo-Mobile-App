@@ -100,7 +100,10 @@ class _ImageSliderState extends State<ImageSlider> {
                         BorderRadius.circular(20), // Reduced from 25 to 20
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withAlpha(100),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .shadow
+                            .withOpacity(0.4),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -135,8 +138,8 @@ class _ImageSliderState extends State<ImageSlider> {
                     _currentPage == index ? 18 : 6, // Reduced from 24/8 to 18/6
                 decoration: BoxDecoration(
                   color: _currentPage == index
-                      ? const Color(0xFF158247)
-                      : Colors.grey.shade300,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(6), // Reduced from 8 to 6
                 ),
               ),

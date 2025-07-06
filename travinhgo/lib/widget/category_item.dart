@@ -9,21 +9,28 @@ import '../screens/ocop_product/ocop_product_screen.dart';
 
 class CategoryItem extends StatelessWidget {
   final String iconName;
-  final int ColorName;
+  final Color color;
   final String title;
   final int index;
 
   const CategoryItem({
     super.key,
     required this.iconName,
-    required this.ColorName,
+    required this.color,
     required this.title,
     required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> screen = const [IntroductionPage(), DestinationScreen(), LocalSpecialtyScreen(), EventFestivalScreen(), OcopProductScreen(), MessageScreen()];
+    List<Widget> screen = const [
+      IntroductionPage(),
+      DestinationScreen(),
+      LocalSpecialtyScreen(),
+      EventFestivalScreen(),
+      OcopProductScreen(),
+      MessageScreen()
+    ];
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -38,7 +45,7 @@ class CategoryItem extends StatelessWidget {
             width: 70,
             height: 70,
             decoration: BoxDecoration(
-              color: Color(ColorName),
+              color: color,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Padding(

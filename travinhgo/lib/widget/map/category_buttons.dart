@@ -1,147 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/map_provider.dart';
 
-/// Category filter buttons for map POIs
+import '../../providers/map_provider.dart';
+import '../../utils/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+/// Widget for displaying category filter buttons on the map
 class CategoryButtons extends StatelessWidget {
   const CategoryButtons({Key? key}) : super(key: key);
 
-  /// Called when a category filter is selected
-  void _onCategorySelected(int index, bool selected, MapProvider provider) {
-    if (selected) {
-      provider.updateSelectedCategory(index);
+  String _getLocalizedCategoryName(BuildContext context, String categoryName) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (categoryName) {
+      case "All":
+        return l10n.all;
+      case "OCOP":
+        return l10n.ocop;
+      case "Hotels":
+        return l10n.categoryHotels;
+      case "Restaurants":
+        return l10n.categoryRestaurants;
+      case "Cafes":
+        return l10n.categoryCafes;
+      case "Fuel":
+        return l10n.categoryFuel;
+      case "ATMs":
+        return l10n.categoryAtms;
+      case "Banks":
+        return l10n.categoryBanks;
+      case "Schools":
+        return l10n.categorySchools;
+      case "Hospitals":
+        return l10n.categoryHospitals;
+      case "Police":
+        return l10n.categoryPolice;
+      case "Bus Stops":
+        return l10n.categoryBusStops;
+      case "Stores":
+        return l10n.categoryStores;
+      default:
+        return categoryName;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<MapProvider>(
-      builder: (context, provider, _) {
-        // Hide category buttons when in routing mode
-        if (provider.isRoutingMode) {
-          return SizedBox.shrink();
-        }
+      builder: (context, provider, child) {
+        // Get selected category index and category list
+        final selectedIndex = provider.selectedCategoryIndex;
+        final categoryList = provider.categories;
+
+        // Calculate required space for system status bar
+        final statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Positioned(
-          top: MediaQuery.of(context).padding.top + 70,
+          top: statusBarHeight + 56,
           left: 0,
           right: 0,
-          height: 50,
-          child: Stack(
-            children: [
-              ShaderMask(
-                shaderCallback: (Rect rect) {
-                  return LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withAlpha(20),
-                      Colors.black.withAlpha(255),
-                      Colors.black.withAlpha(255),
-                      Colors.black.withAlpha(20)
-                    ],
-                    stops: [0.0, 0.05, 0.95, 1.0],
-                  ).createShader(rect);
-                },
-                blendMode: BlendMode.dstIn,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  itemCount: provider.categories.length,
-                  itemBuilder: (context, index) {
-                    // A category is selected if it's the current index AND the category is active
-                    bool isSelected = provider.selectedCategoryIndex == index &&
-                        provider.isCategoryActive;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () =>
-                              _onCategorySelected(index, true, provider),
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.green.withOpacity(0.8)
-                                  : Colors.white.withOpacity(0.7),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.green
-                                    : Colors.white.withOpacity(0.8),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 3,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Category icon
-                                Image.asset(
-                                  provider.getCategoryIcon(index),
-                                  width: 18,
-                                  height: 18,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.category,
-                                      size: 18,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black87,
-                                    );
-                                  },
-                                ),
-                                SizedBox(width: 6),
-                                // Category name
-                                Text(
-                                  provider.categories[index],
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black87,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+          child: Container(
+            height: 44,
+            margin: const EdgeInsets.only(top: 10),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: categoryList.length,
+              itemBuilder: (context, index) {
+                final isSelected =
+                    selectedIndex == index && provider.isCategoryActive;
+                final localizedName =
+                    _getLocalizedCategoryName(context, categoryList[index]);
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(
+                      localizedName,
+                      style: TextStyle(
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontSize: 14,
                       ),
-                    );
-                  },
-                ),
-              ),
-              // Show loading indicator when category search is in progress
-              if (provider.isCategorySearching)
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.white.withAlpha(160),
-                    child: Center(
-                      child: SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.green),
-                        ),
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    selectedColor: Theme.of(context).colorScheme.primary,
+                    checkmarkColor: Theme.of(context).colorScheme.onPrimary,
+                    selected: isSelected,
+                    showCheckmark: false,
+                    avatar: Image.asset(
+                      provider.getCategoryIconForState(index, isSelected),
+                      width: 20,
+                      height: 20,
+                      color: isSelected && provider.isCategoryTintable(index)
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : null,
+                    ),
+                    onSelected: (selected) {
+                      provider.updateSelectedCategory(index);
+                    },
+                    shape: StadiumBorder(
+                      side: BorderSide(
+                        color: isSelected
+                            ? Colors.transparent
+                            : Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.5),
+                        width: 1,
                       ),
                     ),
                   ),
-                ),
-            ],
+                );
+              },
+            ),
           ),
         );
       },

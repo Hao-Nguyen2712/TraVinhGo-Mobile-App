@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/destination_widget/destination_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteDestinationTab extends StatelessWidget {
   const FavoriteDestinationTab({super.key});
@@ -13,8 +14,8 @@ class FavoriteDestinationTab extends StatelessWidget {
     final destinations = favoriteProvider.destinationList;
 
     if (destinations.isEmpty) {
-      return const Center(
-        child: Text('There are no favorite destination.'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noFavoriteDestinations),
       );
     }
 

@@ -18,9 +18,13 @@ import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/services/push_notification_service.dart';
+import 'package:travinhgo/utils/app_theme.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
+import 'package:travinhgo/providers/ocop_product_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 // Import HERE SDK directly in main.dart
 import 'package:here_sdk/core.dart';
@@ -31,7 +35,8 @@ import 'firebase_options.dart';
 // Global navigator key for accessing navigation from anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-final PushNotificationService pushNotificationService = PushNotificationService();
+final PushNotificationService pushNotificationService =
+    PushNotificationService();
 
 // Global flag to track if splash screen has been shown
 bool hasShownSplashScreen = false;
@@ -140,10 +145,13 @@ class _MyAppState extends State<MyApp> {
     final BuildContext? ctx = navigatorKey.currentContext;
     if (ctx == null) return;
 
-    final interactionProvider = Provider.of<InteractionProvider>(ctx, listen: false);
-    final interactionLogProvider = Provider.of<InteractionLogProvider>(ctx, listen: false);
+    final interactionProvider =
+        Provider.of<InteractionProvider>(ctx, listen: false);
+    final interactionLogProvider =
+        Provider.of<InteractionLogProvider>(ctx, listen: false);
 
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
       // App vào nền hoặc chuẩn bị bị kill → gửi log còn lại lên server
       await interactionProvider.sendAllLogs();
       await interactionLogProvider.sendAllInteracLog();
@@ -175,18 +183,31 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(create: (_) => UserProvider()),
           ChangeNotifierProvider(create: (_) => NotificationProvider()),
           ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+          ChangeNotifierProvider(create: (_) => OcopProductProvider()),
         ],
-        child: MaterialApp.router(
-          title: "TraVinhGo",
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme:
-                ColorScheme.fromSeed(seedColor: const Color(0xFF158247)),
-            useMaterial3: true,
-            textTheme: GoogleFonts.montserratTextTheme(),
-          ),
-          routerConfig: _appRouter.router,
-          restorationScopeId: 'app_scope',
+        child: Consumer<SettingProvider>(
+          builder: (context, settingProvider, child) {
+            return MaterialApp.router(
+              title: "TraVinhGo",
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: settingProvider.themeMode,
+              routerConfig: _appRouter.router,
+              restorationScopeId: 'app_scope',
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en', ''), // English, no country code
+                Locale('vi', ''), // Vietnamese, no country code
+              ],
+              locale: settingProvider.locale,
+            );
+          },
         ),
       );
 }
