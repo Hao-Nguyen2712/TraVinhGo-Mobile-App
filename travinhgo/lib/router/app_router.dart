@@ -222,6 +222,16 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/destination-detail/:id',
+        name: 'DestinationDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return DestinationDetailScreen(
+            id: id,
+          );
+        },
+      ),
+      GoRoute(
         path: '/notification',
         name: 'Notification',
         builder: (context, state) => MessageScreen(),

@@ -12,6 +12,8 @@ class OcopProduct {
   final int ocopPoint;
   final int ocopYearRelease;
   final String tagId;
+  final Company company;
+  final OcopTypeDTO? ocopType;
 
   OcopProduct(
       {required this.id,
@@ -24,7 +26,9 @@ class OcopProduct {
       required this.companyId,
       required this.ocopPoint,
       required this.ocopYearRelease,
-      required this.tagId});
+      required this.tagId,
+      required this.company,
+      this.ocopType});
 
   factory OcopProduct.fromJson(Map<String, dynamic> json) {
     return OcopProduct(
@@ -44,6 +48,23 @@ class OcopProduct {
       ocopPoint: json['ocopPoint'],
       ocopYearRelease: json['ocopYearRelease'],
       tagId: json['tagId'],
+      company: Company.fromJson(json['company']),
+      ocopType:
+          json['ocopType'] != null ? OcopTypeDTO.fromJson(json['ocopType']) : null,
+    );
+  }
+}
+
+class Company {
+  final String id;
+  final String name;
+
+  Company({required this.id, required this.name});
+
+  factory Company.fromJson(Map<String, dynamic> json) {
+    return Company(
+      id: json['id'],
+      name: json['name'],
     );
   }
 }
@@ -64,5 +85,16 @@ class SellLocation {
       locationAddress: json['locationAddress'],
       location: Location.fromJson(json['location']),
     );
+  }
+}
+
+class OcopTypeDTO {
+  final String id;
+  final String ocopTypeName;
+
+  OcopTypeDTO({required this.id, required this.ocopTypeName});
+
+  factory OcopTypeDTO.fromJson(Map<String, dynamic> json) {
+    return OcopTypeDTO(id: json['id'], ocopTypeName: json['name']);
   }
 }

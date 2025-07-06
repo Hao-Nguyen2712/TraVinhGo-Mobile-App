@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/sampledata/samplelist.dart';
 import 'package:travinhgo/widget/category_grid.dart';
 import 'package:travinhgo/widget/category_item.dart';
 import 'package:travinhgo/widget/home_header.dart';
 import 'package:travinhgo/widget/image_slider.dart';
 
+import '../../Models/Maps/top_favorite_destination.dart';
+import '../../Models/event_festival/event_and_festival.dart';
+import '../../Models/ocop/ocop_product.dart';
 import '../../main.dart';
+import '../../services/home_service.dart';
+import '../../utils/constants.dart';
+import '../../widget/home_widget/destination/image_slider_destination.dart';
+import '../../widget/home_widget/event_festival/image_slider_event.dart';
+import '../../widget/home_widget/ocop/image_slider_ocop.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -20,8 +27,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<TopFavoriteDestination> _favoriteDestinations = [];
+  List<EventAndFestival> _topEvents = [];
+  List<OcopProduct> _ocopProducts = [];
   bool _handledInitialMessage = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -33,11 +43,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // _handleNotificationNavigation();
     pushNotificationService.firebaseInit(context);
+
+    // fetchdata
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    final data = await HomeService().getHomePageData();
+    if (data != null) {
+      setState(() {
+        _favoriteDestinations = data.favoriteDestinations;
+        _topEvents = data.topEvents;
+        _ocopProducts = data.ocopProducts;
+      });
+    } else {
+      // Xử lý khi data null, ví dụ:
+      setState(() {
+        _favoriteDestinations = [];
+        _topEvents = [];
+        _ocopProducts = [];
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
 
@@ -121,9 +151,58 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 15),
                             // Image slider
                             ImageSlider(imageList: imageListHome),
-                            const SizedBox(height: 20),
                             // Categories grid - now using the CategoryGrid widget
                             const CategoryGrid(),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: Column(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Activities",
+                                      style: TextStyle(
+                                          color: kprimaryColor,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical:12 ),
+                                    child: ImageSliderEvent(topEvents: _topEvents,),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Tourist attraction",
+                                      style: TextStyle(
+                                          color: kprimaryColor,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical:12 ),
+                                    child: ImageSliderDestination(favoriteDestinations: _favoriteDestinations,),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Featured ocop products",
+                                      style: TextStyle(
+                                          color: kprimaryColor,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical:12 ),
+                                    child: ImageSliderOcop(ocopProducts: _ocopProducts,),
+                                  ),
+                                ],
+                              ),
+                            )
                           ],
                         ),
                       ),

@@ -260,6 +260,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               height: 10,
                             ),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   "Place of production",
@@ -267,10 +268,10 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 ),
                                 const Spacer(),
                                 SizedBox(
-                                  width: 200,
+                                  width: 190,
                                   child: Text(
                                     StringHelper.toUpperCase(
-                                        "cty tnhh tra vinh farm"),
+                                        ocopProductDetail.company.name),
                                     style: TextStyle(
                                         fontSize: 18, color: kprimaryColor),
                                     maxLines: 2,
@@ -334,7 +335,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                             DataFieldRow(
                               title: 'Year Release',
-                              value: ocopProductDetail.ocopYearRelease.toString(),
+                              value: ocopProductDetail.ocopType!.ocopTypeName,
                             ),
                             DataFieldRow(
                               title: 'Year Release',
