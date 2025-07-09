@@ -190,13 +190,6 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                                 'assets/images/navigations/leftarrowwhile.png')),
                                       ),
                                     )),
-                                // Text(
-                                //   'Destination Detail',
-                                //   style: const TextStyle(
-                                //       color: Colors.white,
-                                //       fontSize: 18,
-                                //       fontWeight: FontWeight.bold),
-                                // ),
                                 Container(
                                   width: 40,
                                   height: 40,
@@ -249,6 +242,16 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                             onTap: () {
                               favoriteProvider
                                   .toggleDestinationFavorite(destinationDetail);
+                              setState(() {
+                                var isExist = favoriteProvider.isExist(destinationDetail.id);
+                                var count = destinationDetail.favoriteCount ?? 0;
+
+                                if (isExist) {
+                                  destinationDetail.favoriteCount = count + 1;
+                                } else {
+                                  destinationDetail.favoriteCount = count - 1;
+                                }
+                              });
                             },
                             child: Icon(
                               favoriteProvider.isExist(destinationDetail.id)
@@ -292,8 +295,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              const Text(
-                                "82",
+                              Text(
+                                destinationDetail.favoriteCount!.toString(),
                                 style: TextStyle(fontSize: 16),
                               ),
                               const SizedBox(
