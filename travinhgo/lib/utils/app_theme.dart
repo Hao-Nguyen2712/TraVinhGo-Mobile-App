@@ -36,6 +36,7 @@ class AppTheme {
     ).apply(
       bodyColor: const Color(0xFFFFFFFF),
       displayColor: const Color(0xFFFFFFFF),
+      decorationColor: const Color(0xFFFFFFFF),
     ),
   );
 }
