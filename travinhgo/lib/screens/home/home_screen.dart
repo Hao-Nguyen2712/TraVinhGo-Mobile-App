@@ -16,7 +16,6 @@ import '../../Models/ocop/ocop_product.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/home_service.dart';
-import '../../utils/constants.dart';
 import '../../widget/home_widget/destination/image_slider_destination.dart';
 import '../../widget/home_widget/event_festival/image_slider_event.dart';
 import '../../widget/home_widget/ocop/image_slider_ocop.dart';
@@ -74,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // No longer using ProtectedScreen - allowing access to all users
     return Scaffold(
@@ -139,14 +139,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         .searchHere,
                                     hintStyle: TextStyle(
                                         fontSize: 20,
-                                        color: colorScheme.onSurfaceVariant),
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : colorScheme.onSurfaceVariant),
                                     border: InputBorder.none,
                                     icon: Padding(
                                       padding: const EdgeInsets.only(left: 10),
                                       child: Image.asset(
                                         "assets/images/navigations/search.png",
                                         scale: 25,
-                                        color: colorScheme.onSurfaceVariant,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -171,7 +175,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Text(
                                       "Activities",
                                       style: TextStyle(
-                                          color: kprimaryColor,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -188,7 +196,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Text(
                                       "Tourist attraction",
                                       style: TextStyle(
-                                          color: kprimaryColor,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -206,7 +218,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Text(
                                       "Featured ocop products",
                                       style: TextStyle(
-                                          color: kprimaryColor,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold),
                                     ),

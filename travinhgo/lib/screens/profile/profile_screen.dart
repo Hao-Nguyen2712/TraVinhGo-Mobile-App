@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../utils/constants.dart';
-import '../../widget/status_dialog.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -83,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               AppLocalizations.of(context)!.cancel,
               style: GoogleFonts.montserrat(
-                color: Colors.grey[600],
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ),
@@ -103,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Column(
@@ -133,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               AppLocalizations.of(context)!.logOut,
               style: GoogleFonts.montserrat(
-                color: Colors.red,
+                color: Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -146,9 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -156,14 +152,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
             fontSize: 20,
-            color: Colors.black,
           ),
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.edit,
-              color: _hasError ? Colors.grey : kprimaryColor,
+              color: _hasError
+                  ? Theme.of(context).disabledColor
+                  : Theme.of(context).colorScheme.primary,
               size: 24,
             ),
             onPressed: _hasError
@@ -225,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _errorMessage ?? AppLocalizations.of(context)!.unknownError,
             style: GoogleFonts.montserrat(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
             textAlign: TextAlign.center,
           ),
@@ -233,8 +230,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: _loadUserProfile,
             style: ElevatedButton.styleFrom(
-              backgroundColor: kprimaryColor,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -284,7 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: GoogleFonts.montserrat(
               fontSize: 24,
               fontWeight: FontWeight.w600,
-              color: kprimaryColor,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 4),
@@ -293,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             profile.email,
             style: GoogleFonts.montserrat(
               fontSize: 16,
-              color: Colors.grey[500],
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
         ],
@@ -351,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(
               icon,
               size: 24,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 20),
             Text(
@@ -359,13 +356,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: GoogleFonts.montserrat(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: textColor ?? Colors.black87,
               ),
             ),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              color: Colors.grey[400],
+              color: Theme.of(context).unselectedWidgetColor,
               size: 20,
             ),
           ],

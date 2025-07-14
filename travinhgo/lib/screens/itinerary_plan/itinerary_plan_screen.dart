@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../Models/itinerary_plan/itinerary_plan.dart';
 import '../../providers/destination_type_provider.dart';
 import '../../services/itinerary_plan_service.dart';
-import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
 
 class ItineraryPlanScreen extends StatefulWidget {
@@ -27,7 +26,8 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
   }
 
   Future<void> fetchItineraryPlan() async {
-    final data = (await ItineraryPlanService().getItineraryPlan()).reversed.toList();
+    final data =
+        (await ItineraryPlanService().getItineraryPlan()).reversed.toList();
 
     setState(() {
       _itineraryPlans = data;
@@ -40,14 +40,12 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     return Scaffold(
-      backgroundColor: kbackgroundColor,
       body: SafeArea(
           child: CustomScrollView(
         slivers: [
           SliverAppBar(
             floating: true,
             snap: true,
-            backgroundColor: Colors.white,
             title: const Text('Itinerary Plan'),
             centerTitle: true,
           ),
@@ -78,8 +76,8 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
                               color: index == _selectedIndex
-                                  ? kprimaryColor
-                                  : Colors.white,
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             padding: const EdgeInsets.symmetric(
@@ -87,13 +85,15 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
                             child: Row(
                               children: [
                                 Text(
-                                  StringHelper.toTitleCase(
-                                      listOptions[index]),
+                                  StringHelper.toTitleCase(listOptions[index]),
                                   style: TextStyle(
-                                    color:
-                                    index == _selectedIndex
-                                            ? Colors.white
-                                            : Colors.black,
+                                    color: index == _selectedIndex
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
                                   ),
                                 ),
                               ],
@@ -123,10 +123,10 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.grey.shade300,
+                          color: Theme.of(context).dividerColor,
                           width: 1,
                         ),
                       ),
@@ -139,13 +139,19 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
                                 child: Text(
                                   StringHelper.toTitleCase(
                                       _itineraryPlans[_selectedIndex].name),
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                 ),
                               ),
                               SizedBox(width: 26), // khoảng cách nhỏ
-                              Text(_itineraryPlans[_selectedIndex].duration ?? "Unknow", style: TextStyle(fontSize: 14),)
+                              Text(
+                                _itineraryPlans[_selectedIndex].duration ??
+                                    "Unknow",
+                                style: TextStyle(fontSize: 14),
+                              )
                             ],
                           ),
                           const SizedBox(
@@ -154,19 +160,20 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount:
-                                _itineraryPlans[_selectedIndex].touristDestinations.length,
+                            itemCount: _itineraryPlans[_selectedIndex]
+                                .touristDestinations
+                                .length,
                             itemBuilder: (context, index) {
-                              final item =
-                                  _itineraryPlans[_selectedIndex].touristDestinations[index];
+                              final item = _itineraryPlans[_selectedIndex]
+                                  .touristDestinations[index];
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.surface,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.grey.shade300,
+                                    color: Theme.of(context).dividerColor,
                                     width: 1,
                                   ),
                                 ),
@@ -201,10 +208,12 @@ class _ItineraryPlanScreenState extends State<ItineraryPlanScreen> {
                                         children: [
                                           Text(
                                             item.name,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 16,
-                                              color: kprimaryColor,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
                                             ),
                                           ),
                                           const SizedBox(height: 4),

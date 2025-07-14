@@ -10,7 +10,10 @@ class SliderEventCard extends StatelessWidget {
   final String title;
 
   const SliderEventCard(
-      {super.key, required this.imageUrl, required this.title, required this.id});
+      {super.key,
+      required this.imageUrl,
+      required this.title,
+      required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +27,11 @@ class SliderEventCard extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         elevation: 4,
-        color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          
           children: [
             // Image
             // Image with Favorite Icon
@@ -52,7 +53,7 @@ class SliderEventCard extends StatelessWidget {
             ),
             // Name + Icon
             Padding(
-              padding: const EdgeInsets.symmetric(vertical:6, horizontal: 2 ),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
               child: Row(
                 children: [
                   const SizedBox(width: 8),

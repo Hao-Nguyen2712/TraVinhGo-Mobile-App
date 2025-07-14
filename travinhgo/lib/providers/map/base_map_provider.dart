@@ -25,7 +25,7 @@ class BaseMapProvider {
   double currentZoomLevel = 14.0; // Default zoom level
 
   /// Initializes the map scene
-  void initMapScene(HereMapController controller,
+  void initMapScene(HereMapController controller, bool isDarkMode,
       [VoidCallback? onSceneLoaded]) {
     // Verify that HERE SDK is initialized
     if (SDKNativeEngine.sharedInstance == null) {
@@ -37,9 +37,11 @@ class BaseMapProvider {
 
     mapController = controller;
 
-    // Load map scene
-    mapController!.mapScene.loadSceneForMapScheme(MapScheme.normalDay,
-        (MapError? error) {
+    // Load map scene based on theme
+    MapScheme mapScheme =
+        isDarkMode ? MapScheme.normalNight : MapScheme.normalDay;
+
+    mapController!.mapScene.loadSceneForMapScheme(mapScheme, (MapError? error) {
       if (error != null) {
         errorMessage = "Map scene loading failed: ${error.toString()}";
         isLoading = false;
@@ -98,6 +100,24 @@ class BaseMapProvider {
     const double maxZoomLevel = 20.0;
     double zoomLevel = 24 - (math.log(distanceInMeters) / math.ln2);
     return zoomLevel.clamp(minZoomLevel, maxZoomLevel);
+  }
+
+  /// Updates the map scheme based on the theme
+  void updateMapScheme(bool isDarkMode) {
+    if (mapController == null) {
+      return;
+    }
+
+    MapScheme scheme = isDarkMode ? MapScheme.normalNight : MapScheme.normalDay;
+    mapController!.mapScene.loadSceneForMapScheme(scheme, (MapError? error) {
+      if (error != null) {
+        developer.log('Error loading map scene for theme: ${error.toString()}',
+            name: 'BaseMapProvider');
+      } else {
+        developer.log('Map scheme updated to ${isDarkMode ? 'night' : 'day'}',
+            name: 'BaseMapProvider');
+      }
+    });
   }
 
   /// Cleans up map resources
