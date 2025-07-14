@@ -225,7 +225,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   void _onMapCreated(HereMapController hereMapController) {
     try {
       developer.log('Map controller created successfully', name: 'MapScreen');
-      _mapProvider.initMapScene(hereMapController);
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+      _mapProvider.initMapScene(hereMapController, isDarkMode);
 
       // Set up tap listener for map interactions
       hereMapController.gestures.tapListener =

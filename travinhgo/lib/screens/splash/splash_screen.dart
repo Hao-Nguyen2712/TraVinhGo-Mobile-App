@@ -16,7 +16,6 @@ import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
 import '../../providers/interaction_provider.dart';
 import '../../providers/ocop_type_provider.dart';
-import '../../services/push_notification_service.dart';
 import '../../providers/ocop_product_provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -114,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: kprimaryColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +122,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Colors.white,
                 fontFamily: 'Aclonica',
               ),
               child: AnimatedTextKit(
@@ -140,7 +139,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 20),
             if (!_isDataLoaded)
               CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Colors.white,
                 strokeWidth: 2,
               ),
           ],

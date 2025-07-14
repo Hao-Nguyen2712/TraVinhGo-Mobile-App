@@ -43,9 +43,6 @@ class _MessageScreenState extends State<MessageScreen> {
       setState(() {
         _userNotification.insertAll(0, newNotifications);
       });
-
-      // Sau khi thêm rồi thì xóa khỏi provider (nếu bạn không muốn lưu lặp)
-      // NotificationProvider.of(context, listen: false).resetNotification();
     }
   }
 
@@ -67,38 +64,49 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   Widget build(BuildContext context) {
     final notificationProvider = NotificationProvider.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               floating: true,
               snap: true,
-              backgroundColor: Colors.white,
-              title: Text(AppLocalizations.of(context)!.notificationTitle(
-                  notificationProvider.userNotification.length)),
+              backgroundColor: colorScheme.surface,
+              title: Text(
+                AppLocalizations.of(context)!.notificationTitle(
+                    notificationProvider.userNotification.length),
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                ),
+              ),
               centerTitle: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: colorScheme.onSurface,
+                ),
                 onPressed: () {
-                  // context.pop();
                   final router = GoRouter.of(context);
                   if (router.canPop()) {
                     router.pop();
                   } else {
-                    router.go(
-                        '/home'); // hoặc router.goNamed('Home') nếu bạn dùng tên route
+                    router.go('/home');
                   }
                 },
               ),
             ),
             _isLoading
-                ? const SliverToBoxAdapter(
+                ? SliverToBoxAdapter(
                     child: Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 32),
-                        child: CircularProgressIndicator(),
+                        child: CircularProgressIndicator(
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                   )
@@ -112,7 +120,6 @@ class _MessageScreenState extends State<MessageScreen> {
                         (context, index) {
                           final isNew = index <
                               notificationProvider.userNotification.length;
-                          final listNew = notificationProvider.userNotification;
 
                           return NotificationItem(
                             userNotification: _userNotification[index],

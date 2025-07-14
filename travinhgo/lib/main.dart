@@ -176,7 +176,16 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(create: (_) => CardProvider()),
           ChangeNotifierProvider(create: (_) => SettingProvider()),
           ChangeNotifierProvider(create: (_) => MarkerProvider()),
-          ChangeNotifierProvider(create: (_) => MapProvider()),
+          ChangeNotifierProxyProvider<SettingProvider, MapProvider>(
+            create: (_) => MapProvider(),
+            update: (_, settings, previous) {
+              final mapProvider = previous ?? MapProvider();
+              final platformBrightness = MediaQuery.of(_).platformBrightness;
+              mapProvider.updateMapTheme(
+                  settings.themeMode, platformBrightness);
+              return mapProvider;
+            },
+          ),
           ChangeNotifierProvider(create: (_) => DestinationTypeProvider()),
           ChangeNotifierProvider(create: (_) => TagProvider()),
           ChangeNotifierProvider(create: (_) => OcopTypeProvider()),

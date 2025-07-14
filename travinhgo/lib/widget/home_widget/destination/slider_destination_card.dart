@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../utils/constants.dart';
 import '../../../utils/string_helper.dart';
 
 class SliderDestinationCard extends StatelessWidget {
@@ -31,7 +30,6 @@ class SliderDestinationCard extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         elevation: 4,
-        color: kbackgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

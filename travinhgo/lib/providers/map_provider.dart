@@ -152,9 +152,20 @@ class MapProvider extends ChangeNotifier {
   List<TopFavoriteDestination> topDestinations = [];
   final MapService _mapService = MapService();
 
+  /// Updates the map theme based on the provided theme mode.
+  void updateMapTheme(ThemeMode themeMode, Brightness platformBrightness) {
+    if (mapController == null) {
+      return;
+    }
+    bool isDarkMode = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            platformBrightness == Brightness.dark);
+    _baseMapProvider.updateMapScheme(isDarkMode);
+  }
+
   /// Initializes the map scene
-  void initMapScene(HereMapController controller) {
-    _baseMapProvider.initMapScene(controller, () async {
+  void initMapScene(HereMapController controller, bool isDarkMode) {
+    _baseMapProvider.initMapScene(controller, isDarkMode, () async {
       // On successful map scene loading, just move to Tra Vinh center
       // without adding a marker
       refreshMap();

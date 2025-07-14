@@ -9,6 +9,7 @@ class LanguageSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     final settingProvider = Provider.of<SettingProvider>(context);
     final isVietnamese = settingProvider.locale.languageCode == 'vi';
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -22,7 +23,9 @@ class LanguageSwitch extends StatelessWidget {
         width: 90,
         height: 30,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: isDarkMode
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -51,7 +54,7 @@ class LanguageSwitch extends StatelessWidget {
                       Text(
                         "Vie",
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -66,7 +69,7 @@ class LanguageSwitch extends StatelessWidget {
                       Text(
                         "Eng",
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -91,10 +94,15 @@ class LanguageSwitch extends StatelessWidget {
                 height: 26,
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: isDarkMode
+                      ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.2)
+                      : Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: Theme.of(context).colorScheme.primary, width: 1),
+                      color: isDarkMode
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.primary,
+                      width: 1),
                 ),
               ),
             ),

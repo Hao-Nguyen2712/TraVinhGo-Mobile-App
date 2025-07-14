@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/constants.dart';
 import '../widget/auth_required_screen.dart';
 import 'home/home_screen.dart';
 import 'map/map_screen.dart';
@@ -72,11 +71,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 context.go('/home');
               },
               shape: const CircleBorder(),
-              backgroundColor:
-                  currentIndex == 2 ? kprimaryColor : Colors.grey.shade400,
+              backgroundColor: currentIndex == 2
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.secondaryContainer,
               child: Image.asset(
                 'assets/images/navigations/home.png',
-                color: currentIndex == 2 ? Colors.white : Colors.black,
+                color: currentIndex == 2
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.onSecondaryContainer,
                 scale: 20,
               ),
             ),
@@ -88,7 +90,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Theme.of(context).shadowColor.withOpacity(0.1),
                   blurRadius: 10,
                   spreadRadius: 0,
                 ),
@@ -103,7 +105,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
               child: BottomAppBar(
                 height: 70,
                 elevation: 1,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 notchMargin: 10,
                 clipBehavior: Clip.antiAliasWithSaveLayer,
                 child: Row(
@@ -120,8 +122,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                       icon: Image.asset(
                         'assets/images/navigations/map.png',
                         color: currentIndex == 0
-                            ? kprimaryColor
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).unselectedWidgetColor,
                       ),
                     ),
                     IconButton(
@@ -134,8 +136,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                       icon: Image.asset(
                         'assets/images/navigations/event.png',
                         color: currentIndex == 1
-                            ? kprimaryColor
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).unselectedWidgetColor,
                       ),
                     ),
                     const SizedBox(width: 60),
@@ -149,8 +151,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                       icon: Image.asset(
                         'assets/images/navigations/love.png',
                         color: currentIndex == 3
-                            ? kprimaryColor
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).unselectedWidgetColor,
                       ),
                     ),
                     IconButton(
@@ -163,8 +165,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                       icon: Image.asset(
                         'assets/images/navigations/user.png',
                         color: currentIndex == 4
-                            ? kprimaryColor
-                            : Colors.grey.shade400,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).unselectedWidgetColor,
                       ),
                     ),
                   ],
@@ -221,11 +223,14 @@ class _ShellNavigatorState extends State<ShellNavigator> {
           child: FloatingActionButton(
             onPressed: () => context.go('/home'),
             shape: const CircleBorder(),
-            backgroundColor:
-                currentIndex == 2 ? kprimaryColor : Colors.grey.shade400,
+            backgroundColor: currentIndex == 2
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.secondaryContainer,
             child: Image.asset(
               'assets/images/navigations/home.png',
-              color: currentIndex == 2 ? Colors.white : Colors.black,
+              color: currentIndex == 2
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : Theme.of(context).colorScheme.onSecondaryContainer,
               scale: 20,
             ),
           ),
@@ -235,7 +240,7 @@ class _ShellNavigatorState extends State<ShellNavigator> {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Theme.of(context).shadowColor.withOpacity(0.1),
                 blurRadius: 10,
                 spreadRadius: 0,
               ),
@@ -249,7 +254,7 @@ class _ShellNavigatorState extends State<ShellNavigator> {
             child: BottomAppBar(
               height: 70,
               elevation: 1,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               notchMargin: 10,
               clipBehavior: Clip.antiAliasWithSaveLayer,
               child: Row(
@@ -261,8 +266,8 @@ class _ShellNavigatorState extends State<ShellNavigator> {
                     icon: Image.asset(
                       'assets/images/navigations/map.png',
                       color: currentIndex == 0
-                          ? kprimaryColor
-                          : Colors.grey.shade400,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).unselectedWidgetColor,
                     ),
                   ),
                   IconButton(
@@ -270,8 +275,8 @@ class _ShellNavigatorState extends State<ShellNavigator> {
                     icon: Image.asset(
                       'assets/images/navigations/event.png',
                       color: currentIndex == 1
-                          ? kprimaryColor
-                          : Colors.grey.shade400,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).unselectedWidgetColor,
                     ),
                   ),
                   const SizedBox(width: 60),
@@ -280,8 +285,8 @@ class _ShellNavigatorState extends State<ShellNavigator> {
                     icon: Image.asset(
                       'assets/images/navigations/love.png',
                       color: currentIndex == 3
-                          ? kprimaryColor
-                          : Colors.grey.shade400,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).unselectedWidgetColor,
                     ),
                   ),
                   IconButton(
@@ -289,8 +294,8 @@ class _ShellNavigatorState extends State<ShellNavigator> {
                     icon: Image.asset(
                       'assets/images/navigations/user.png',
                       color: currentIndex == 4
-                          ? kprimaryColor
-                          : Colors.grey.shade400,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).unselectedWidgetColor,
                     ),
                   ),
                 ],

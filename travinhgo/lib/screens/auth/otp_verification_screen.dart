@@ -487,6 +487,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       const storage = FlutterSecureStorage();
       final savedPath = await storage.read(key: 'previous_route_before_login');
       debugPrint("Log_Auth_flow: OTP - Read saved return path: $savedPath");
+      if (savedPath != null) {
+        await storage.delete(key: 'previous_route_before_login');
+      }
       return savedPath;
     } catch (e) {
       debugPrint("Log_Auth_flow: OTP - Error reading saved path: $e");
@@ -602,7 +605,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         return;
       }
 
-      _processPastedOtp(pastedText);
+      // Extract only digits
+      final digitsOnly = pastedText.replaceAll(RegExp(r'[^0-9]'), '');
+      if (digitsOnly.isNotEmpty) {
+        // Take the first 6 digits
+        final otp =
+            digitsOnly.length > 6 ? digitsOnly.substring(0, 6) : digitsOnly;
+        _fullOtpController.value = TextEditingValue(
+          text: otp,
+          selection: TextSelection.collapsed(offset: otp.length),
+        );
+      }
     } catch (e) {
       debugPrint("OTP: Error pasting OTP: $e");
       _showPasteError(AppLocalizations.of(context)!.clipboardAccessError);
@@ -650,45 +663,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           debugPrint("OTP: Found potential OTP in clipboard: $otpCode");
 
           // Check if this is different from what's already in the fields
-          final currentOtp = _otpControllers.map((c) => c.text).join();
-          if (currentOtp == otpCode) return; // Same OTP, no need to update
+          if (_fullOtpController.text == otpCode) {
+            return; // Same OTP, no need to update
+          }
 
           // Fill the OTP fields
           if (otpCode != null && mounted) {
-            setState(() {
-              for (int i = 0; i < 6; i++) {
-                _otpControllers[i].text = otpCode[i];
-              }
-
-              // Clear any errors
-              if (_otpError != null) {
-                _otpError = null;
-              }
-            });
-
-            // Show a brief indicator that OTP was auto-filled
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.otpAutoFilled),
-                backgroundColor: const Color(0xFF158247),
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(16),
-                duration: const Duration(seconds: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            );
-
-            // Auto-verify after a short delay
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted && !_otpSubmitted && !_isLoading) {
-                _verifyOtp();
-              }
-            });
-
-            // Stop checking clipboard after successful auto-fill
-            timer.cancel();
+            _fullOtpController.text = otpCode;
+            // The listener will handle UI updates and verification
           }
         }
       } catch (e) {
@@ -700,28 +682,37 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   // Handle changes in the full OTP input field
   void _handleFullOtpChange() {
-    final fullOtp = _fullOtpController.text;
+    final otp = _fullOtpController.text;
 
-    // Only process if we have input
-    if (fullOtp.isEmpty) return;
+    // This check is for safety, though LengthLimitingTextInputFormatter should prevent this
+    if (otp.length > 6) return;
 
-    // Extract only digits
-    final digitsOnly = fullOtp.replaceAll(RegExp(r'[^0-9]'), '');
-
-    // Update individual OTP fields
-    for (int i = 0; i < math.min(digitsOnly.length, 6); i++) {
-      _otpControllers[i].text = digitsOnly[i];
+    // Update individual OTP display fields
+    for (int i = 0; i < 6; i++) {
+      if (i < otp.length) {
+        _otpControllers[i].text = otp[i];
+      } else {
+        _otpControllers[i].text = '';
+      }
     }
 
-    // Clear the full OTP field to prepare for new input
-    _fullOtpController.clear();
+    // Move focus highlight
+    if (mounted) {
+      if (otp.length < 6) {
+        // Request focus to the next empty box
+        FocusScope.of(context).requestFocus(_focusNodes[otp.length]);
+      } else {
+        // If 6 digits are entered, keep focus on the last box without a cursor
+        FocusScope.of(context).requestFocus(_focusNodes[5]);
+      }
+    }
 
-    // Check if we have all 6 digits and verify
-    if (digitsOnly.length >= 6) {
+    // Auto-verify when 6 digits are entered
+    if (otp.length == 6) {
       // Unfocus to hide keyboard
       FocusScope.of(context).unfocus();
 
-      // Small delay to allow UI to update
+      // Small delay to allow UI to update before verifying
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted && !_otpSubmitted && !_isLoading) {
           _verifyOtp();
@@ -739,24 +730,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     if (digitsOnly.isEmpty) return;
 
-    // Update individual OTP fields
-    for (int i = 0; i < math.min(digitsOnly.length, 6); i++) {
-      _otpControllers[i].text = digitsOnly[i];
-    }
-
-    // Focus the next empty field or unfocus if all fields are filled
-    if (digitsOnly.length < 6) {
-      _focusNodes[math.min(digitsOnly.length, 5)].requestFocus();
-    } else {
-      FocusScope.of(context).unfocus();
-
-      // Verify OTP if we have all 6 digits
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted && !_otpSubmitted && !_isLoading) {
-          _verifyOtp();
-        }
-      });
-    }
+    // Update the single source of truth
+    final otp = digitsOnly.length > 6 ? digitsOnly.substring(0, 6) : digitsOnly;
+    _fullOtpController.value = TextEditingValue(
+      text: otp,
+      selection: TextSelection.collapsed(offset: otp.length),
+    );
   }
 
   // Add a method to clear all OTP fields
@@ -952,114 +931,94 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         // OTP input fields
                         Stack(
                           children: [
-                            // Visible OTP fields
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate(
-                                6,
-                                (index) => SizedBox(
-                                  width: 45,
-                                  height: 50,
-                                  child: TextField(
-                                    controller: _otpControllers[index],
-                                    focusNode: _focusNodes[index],
-                                    keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 20),
-                                    maxLength: 1,
-                                    decoration: InputDecoration(
-                                      counterText: '',
-                                      filled: true,
-                                      fillColor: Theme.of(context)
-                                          .colorScheme
-                                          .surfaceVariant,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: _otpError != null
-                                            ? BorderSide(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .error,
-                                                width: 1.0)
-                                            : BorderSide.none,
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: _otpError != null
-                                            ? BorderSide(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .error,
-                                                width: 1.0)
-                                            : BorderSide.none,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: _otpError != null
-                                            ? BorderSide(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .error,
-                                                width: 1.0)
-                                            : BorderSide(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                                width: 1.0),
-                                      ),
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    onChanged: (value) {
-                                      // Clear error when user types
-                                      if (_otpError != null) {
-                                        setState(() {
-                                          _otpError = null;
-                                        });
-                                      }
-
-                                      // Auto focus to next field
-                                      if (value.isNotEmpty && index < 5) {
-                                        _focusNodes[index + 1].requestFocus();
-                                      }
-
-                                      // Auto-submit when all fields are filled
-                                      if (index == 5 && value.isNotEmpty) {
-                                        bool allFilled = _otpControllers.every(
-                                            (controller) =>
-                                                controller.text.isNotEmpty);
-
-                                        if (allFilled) {
-                                          // Unfocus keyboard
-                                          FocusScope.of(context).unfocus();
-                                          // Small delay to allow UI to update
-                                          Future.delayed(
-                                              const Duration(milliseconds: 100),
-                                              () {
-                                            _verifyOtp();
-                                          });
-                                        }
-                                      }
-                                    },
-                                  ),
-                                ),
+                            // Hidden full OTP input field to handle keyboard input
+                            Opacity(
+                              opacity: 0.0, // Make it invisible
+                              child: TextField(
+                                controller: _fullOtpController,
+                                focusNode: _fullOtpFocusNode,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(6),
+                                ],
+                                autofocus:
+                                    true, // Automatically focus when screen opens
+                                showCursor:
+                                    false, // Hide cursor from the invisible field
                               ),
                             ),
-
-                            // Hidden full OTP input field - only used for clipboard pasting
-                            Opacity(
-                              opacity: 0,
-                              child: Offstage(
-                                offstage: true,
-                                child: TextField(
-                                  controller: _fullOtpController,
-                                  focusNode: _fullOtpFocusNode,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(6),
-                                  ],
+                            // Visible OTP fields
+                            GestureDetector(
+                              onTap: () {
+                                // When user taps the boxes, focus the hidden field to bring up keyboard
+                                FocusScope.of(context)
+                                    .requestFocus(_fullOtpFocusNode);
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: List.generate(
+                                  6,
+                                  (index) => SizedBox(
+                                    width: 45,
+                                    height: 50,
+                                    child: TextField(
+                                      controller: _otpControllers[index],
+                                      focusNode: _focusNodes[index],
+                                      readOnly: true, // Not directly editable
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface),
+                                      decoration: InputDecoration(
+                                        counterText: '',
+                                        filled: true,
+                                        fillColor: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceVariant,
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: _otpError != null
+                                              ? BorderSide(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .error,
+                                                  width: 1.0)
+                                              : BorderSide.none,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: _otpError != null
+                                              ? BorderSide(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .error,
+                                                  width: 1.0)
+                                              : BorderSide.none,
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: _otpError != null
+                                              ? BorderSide(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .error,
+                                                  width: 1.5)
+                                              : BorderSide(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                  width: 1.5),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

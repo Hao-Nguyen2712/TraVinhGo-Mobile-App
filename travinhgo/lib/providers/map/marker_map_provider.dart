@@ -359,12 +359,32 @@ class MarkerMapProvider {
       String? city = marker.metadata?.getString("place_city");
       String? state = marker.metadata?.getString("place_state");
       String? phone = marker.metadata?.getString("place_phone");
-      String? images = marker.metadata?.getString("product_images");
-      String? rating = marker.metadata?.getString("product_rating");
+
+      // Handle both product and destination images
+      String? productImages = marker.metadata?.getString("product_images");
+      String? placeImages = marker.metadata?.getString("place_images");
+      String? images = placeImages ?? productImages;
+
+      // Handle both product and destination ratings
+      String? productRating = marker.metadata?.getString("product_rating");
+      String? placeRatingStr = marker.metadata?.getString("place_rating");
+      double? placeRating =
+          placeRatingStr != null ? double.tryParse(placeRatingStr) : null;
+      String? rating =
+          placeRating != null ? placeRating.toString() : productRating;
+
+      // Get additional destination details
+      String? description = marker.metadata?.getString("place_description");
+      String? email = marker.metadata?.getString("place_email");
+      String? website = marker.metadata?.getString("place_website");
+      String? openingHours = marker.metadata?.getString("place_opening_hours");
+      String? destinationId = marker.metadata?.getString("destination_id");
 
       // Get coordinates directly from metadata if available, otherwise use marker coordinates
-      double? lat = marker.metadata?.getDouble("place_lat");
-      double? lon = marker.metadata?.getDouble("place_lon");
+      String? latStr = marker.metadata?.getString("place_lat");
+      String? lonStr = marker.metadata?.getString("place_lon");
+      double? lat = latStr != null ? double.tryParse(latStr) : null;
+      double? lon = lonStr != null ? double.tryParse(lonStr) : null;
 
       if (name != null) placeInfo['name'] = name;
       if (category != null) placeInfo['category'] = category;

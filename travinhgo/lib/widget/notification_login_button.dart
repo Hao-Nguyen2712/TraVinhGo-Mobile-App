@@ -10,6 +10,7 @@ class NotificationLoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final notificationProvider = NotificationProvider.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -25,13 +26,15 @@ class NotificationLoginButton extends StatelessWidget {
             height: 45,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: colorScheme.onPrimary, width: 2),
+              border: Border.all(
+                  color: isDarkMode ? Colors.white : colorScheme.onPrimary,
+                  width: 2),
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
                 "assets/images/navigations/bell.png",
-                color: colorScheme.onPrimary,
+                color: isDarkMode ? Colors.white : colorScheme.onPrimary,
                 scale: 10,
               ),
             ),

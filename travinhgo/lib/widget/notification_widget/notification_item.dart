@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:travinhgo/Models/notification/notification.dart';
 
-import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
 
 class NotificationItem extends StatelessWidget {
@@ -41,8 +40,9 @@ class NotificationItem extends StatelessWidget {
             Text(
               textAlign: TextAlign.left,
               StringHelper.normalizeName(userNotification.content!) ?? 'N/A',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -50,7 +50,10 @@ class NotificationItem extends StatelessWidget {
               textAlign: TextAlign.left,
               StringHelper.formatDateTime(
                   userNotification.createdAt.toString()),
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(
+                fontSize: 14,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
