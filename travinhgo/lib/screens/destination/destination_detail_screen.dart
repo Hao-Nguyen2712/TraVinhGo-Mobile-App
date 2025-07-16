@@ -159,13 +159,75 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     }
   }
 
+  // void updateRating() {
+  //   // clear old data
+  //   setState(() {
+  //     _ratingSummary = null;
+  //     ratingData = [];
+  //   });
+  //  
+  //   int oneStar = 0;
+  //   int twoStar = 0;
+  //   int threeStar = 0;
+  //   int fourStar = 0;
+  //   int fiveStar = 0;
+  //
+  //   for (var review in reviews) {
+  //     switch (review.rating) {
+  //       case 1:
+  //         oneStar++;
+  //         break;
+  //       case 2:
+  //         twoStar++;
+  //         break;
+  //       case 3:
+  //         threeStar++;
+  //         break;
+  //       case 4:
+  //         fourStar++;
+  //         break;
+  //       case 5:
+  //         fiveStar++;
+  //         break;
+  //     }
+  //   }
+  //
+  //   int total = reviews.length;
+  //
+  //   double getPercent(int count) => total == 0 ? 0 : (count / total) * 100;
+  //  
+  //
+  //   setState(() {
+  //     _ratingSummary = RatingSummary(
+  //       oneStar: oneStar,
+  //       twoStar: twoStar,
+  //       threeStar: threeStar,
+  //       fourStar: fourStar,
+  //       fiveStar: fiveStar,
+  //       oneStarPercent: getPercent(oneStar),
+  //       twoStarPercent: getPercent(twoStar),
+  //       threeStarPercent: getPercent(threeStar),
+  //       fourStarPercent: getPercent(fourStar),
+  //       fiveStarPercent: getPercent(fiveStar),
+  //     );
+  //    
+  //     ratingData = [
+  //       {'stars': 5, 'percent': _ratingSummary!.fiveStarPercent},
+  //       {'stars': 4, 'percent': _ratingSummary!.fourStarPercent},
+  //       {'stars': 3, 'percent': _ratingSummary!.threeStarPercent},
+  //       {'stars': 2, 'percent': _ratingSummary!.twoStarPercent},
+  //       {'stars': 1, 'percent': _ratingSummary!.oneStarPercent},
+  //     ];
+  //   });
+  // }
+
   void updateRating() {
     // clear old data
     setState(() {
       _ratingSummary = null;
       ratingData = [];
     });
-    
+
     int oneStar = 0;
     int twoStar = 0;
     int threeStar = 0;
@@ -192,11 +254,25 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
       }
     }
 
-    int total = reviews.length;
+    int totalReviews = reviews.length;
 
-    double getPercent(int count) => total == 0 ? 0 : (count / total) * 100;
+    // --- PHẦN SỬA LỖI LOGIC VÀ KIỂU DỮ LIỆU NẰM Ở ĐÂY ---
+
+    // 1. Tính tổng số điểm (sum of all ratings)
+    int sumOfRatings = (oneStar * 1) + (twoStar * 2) + (threeStar * 3) + (fourStar * 4) + (fiveStar * 5);
+
+    double rawAverageRating = totalReviews == 0 ? 0.0 : sumOfRatings / totalReviews;
+
+    // 2. Làm tròn đến 1 chữ số thập phân
+    double averageRating = double.parse(rawAverageRating.toStringAsFixed(1));
+
+    // Hàm tính phần trăm
+    double getPercent(int count) => totalReviews == 0 ? 0 : (count / totalReviews) * 100;
 
     setState(() {
+      // 3. Gán giá trị trung bình đã tính toán (kiểu double)
+      destinationDetail.avarageRating = averageRating;
+
       _ratingSummary = RatingSummary(
         oneStar: oneStar,
         twoStar: twoStar,
@@ -209,7 +285,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
         fourStarPercent: getPercent(fourStar),
         fiveStarPercent: getPercent(fiveStar),
       );
-      
+
       ratingData = [
         {'stars': 5, 'percent': _ratingSummary!.fiveStarPercent},
         {'stars': 4, 'percent': _ratingSummary!.fourStarPercent},
@@ -612,7 +688,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                       height: 10,
                     ),
                     Column(
-                      children: reviews.map((review) {
+                      children: reviews.take(5).map((review) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           child: ReviewItem(review: review),

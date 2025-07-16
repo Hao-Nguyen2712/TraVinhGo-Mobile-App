@@ -527,7 +527,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                       return StatefulBuilder(
                                         builder: (context, setState) {
                                           return AlertDialog(
-                                            title: const Text("Select number star reviews"),
+                                            title: const Text("Tap to rate"),
                                             content: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
