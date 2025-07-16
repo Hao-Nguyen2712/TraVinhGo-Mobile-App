@@ -1,7 +1,7 @@
 class Destination {
   final String id;
   final String name;
-  final double avarageRating;
+  double avarageRating;
   final String? description;
   final String? address;
   final Location location;

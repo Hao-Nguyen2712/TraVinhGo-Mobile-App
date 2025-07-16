@@ -11,11 +11,14 @@ import 'package:travinhgo/screens/profile/profile_screen.dart';
 import 'package:travinhgo/screens/splash/splash_screen.dart';
 import 'package:travinhgo/utils/router_logger.dart';
 
+import '../Models/itinerary_plan/itinerary_plan.dart';
 import '../main.dart';
 import '../screens/destination/destination_detail_screen.dart';
 import '../screens/event_festival/event_fesftival_detail_screen.dart';
 import '../screens/favorite/favorite_screen.dart';
 import '../screens/feedback/feedback_form_screen.dart';
+import '../screens/itinerary_plan/itinerary_plan_detail_screen.dart';
+import '../screens/itinerary_plan/itinerary_plan_list_screen.dart';
 import '../screens/itinerary_plan/itinerary_plan_screen.dart';
 import '../screens/local_specialty/local_specialty_detail_screen.dart';
 import '../screens/ocop_product/ocop_product_detail_screen.dart';
@@ -203,6 +206,14 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/itinerary-plan-detail',
+        name: 'ItineraryPlanDetail',
+        builder: (context, state) {
+          final plan = state.extra as ItineraryPlan;
+          return ItineraryPlanDetailScreen(itineraryPlan: plan);
+        },
+      ),
+      GoRoute(
         path: '/event-festival-detail/:id',
         name: 'EventFestivalDetail',
         builder: (context, state) {
@@ -287,7 +298,7 @@ class AppRouter {
           GoRoute(
             path: '/events',
             name: 'events',
-            builder: (context, state) => const ItineraryPlanScreen(),
+            builder: (context, state) => const ItineraryPlanListScreen(),
           ),
           GoRoute(
             path: '/favorites',
