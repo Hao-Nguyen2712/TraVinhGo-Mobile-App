@@ -90,7 +90,9 @@ class OcopProductItem extends StatelessWidget {
                     maxLines: 2,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.primary,
                         fontSize: 16,
                         overflow: TextOverflow.ellipsis),
                   ),
@@ -128,7 +130,10 @@ class OcopProductItem extends StatelessWidget {
                         "Buy at",
                         style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).colorScheme.primary),
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(width: 4),
                       Image.asset(

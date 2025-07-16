@@ -41,7 +41,13 @@ class DescriptionFm extends StatelessWidget {
         Center(
           child: TextButton(
             onPressed: onToggle,
-            child: Text(isExpanded ? 'Less' : 'More'),
+            child: Text(
+              isExpanded ? 'Less' : 'More',
+              style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.primary),
+            ),
           ),
         ),
       ],

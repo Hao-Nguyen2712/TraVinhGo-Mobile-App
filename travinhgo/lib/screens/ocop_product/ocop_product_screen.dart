@@ -43,15 +43,15 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
     final isLoading = ocopProvider.isLoading;
     final error = ocopProvider.errorMessage;
     final filteredProducts = _filteredOcopProducts(ocopProducts);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
           child: CustomScrollView(slivers: [
         SliverAppBar(
           floating: true,
           snap: true,
-          backgroundColor: Colors.white,
           title: Text(AppLocalizations.of(context)!.ocopProduct),
           centerTitle: true,
           leading: IconButton(
@@ -95,7 +95,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: kSearchBackgroundColor,
+                      fillColor: colorScheme.surfaceVariant,
                     ),
                   );
                 },
@@ -109,7 +109,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                         width: MediaQuery.of(context).size.width * 0.9,
                         constraints: const BoxConstraints(maxHeight: 200),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: ListView.builder(
@@ -126,7 +126,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                                     horizontal: 12.0, vertical: 12.0),
                                 child: Text(
                                   option,
-                                  style: const TextStyle(fontSize: 16),
+                                  style: theme.textTheme.bodyLarge,
                                 ),
                               ),
                             );

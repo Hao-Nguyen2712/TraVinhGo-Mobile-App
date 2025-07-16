@@ -39,7 +39,11 @@ class DataFieldRow extends StatelessWidget {
                 child: Text(
                   value ?? 'N/A',
                   style: TextStyle(
-                      fontSize: 16, color: colorScheme.onSurfaceVariant),
+                    fontSize: 16,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : colorScheme.onSurfaceVariant,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
