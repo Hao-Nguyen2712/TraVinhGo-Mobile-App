@@ -9,6 +9,9 @@ class DataFieldRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       children: [
         Row(
@@ -16,7 +19,7 @@ class DataFieldRow extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
             ),
             const Spacer(),
             ConstrainedBox(
@@ -35,7 +38,8 @@ class DataFieldRow extends StatelessWidget {
                 },
                 child: Text(
                   value ?? 'N/A',
-                  style: const TextStyle(fontSize: 16),
+                  style: TextStyle(
+                      fontSize: 16, color: colorScheme.onSurfaceVariant),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
@@ -45,9 +49,9 @@ class DataFieldRow extends StatelessWidget {
           ],
         ),
         Divider(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
-          thickness: 0.4,
-          height: 10,
+          color: colorScheme.outline.withOpacity(0.2),
+          thickness: 1,
+          height: 12,
         ),
       ],
     );

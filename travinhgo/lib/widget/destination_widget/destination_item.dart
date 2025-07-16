@@ -22,6 +22,7 @@ class DestinationItem extends StatelessWidget {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     final favoriteProvider = FavoriteProvider.of(context);
     final interactionProvider = InteractionProvider.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -39,7 +40,9 @@ class DestinationItem extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: colorScheme.surface,
+                color: isDarkMode
+                    ? colorScheme.surfaceVariant
+                    : colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
                     color: colorScheme.shadow.withOpacity(0.1),
@@ -94,7 +97,7 @@ class DestinationItem extends StatelessWidget {
                     maxLines: 2,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
+                        color: isDarkMode ? Colors.white : colorScheme.primary,
                         fontSize: 16,
                         overflow: TextOverflow.ellipsis),
                   ),
@@ -105,7 +108,9 @@ class DestinationItem extends StatelessWidget {
                     children: [
                       Text(
                         destination.avarageRating.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 15),
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: isDarkMode ? Colors.white70 : null),
                       ),
                       const SizedBox(width: 5),
                       ...List.generate(5, (index) {
@@ -147,7 +152,9 @@ class DestinationItem extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           softWrap: true,
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: isDarkMode ? Colors.white70 : null),
                         ),
                       ),
                     ],

@@ -275,7 +275,14 @@ class AppRouter {
           GoRoute(
             path: '/map',
             name: 'map',
-            builder: (context, state) => const MapScreen(),
+            builder: (context, state) {
+              final double? lat =
+                  double.tryParse(state.uri.queryParameters['lat'] ?? '');
+              final double? lon =
+                  double.tryParse(state.uri.queryParameters['lon'] ?? '');
+              final String? name = state.uri.queryParameters['name'];
+              return MapScreen(latitude: lat, longitude: lon, name: name);
+            },
           ),
           GoRoute(
             path: '/events',

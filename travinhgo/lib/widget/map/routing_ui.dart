@@ -22,10 +22,12 @@ class LocationSelectionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: isDarkMode ? Color(0xFF2C2C2E) : colorScheme.surface,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
@@ -71,7 +73,9 @@ class LocationSelectionPanel extends StatelessWidget {
                 _buildRoutePoint(
                   context: context,
                   icon: Icons.location_on,
-                  iconColor: Theme.of(context).colorScheme.primary,
+                  iconColor: isDarkMode
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.primary,
                   title: AppLocalizations.of(context)!.departurePoint,
                   locationName: provider.departureName ?? "Không xác định",
                   locationAddress: provider.departureAddress,
@@ -156,9 +160,10 @@ class LocationSelectionPanel extends StatelessWidget {
       required VoidCallback onPressed,
       String? tooltip}) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: isDarkMode ? Color(0xFF3A3A3C) : colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -171,7 +176,7 @@ class LocationSelectionPanel extends StatelessWidget {
       child: IconButton(
         icon: Icon(icon, size: 22),
         onPressed: onPressed,
-        color: colorScheme.onSurfaceVariant,
+        color: isDarkMode ? Colors.white : colorScheme.onSurfaceVariant,
         tooltip: tooltip,
         padding: EdgeInsets.all(8),
         constraints: BoxConstraints(),
@@ -192,6 +197,7 @@ class LocationSelectionPanel extends StatelessWidget {
     bool isDeparture = false,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     // Determine if the text field should be shown
     final bool showTextField = isDeparture && provider.isShowingDepartureInput;
 
@@ -228,6 +234,7 @@ class LocationSelectionPanel extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: Colors.white,
                   ),
                 )
               :
@@ -240,16 +247,19 @@ class LocationSelectionPanel extends StatelessWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
+                          color: isDarkMode
+                              ? Colors.white70
+                              : colorScheme.onSurfaceVariant,
                           fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         locationName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          color: isDarkMode ? Colors.white : null,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -260,7 +270,9 @@ class LocationSelectionPanel extends StatelessWidget {
                           child: Text(
                             locationAddress,
                             style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
+                              color: isDarkMode
+                                  ? Colors.white70
+                                  : colorScheme.onSurfaceVariant,
                               fontSize: 14,
                             ),
                             maxLines: 2,
@@ -275,7 +287,10 @@ class LocationSelectionPanel extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Icon(Icons.edit,
-                color: colorScheme.onSurfaceVariant.withOpacity(0.7), size: 20),
+                color: isDarkMode
+                    ? Colors.white54
+                    : colorScheme.onSurfaceVariant.withOpacity(0.7),
+                size: 20),
           ),
       ],
     );
@@ -498,6 +513,7 @@ class _RoutingUIState extends State<RoutingUI> {
     TransportMode mode,
     IconData icon,
     String label,
+    bool isDarkMode,
   ) {
     bool isSelected = provider.selectedTransportMode == mode;
     final colorScheme = Theme.of(context).colorScheme;
@@ -517,7 +533,9 @@ class _RoutingUIState extends State<RoutingUI> {
           padding: EdgeInsets.symmetric(vertical: 4),
           decoration: BoxDecoration(
             color: isSelected
-                ? colorScheme.primary.withOpacity(0.1)
+                ? (isDarkMode
+                    ? colorScheme.primary.withOpacity(0.3)
+                    : colorScheme.primary.withOpacity(0.1))
                 : Colors.transparent,
             border: Border(
               bottom: BorderSide(
@@ -532,7 +550,9 @@ class _RoutingUIState extends State<RoutingUI> {
                 icon,
                 color: isSelected
                     ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
+                    : (isDarkMode
+                        ? Colors.white70
+                        : colorScheme.onSurfaceVariant),
                 size: 28,
               ),
               SizedBox(height: 4),
@@ -540,8 +560,10 @@ class _RoutingUIState extends State<RoutingUI> {
                 displayText,
                 style: TextStyle(
                   color: isSelected
-                      ? colorScheme.onSurface
-                      : colorScheme.onSurfaceVariant,
+                      ? (isDarkMode ? Colors.white : colorScheme.onSurface)
+                      : (isDarkMode
+                          ? Colors.white70
+                          : colorScheme.onSurfaceVariant),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   fontSize: 14,
                 ),
@@ -557,6 +579,7 @@ class _RoutingUIState extends State<RoutingUI> {
   Widget build(BuildContext context) {
     return Consumer<MapProvider>(
       builder: (context, provider, _) {
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
         if (!provider.isRoutingMode) {
           return SizedBox.shrink();
         }
@@ -592,8 +615,8 @@ class _RoutingUIState extends State<RoutingUI> {
                   topLeft: Radius.circular(24.0),
                   topRight: Radius.circular(24.0),
                 ),
-                panel: _buildDraggablePanel(provider),
-                collapsed: _buildCollapsedPanel(provider),
+                panel: _buildDraggablePanel(provider, isDarkMode),
+                collapsed: _buildCollapsedPanel(provider, isDarkMode),
                 body: Container(), // The underlying map is the body
               ),
 
@@ -669,10 +692,12 @@ class _RoutingUIState extends State<RoutingUI> {
   }
 
   /// Builds the part of the panel that is always visible (collapsed state)
-  Widget _buildCollapsedPanel(MapProvider provider) {
+  Widget _buildCollapsedPanel(MapProvider provider, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: isDarkMode
+            ? Color(0xFF2C2C2E)
+            : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.0),
           topRight: Radius.circular(24.0),
@@ -686,10 +711,12 @@ class _RoutingUIState extends State<RoutingUI> {
             height: 4,
             margin: const EdgeInsets.symmetric(vertical: 6.0),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurfaceVariant
-                  .withOpacity(0.5),
+              color: isDarkMode
+                  ? Colors.white54
+                  : Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withOpacity(0.5),
               borderRadius: BorderRadius.circular(12.0),
             ),
           ),
@@ -697,21 +724,23 @@ class _RoutingUIState extends State<RoutingUI> {
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
-            child: _buildRouteSummary(provider),
+            child: _buildRouteSummary(provider, isDarkMode),
           ),
           SizedBox(height: 8),
           // Transport mode tabs
-          _buildTransportModeTabs(provider),
+          _buildTransportModeTabs(provider, isDarkMode),
         ],
       ),
     );
   }
 
   /// Builds the main draggable panel content
-  Widget _buildDraggablePanel(MapProvider provider) {
+  Widget _buildDraggablePanel(MapProvider provider, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: isDarkMode
+            ? Color(0xFF2C2C2E)
+            : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.0),
           topRight: Radius.circular(24.0),
@@ -725,10 +754,12 @@ class _RoutingUIState extends State<RoutingUI> {
             height: 4,
             margin: const EdgeInsets.symmetric(vertical: 6.0),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurfaceVariant
-                  .withOpacity(0.5),
+              color: isDarkMode
+                  ? Colors.white54
+                  : Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withOpacity(0.5),
               borderRadius: BorderRadius.circular(12.0),
             ),
           ),
@@ -736,11 +767,11 @@ class _RoutingUIState extends State<RoutingUI> {
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
-            child: _buildRouteSummary(provider),
+            child: _buildRouteSummary(provider, isDarkMode),
           ),
           SizedBox(height: 8),
           // Transport mode tabs
-          _buildTransportModeTabs(provider),
+          _buildTransportModeTabs(provider, isDarkMode),
           // Route details
           Expanded(
             child: SingleChildScrollView(
@@ -749,9 +780,9 @@ class _RoutingUIState extends State<RoutingUI> {
                 child: Column(
                   children: [
                     SizedBox(height: 16),
-                    _buildRoutePointsInfo(provider),
+                    _buildRoutePointsInfo(provider, isDarkMode),
                     SizedBox(height: 16),
-                    _buildActionButtons(provider),
+                    _buildActionButtons(provider, isDarkMode),
                   ],
                 ),
               ),
@@ -763,38 +794,43 @@ class _RoutingUIState extends State<RoutingUI> {
   }
 
   /// Transport mode tabs
-  Widget _buildTransportModeTabs(MapProvider provider) {
+  Widget _buildTransportModeTabs(MapProvider provider, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 2.0),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              color: isDarkMode
+                  ? Colors.white24
+                  : Theme.of(context).colorScheme.outline.withOpacity(0.2),
               width: 1),
         ),
       ),
       child: Row(
         children: [
           _buildTransportTab(context, provider, TransportMode.car,
-              Icons.directions_car, "Car"),
+              Icons.directions_car, "Car", isDarkMode),
           _buildTransportTab(context, provider, TransportMode.motorcycle,
-              Icons.motorcycle, "Motorcycle"),
+              Icons.motorcycle, "Motorcycle", isDarkMode),
           _buildTransportTab(context, provider, TransportMode.pedestrian,
-              Icons.directions_walk, "Walk"),
+              Icons.directions_walk, "Walk", isDarkMode),
         ],
       ),
     );
   }
 
   /// Route summary (time and distance)
-  Widget _buildRouteSummary(MapProvider provider) {
+  Widget _buildRouteSummary(MapProvider provider, bool isDarkMode) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
+        color: isDarkMode ? Color(0xFF3A3A3C) : colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
+        border: Border.all(
+            color: isDarkMode
+                ? Colors.transparent
+                : colorScheme.outline.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -802,20 +838,22 @@ class _RoutingUIState extends State<RoutingUI> {
           // Time and arrival
           Row(
             children: [
-              Icon(Icons.access_time, color: colorScheme.primary),
+              Icon(Icons.access_time,
+                  color: isDarkMode ? Colors.white : colorScheme.primary),
               SizedBox(width: 8),
               Text(
                 "${MapUiUtils.formatDuration(provider.routeDurationInSeconds!)}",
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : null),
               ),
               const Spacer(),
               Text(
                 MapUiUtils.getEstimatedArrivalTime(
-                    provider.routeDurationInSeconds!,
-                    AppLocalizations.of(context)!),
+                    provider.routeDurationInSeconds!, context),
                 style: TextStyle(
-                    color: colorScheme.primary,
+                    color: isDarkMode ? Colors.white70 : colorScheme.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16),
               ),
@@ -825,12 +863,14 @@ class _RoutingUIState extends State<RoutingUI> {
           // Distance and route info
           Row(
             children: [
-              Icon(Icons.straighten, color: colorScheme.secondary, size: 20),
+              Icon(Icons.straighten,
+                  color: isDarkMode ? Colors.white70 : colorScheme.secondary,
+                  size: 20),
               SizedBox(width: 8),
               Text(
                 MapUiUtils.formatDistance(provider.routeLengthInMeters!),
                 style: TextStyle(
-                    color: colorScheme.onSurface,
+                    color: isDarkMode ? Colors.white : colorScheme.onSurface,
                     fontWeight: FontWeight.w500,
                     fontSize: 16),
               ),
@@ -838,18 +878,25 @@ class _RoutingUIState extends State<RoutingUI> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: colorScheme.secondaryContainer,
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.bolt,
-                        color: colorScheme.onSecondaryContainer, size: 16),
+                        color: isDarkMode
+                            ? Colors.white
+                            : colorScheme.onSecondaryContainer,
+                        size: 16),
                     SizedBox(width: 4),
                     Text(
                       "Đường nhanh nhất",
                       style: TextStyle(
-                          color: colorScheme.onSecondaryContainer,
+                          color: isDarkMode
+                              ? Colors.white
+                              : colorScheme.onSecondaryContainer,
                           fontSize: 12,
                           fontWeight: FontWeight.bold),
                     ),
@@ -864,14 +911,17 @@ class _RoutingUIState extends State<RoutingUI> {
   }
 
   /// From/To location info
-  Widget _buildRoutePointsInfo(MapProvider provider) {
+  Widget _buildRoutePointsInfo(MapProvider provider, bool isDarkMode) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
+        color: isDarkMode ? Color(0xFF3A3A3C) : colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
+        border: Border.all(
+            color: isDarkMode
+                ? Colors.transparent
+                : colorScheme.outline.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -889,7 +939,9 @@ class _RoutingUIState extends State<RoutingUI> {
               Expanded(
                 child: Text(
                   provider.departureName ?? "Trung tâm Trà Vinh",
-                  style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: isDarkMode ? Colors.white : colorScheme.onSurface),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -901,7 +953,9 @@ class _RoutingUIState extends State<RoutingUI> {
             margin: EdgeInsets.only(left: 4),
             height: 20,
             width: 1,
-            color: colorScheme.outline.withOpacity(0.5),
+            color: isDarkMode
+                ? Colors.white30
+                : colorScheme.outline.withOpacity(0.5),
           ),
           // To location
           Row(
@@ -919,7 +973,7 @@ class _RoutingUIState extends State<RoutingUI> {
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface),
+                      color: isDarkMode ? Colors.white : colorScheme.onSurface),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -932,7 +986,7 @@ class _RoutingUIState extends State<RoutingUI> {
   }
 
   /// Action buttons (start, save, etc.)
-  Widget _buildActionButtons(MapProvider provider) {
+  Widget _buildActionButtons(MapProvider provider, bool isDarkMode) {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -941,7 +995,9 @@ class _RoutingUIState extends State<RoutingUI> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: colorScheme.primary.withOpacity(0.1),
+            color: isDarkMode
+                ? Colors.white.withOpacity(0.1)
+                : colorScheme.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -949,7 +1005,7 @@ class _RoutingUIState extends State<RoutingUI> {
               Icon(
                   MapUiUtils.getTransportModeIcon(
                       provider.selectedTransportMode),
-                  color: colorScheme.primary,
+                  color: isDarkMode ? Colors.white : colorScheme.primary,
                   size: 20),
               SizedBox(width: 6),
               Text(
@@ -958,7 +1014,7 @@ class _RoutingUIState extends State<RoutingUI> {
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.primary),
+                    color: isDarkMode ? Colors.white : colorScheme.primary),
               ),
             ],
           ),
@@ -968,8 +1024,10 @@ class _RoutingUIState extends State<RoutingUI> {
         ElevatedButton(
           onPressed: () {/* Start navigation - future implementation */},
           style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
+            backgroundColor: isDarkMode
+                ? colorScheme.primary.withOpacity(0.8)
+                : colorScheme.primary,
+            foregroundColor: isDarkMode ? Colors.black : colorScheme.onPrimary,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
@@ -989,9 +1047,12 @@ class _RoutingUIState extends State<RoutingUI> {
         // Save button
         IconButton(
           onPressed: () {/* Save route - future implementation */},
-          icon: Icon(Icons.bookmark_border, color: colorScheme.secondary),
+          icon: Icon(Icons.bookmark_border,
+              color: isDarkMode ? Colors.white70 : colorScheme.secondary),
           style: IconButton.styleFrom(
-            backgroundColor: colorScheme.secondary.withOpacity(0.1),
+            backgroundColor: isDarkMode
+                ? Colors.white.withOpacity(0.1)
+                : colorScheme.secondary.withOpacity(0.1),
             shape: CircleBorder(),
           ),
           tooltip: "Lưu",

@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import '../../providers/map_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-/// Error view displayed when map fails to load
+/// A widget to display an error message when the map fails to load.
 class ErrorView extends StatelessWidget {
-  const ErrorView({Key? key}) : super(key: key);
+  final String message;
+  const ErrorView({Key? key, required this.message}) : super(key: key);
 
   /// Shows debug information in case of errors
   void _showDebugInfo(BuildContext context, MapProvider provider) {
@@ -29,34 +30,33 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of(context, listen: false);
-    final l10n = AppLocalizations.of(context)!;
-
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.mapLoadFailed(provider.errorMessage ?? 'Unknown error'),
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
+    return Container(
+      color: Theme.of(context).colorScheme.errorContainer,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.onErrorContainer,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onErrorContainer
+                      .withOpacity(0.8),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              provider.errorMessage = null;
-              provider.isLoading = true;
-              // Simply notify listeners to trigger UI refresh
-              provider.notifyListeners();
-            },
-            child: Text(l10n.tryAgain),
-          ),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: () => _showDebugInfo(context, provider),
-            child: Text(l10n.showDebugInfo),
-          ),
-        ],
+        ),
       ),
     );
   }

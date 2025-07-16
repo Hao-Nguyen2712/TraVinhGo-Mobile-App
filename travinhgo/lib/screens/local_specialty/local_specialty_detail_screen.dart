@@ -111,7 +111,6 @@ class _LocalSpecialtyDetailScreenState
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -158,7 +157,7 @@ class _LocalSpecialtyDetailScreenState
                                       height: 40,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Colors.grey.withOpacity(0.5),
+                                        color: Colors.black.withOpacity(0.3),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(4.0),
@@ -176,7 +175,7 @@ class _LocalSpecialtyDetailScreenState
                                     height: 40,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.grey.withOpacity(0.5),
+                                      color: Colors.black.withOpacity(0.3),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.all(2.0),
@@ -211,8 +210,13 @@ class _LocalSpecialtyDetailScreenState
                                           borderRadius:
                                               BorderRadius.circular(10),
                                           color: currentImage == index
-                                              ? Colors.white
-                                              : Colors.grey,
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.3),
                                         ),
                                       )),
                             ),
@@ -230,7 +234,7 @@ class _LocalSpecialtyDetailScreenState
                                         .isExist(localSpecialtyDetail.id)
                                     ? Icons.favorite
                                     : Icons.favorite_border,
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                                 size: 40,
                               ),
                             ),
@@ -270,10 +274,14 @@ class _LocalSpecialtyDetailScreenState
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   localSpecialtyDetail.foodName,
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                      color: kprimaryColor),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
                                 )),
                             const SizedBox(
                               height: 8,
@@ -289,8 +297,11 @@ class _LocalSpecialtyDetailScreenState
                                 child: Text(
                                   AppLocalizations.of(context)!
                                       .sellingLocations,
-                                  style: const TextStyle(
-                                      fontSize: 24, color: kprimaryColor),
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
                                 )),
                           ],
                         ),

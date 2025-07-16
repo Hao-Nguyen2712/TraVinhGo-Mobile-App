@@ -5,6 +5,8 @@ import 'package:here_sdk/search.dart';
 import 'dart:developer' as developer;
 import 'dart:async';
 
+import '../../models/marker/marker_type.dart';
+import '../destination_provider.dart';
 import 'base_map_provider.dart';
 import 'marker_map_provider.dart';
 import 'boundary_map_provider.dart';
@@ -18,6 +20,7 @@ class CategoryType {
   final String iconAsset; // Path to the icon asset for category buttons
   final String? selectedIconAsset;
   final bool isTintable;
+  final bool isDestinationType;
 
   const CategoryType({
     required this.name,
@@ -26,6 +29,7 @@ class CategoryType {
     required this.iconAsset,
     this.selectedIconAsset,
     this.isTintable = false,
+    this.isDestinationType = false,
   });
 }
 
@@ -68,7 +72,7 @@ class CategoryMapProvider {
   HereMapController? get mapController => baseMapProvider.mapController;
 
   // Available category types with mapping between display name, PlaceCategory ID, and marker asset
-  final List<CategoryType> availableCategories = [
+  List<CategoryType> availableCategories = [
     CategoryType(
       name: "All",
       categoryId: "", // Empty for "All" category
@@ -163,6 +167,44 @@ class CategoryMapProvider {
         boundaryProvider ?? BoundaryMapProvider(baseMapProvider);
   }
 
+  /// Build the list of categories by combining hardcoded and dynamic destination types
+  Future<void> buildCategories(DestinationProvider destinationProvider) async {
+    // Fetch all destination data (including types and markers)
+    await destinationProvider.fetchAllDestinations();
+
+    // Create CategoryType objects from destination types
+    final destinationTypeCategories =
+        destinationProvider.destinationTypes.map((dt) {
+      // Use the markerId from the destination type to determine the marker type
+      final markerType = MarkerType.fromMarkerId(dt.markerId);
+      // Get the asset path from the MarkerType enum
+      final iconAsset = markerType.getAccessPath();
+
+      return CategoryType(
+        name: dt.name,
+        categoryId: dt.id,
+        markerAsset: iconAsset,
+        iconAsset: iconAsset,
+        isDestinationType: true,
+      );
+    }).toList();
+
+    // Get the original hardcoded categories
+    final originalCategories = availableCategories.toList();
+
+    // Create the new dynamic list
+    availableCategories = [
+      originalCategories[0], // "All"
+      originalCategories[1], // "OCOP"
+      ...destinationTypeCategories, // Add destination types
+      ...originalCategories.sublist(2) // Add remaining hardcoded POIs
+    ];
+
+    developer.log(
+        'Built dynamic category list with ${availableCategories.length} total categories.',
+        name: 'CategoryMapProvider');
+  }
+
   /// Initialize the search engine for category searches
   void initializeSearchEngine() {
     try {
@@ -200,7 +242,9 @@ class CategoryMapProvider {
     if (index < 0 || index >= availableCategories.length) {
       return false;
     }
-    return availableCategories[index].isTintable;
+    // Also consider destination types to be tintable
+    return availableCategories[index].isTintable ||
+        availableCategories[index].isDestinationType;
   }
 
   /// Preload all category search results for caching
@@ -385,8 +429,9 @@ class CategoryMapProvider {
   void displayAllCategories() {
     // Skip the first category which is "All"
     for (int i = 1; i < availableCategories.length; i++) {
+      final category = availableCategories[i];
       // Special handling for OCOP products
-      if (availableCategories[i].categoryId == "ocop_products") {
+      if (category.categoryId == "ocop_products") {
         if (onOcopCategorySelected != null) {
           developer.log('Showing OCOP products as part of All categories',
               name: 'CategoryMapProvider');
@@ -396,7 +441,7 @@ class CategoryMapProvider {
       }
 
       // Handle other regular categories
-      displayCategoryPlaces(availableCategories[i], isFromAllCategories: true);
+      displayCategoryPlaces(category, isFromAllCategories: true);
     }
   }
 
