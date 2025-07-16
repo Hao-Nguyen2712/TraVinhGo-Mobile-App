@@ -110,6 +110,7 @@ flutter:
       - .env
       - assets/geo/travinh.json
       - assets/geo/vietnam-provinces.json
+      - assets/images/home/
 
  
   fonts:

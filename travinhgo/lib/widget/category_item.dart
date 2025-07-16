@@ -17,7 +17,7 @@ class CategoryItem extends StatelessWidget {
   const CategoryItem({
     super.key,
     required this.iconName,
-    required this.color,
+    this.color = Colors.transparent,
     required this.title,
     required this.index,
   });
@@ -51,9 +51,9 @@ class CategoryItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: const EdgeInsets.all(0.0),
               child: Image.asset(
-                "assets/images/navigations/$iconName.png",
+                "assets/images/home/$iconName.png",
                 fit: BoxFit.contain,
               ),
             ),
@@ -64,8 +64,8 @@ class CategoryItem extends StatelessWidget {
             child: Text(
               title,
               style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,

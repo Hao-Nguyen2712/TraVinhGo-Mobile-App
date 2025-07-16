@@ -101,6 +101,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
     final favoriteProvider = FavoriteProvider.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
     void _toggleExpanded() {
       setState(() {
         _isExpanded = !_isExpanded;
@@ -269,14 +272,12 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 child: Text(
                                   StringHelper.toTitleCase(
                                       ocopProductDetail.productName),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
+                                  style: theme.textTheme.headlineSmall
                                       ?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary),
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : colorScheme.primary),
                                 )),
                             const SizedBox(
                               height: 8,
@@ -289,7 +290,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 onToggle: _toggleExpanded,
                               ),
                             Divider(
-                              color: Theme.of(context).dividerColor,
+                              color: theme.dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),
@@ -309,9 +310,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         ocopProductDetail.company.name),
                                     style: TextStyle(
                                         fontSize: 18,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary),
+                                        color: colorScheme.primary),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -319,7 +318,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               ],
                             ),
                             Divider(
-                              color: Theme.of(context).dividerColor,
+                              color: theme.dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),
@@ -338,9 +337,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                             ocopProductDetail.productPrice),
                                         style: TextStyle(
                                             fontSize: 18,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onBackground,
+                                            color: colorScheme.onBackground,
                                             fontWeight: FontWeight.w800),
                                       ),
                                       TextSpan(
@@ -348,9 +345,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                             .currencyVnd,
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onBackground,
+                                          color: colorScheme.onBackground,
                                         ),
                                       ),
                                     ],
@@ -359,7 +354,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               ],
                             ),
                             Divider(
-                              color: Theme.of(context).dividerColor,
+                              color: theme.dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),
@@ -374,7 +369,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               ],
                             ),
                             Divider(
-                              color: Theme.of(context).dividerColor,
+                              color: theme.dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),
