@@ -25,6 +25,7 @@ class MarkerMapProvider {
   static const String MARKER_TYPE_CATEGORY = "category";
   static const String MARKER_TYPE_DEPARTURE = "departure";
   static const String MARKER_TYPE_ROUTE_DESTINATION = "route_destination";
+  static const String MARKER_TYPE_TOURIST_DESTINATION = "tourist_destination";
 
   // Marker collections
   final List<MapMarker> destinationMarkers = [];
@@ -79,7 +80,7 @@ class MarkerMapProvider {
           customMarkers.add(mapMarker);
           currentCustomMarker = mapMarker;
           break;
-        case MARKER_TYPE_DESTINATION:
+        case MARKER_TYPE_TOURIST_DESTINATION:
           destinationMarkers.add(mapMarker);
           break;
         case MARKER_TYPE_CATEGORY:
@@ -129,6 +130,7 @@ class MarkerMapProvider {
         case MARKER_TYPE_CATEGORY:
         case MARKER_TYPE_DEPARTURE:
         case MARKER_TYPE_ROUTE_DESTINATION:
+        case MARKER_TYPE_TOURIST_DESTINATION:
         default:
           assetPath = 'assets/images/markers/marker.png';
           break;
@@ -239,6 +241,8 @@ class MarkerMapProvider {
       // Store marker reference based on type
       if (markerType == MARKER_TYPE_CATEGORY) {
         categoryMarkers.add(mapMarker);
+      } else if (markerType == MARKER_TYPE_TOURIST_DESTINATION) {
+        destinationMarkers.add(mapMarker);
       }
 
       // Log the coordinates where marker was placed
@@ -342,6 +346,12 @@ class MarkerMapProvider {
             routeDestinationMarker = null;
           }
           break;
+        case MARKER_TYPE_TOURIST_DESTINATION:
+          for (var marker in destinationMarkers) {
+            mapController!.mapScene.removeMapMarker(marker);
+          }
+          destinationMarkers.clear();
+          break;
       }
     }
   }
@@ -426,7 +436,8 @@ class MarkerMapProvider {
       MARKER_TYPE_CUSTOM,
       MARKER_TYPE_CATEGORY,
       MARKER_TYPE_DEPARTURE,
-      MARKER_TYPE_ROUTE_DESTINATION
+      MARKER_TYPE_ROUTE_DESTINATION,
+      MARKER_TYPE_TOURIST_DESTINATION
     ]);
 
     developer.log('All marker resources have been cleaned up',

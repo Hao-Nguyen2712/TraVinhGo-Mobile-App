@@ -85,7 +85,6 @@ class _EventFesftivalDetailScreenState
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -116,7 +115,7 @@ class _EventFesftivalDetailScreenState
                                     end: Alignment.bottomCenter,
                                     colors: [
                                       Colors.transparent,
-                                      Colors.white.withOpacity(1),
+                                      Theme.of(context).scaffoldBackgroundColor,
                                     ],
                                   ),
                                 ),
@@ -138,7 +137,7 @@ class _EventFesftivalDetailScreenState
                                         height: 40,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: Colors.grey.withOpacity(0.5),
+                                          color: Colors.black.withOpacity(0.3),
                                         ),
                                         child: Padding(
                                           padding: const EdgeInsets.all(4.0),
@@ -156,7 +155,7 @@ class _EventFesftivalDetailScreenState
                                       height: 40,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Colors.grey.withOpacity(0.5),
+                                        color: Colors.black.withOpacity(0.3),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(2.0),
@@ -192,7 +191,9 @@ class _EventFesftivalDetailScreenState
                                   style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.w900,
-                                      color: kprimaryColor),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
                                 )),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -248,17 +249,21 @@ class _EventFesftivalDetailScreenState
                                       ),
                                     ),
                                     side: BorderSide(
-                                        color: Colors.grey.withOpacity(0.3)),
+                                        color: Theme.of(context).dividerColor),
                                     backgroundColor: this.currentIndexTab == 0
-                                        ? kprimaryColor
-                                        : Colors.white,
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.surface,
                                   ),
                                   child: Text(
                                     AppLocalizations.of(context)!.information,
                                     style: TextStyle(
                                         color: this.currentIndexTab == 0
-                                            ? Colors.white
-                                            : kprimaryColor,
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .primary,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w900),
                                   ),
@@ -279,17 +284,21 @@ class _EventFesftivalDetailScreenState
                                       ),
                                     ),
                                     side: BorderSide(
-                                        color: Colors.grey.withOpacity(0.3)),
+                                        color: Theme.of(context).dividerColor),
                                     backgroundColor: this.currentIndexTab == 1
-                                        ? kprimaryColor
-                                        : Colors.white,
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.surface,
                                   ),
                                   child: Text(
                                     AppLocalizations.of(context)!.content,
                                     style: TextStyle(
                                         color: this.currentIndexTab == 1
-                                            ? Colors.white
-                                            : kprimaryColor,
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .primary,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w900),
                                   ),
@@ -310,17 +319,21 @@ class _EventFesftivalDetailScreenState
                                       ),
                                     ),
                                     side: BorderSide(
-                                        color: Colors.grey.withOpacity(0.3)),
+                                        color: Theme.of(context).dividerColor),
                                     backgroundColor: this.currentIndexTab == 2
-                                        ? kprimaryColor
-                                        : Colors.white,
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.surface,
                                   ),
                                   child: Text(
                                     AppLocalizations.of(context)!.pictures,
                                     style: TextStyle(
                                         color: this.currentIndexTab == 2
-                                            ? Colors.white
-                                            : kprimaryColor,
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .primary,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w900),
                                   ),
@@ -332,7 +345,7 @@ class _EventFesftivalDetailScreenState
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Container(
                                 margin: const EdgeInsets.only(top: 3),
-                                color: Colors.grey.withOpacity(0.3),
+                                color: Theme.of(context).dividerColor,
                                 height: 1.3),
                           ),
                         ],

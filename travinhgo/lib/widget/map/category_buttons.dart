@@ -47,6 +47,10 @@ class CategoryButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<MapProvider>(
       builder: (context, provider, child) {
+        // Get theme to determine dark mode
+        final theme = Theme.of(context);
+        final isDarkMode = theme.brightness == Brightness.dark;
+
         // Get selected category index and category list
         final selectedIndex = provider.selectedCategoryIndex;
         final categoryList = provider.categories;
@@ -78,25 +82,23 @@ class CategoryButtons extends StatelessWidget {
                       localizedName,
                       style: TextStyle(
                         fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.w500,
+                            isSelected ? FontWeight.w800 : FontWeight.w500,
                         color: isSelected
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurface,
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface,
                         fontSize: 14,
                       ),
                     ),
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    selectedColor: Theme.of(context).colorScheme.primary,
-                    checkmarkColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.surface,
                     selected: isSelected,
                     showCheckmark: false,
                     avatar: Image.asset(
                       provider.getCategoryIconForState(index, isSelected),
                       width: 20,
                       height: 20,
-                      color: isSelected && provider.isCategoryTintable(index)
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : null,
+                      color: null,
                     ),
                     onSelected: (selected) {
                       provider.updateSelectedCategory(index);
@@ -109,7 +111,7 @@ class CategoryButtons extends StatelessWidget {
                                 .colorScheme
                                 .outline
                                 .withOpacity(0.5),
-                        width: 1,
+                        width: isSelected ? 0 : 1,
                       ),
                     ),
                   ),

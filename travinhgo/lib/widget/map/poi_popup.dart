@@ -35,6 +35,7 @@ class PoiPopup extends StatelessWidget {
     final bool isOcop = metadata?.getString("is_ocop_product") == "true";
     final String? ocopProductId = metadata?.getString("product_id");
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Positioned(
       bottom: 20,
@@ -48,6 +49,8 @@ class PoiPopup extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
+            color:
+                isDarkMode ? colorScheme.surfaceVariant : colorScheme.surface,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
               child: Column(
@@ -108,43 +111,58 @@ class PoiPopup extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Action Buttons
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                  IntrinsicHeight(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        _buildActionButton(context, Icons.directions,
-                            AppLocalizations.of(context)!.direct, true, () {
-                          if (mapProvider.lastPoiCoordinates != null) {
-                            mapProvider.startRouting(
-                              mapProvider.lastPoiCoordinates!,
-                              name,
-                            );
-                            mapProvider.closePoiPopup();
-                          }
-                        }),
+                        Expanded(
+                          child: _buildActionButton(
+                            context,
+                            Icons.directions,
+                            AppLocalizations.of(context)!.direct,
+                            false,
+                            () {
+                              if (mapProvider.lastPoiCoordinates != null) {
+                                mapProvider.startRouting(
+                                  mapProvider.lastPoiCoordinates!,
+                                  name,
+                                );
+                                mapProvider.closePoiPopup();
+                              }
+                            },
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        _buildActionButton(context, Icons.play_arrow,
-                            AppLocalizations.of(context)!.start, false, () {
-                          // Could be used for turn-by-turn navigation start
-                        }),
+                        Expanded(
+                          child: _buildActionButton(
+                            context,
+                            Icons.info_outline,
+                            AppLocalizations.of(context)!.detail,
+                            false,
+                            () {
+                              if (isOcop && ocopProductId != null) {
+                                GoRouter.of(context).push(
+                                    '/ocop-product-detail/$ocopProductId');
+                                mapProvider.closePoiPopup();
+                              }
+                              // Handle other detail navigations if needed
+                            },
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        _buildActionButton(context, Icons.info_outline,
-                            AppLocalizations.of(context)!.detail, false, () {
-                          if (isOcop && ocopProductId != null) {
-                            GoRouter.of(context)
-                                .push('/ocop-product-detail/$ocopProductId');
-                            mapProvider.closePoiPopup();
-                          }
-                          // Handle other detail navigations if needed
-                        }),
-                        const SizedBox(width: 8),
-                        _buildActionButton(context, Icons.share,
-                            AppLocalizations.of(context)!.share, false, () {
-                          final textToShare = AppLocalizations.of(context)!
-                              .shareText(name, address);
-                          Share.share(textToShare);
-                        }),
+                        Expanded(
+                          child: _buildActionButton(
+                            context,
+                            Icons.share,
+                            AppLocalizations.of(context)!.share,
+                            false,
+                            () {
+                              final textToShare = AppLocalizations.of(context)!
+                                  .shareText(name, address);
+                              Share.share(textToShare);
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -191,6 +209,11 @@ class PoiPopup extends StatelessWidget {
 
                   const SizedBox(height: 16),
                   _buildInfoRow(context, Icons.location_on_outlined, address),
+                  _buildInfoRow(context, Icons.map_outlined,
+                      '${mapProvider.lastPoiCoordinates!.latitude.toStringAsFixed(5)}, ${mapProvider.lastPoiCoordinates!.longitude.toStringAsFixed(5)}'),
+                  if (mapProvider.lastPoiCategory != null)
+                    _buildInfoRow(context, Icons.category_outlined,
+                        mapProvider.lastPoiCategory!),
                 ],
               ),
             ),
@@ -201,11 +224,11 @@ class PoiPopup extends StatelessWidget {
             right: 8,
             child: Container(
               decoration: BoxDecoration(
-                color: colorScheme.scrim,
+                color: colorScheme.surface.withOpacity(0.8),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.close, color: colorScheme.onInverseSurface),
+                icon: Icon(Icons.close, color: colorScheme.onSurface),
                 iconSize: 20,
                 onPressed: () => mapProvider.closePoiPopup(),
                 splashRadius: 20,
@@ -221,20 +244,23 @@ class PoiPopup extends StatelessWidget {
 
   Widget _buildActionButton(BuildContext context, IconData icon, String label,
       bool isPrimary, VoidCallback onPressed) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final backgroundColor =
-        isPrimary ? colorScheme.primary : colorScheme.secondaryContainer;
-    final foregroundColor =
-        isPrimary ? colorScheme.onPrimary : colorScheme.onSecondaryContainer;
-
-    return ActionChip(
-      avatar: Icon(icon, color: foregroundColor, size: 20),
+    return FilledButton.icon(
+      icon: Icon(icon, size: 18),
       label: Text(label),
       onPressed: onPressed,
-      backgroundColor: backgroundColor,
-      labelStyle:
-          TextStyle(color: foregroundColor, fontWeight: FontWeight.bold),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      style: FilledButton.styleFrom(
+        foregroundColor: isPrimary
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.onSecondaryContainer,
+        backgroundColor: isPrimary
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.secondaryContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+      ),
     );
   }
 
@@ -250,7 +276,10 @@ class PoiPopup extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: colorScheme.onSurface, fontSize: 14),
+              style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600),
             ),
           ),
         ],

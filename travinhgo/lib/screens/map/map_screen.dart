@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:developer' as developer;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import '../../Models/Maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
@@ -24,13 +25,19 @@ import '../../widget/map/routing_ui.dart';
 
 /// Map Screen that displays HERE maps with POIs and user location
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+  final double? latitude;
+  final double? longitude;
+  final String? name;
+
+  const MapScreen({Key? key, this.latitude, this.longitude, this.name})
+      : super(key: key);
 
   @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
+  final PanelController _panelController = PanelController();
   // PageController for the destination carousel
   final PageController _pageController = PageController(viewportFraction: 0.85);
 
@@ -57,9 +64,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Initialize the provider after widget is built
+    _mapProvider = Provider.of<MapProvider>(context, listen: false);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _mapProvider = Provider.of<MapProvider>(context, listen: false);
       // SDK is already initialized in main.dart, no need to initialize again
       _mapProvider.loadTopDestinations();
     });
@@ -222,26 +229,17 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   /// Called when the map is created
-  void _onMapCreated(HereMapController hereMapController) {
-    try {
-      developer.log('Map controller created successfully', name: 'MapScreen');
-      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-      _mapProvider.initMapScene(hereMapController, isDarkMode);
-
-      // Set up tap listener for map interactions
-      hereMapController.gestures.tapListener =
-          TapListener((Point2D touchPoint) {
-        var geoCoords = hereMapController.viewToGeoCoordinates(touchPoint);
-        if (geoCoords != null) {
-          // Let the map provider handle all tap interactions
-          _mapProvider.handleMapTap(touchPoint, geoCoords);
-        }
-      });
-    } catch (e) {
-      developer.log('Error initializing map scene: $e', name: 'MapScreen');
-      _mapProvider.errorMessage = "Map initialization failed: ${e.toString()}";
-      _mapProvider.isLoading = false;
-      _mapProvider.notifyListeners();
+  void _onMapCreated(HereMapController controller) {
+    _mapProvider.initMapScene(
+      controller,
+      Theme.of(context).brightness == Brightness.dark,
+    );
+    // Start routing if coordinates are provided
+    if (widget.latitude != null && widget.longitude != null) {
+      final name = widget.name ??
+          '${widget.latitude!.toStringAsFixed(5)}, ${widget.longitude!.toStringAsFixed(5)}';
+      _mapProvider.startRouting(
+          GeoCoordinates(widget.latitude!, widget.longitude!), name);
     }
   }
 
@@ -310,45 +308,32 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MapProvider>(
-      builder: (context, provider, child) {
-        _mapProvider = provider;
-        return Scaffold(
-          key: provider.scaffoldMessengerKey,
-          body: Stack(
+    return Scaffold(
+      key: _mapProvider.scaffoldMessengerKey,
+      body: Consumer<MapProvider>(
+        builder: (context, provider, child) {
+          return Stack(
             children: [
-              // Map view
-              provider.errorMessage != null
-                  ? const ErrorView()
-                  : provider.isLoading && provider.mapController == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : HereMap(onMapCreated: _onMapCreated),
-
-              // Category buttons - only show when not in routing mode
-              if (!provider.isRoutingMode) const CategoryButtons(),
-
-              // Location button
-              const LocationButton(),
-
-              // Loading indicator
-              if (provider.isLoading && provider.mapController != null)
+              HereMap(onMapCreated: _onMapCreated),
+              if (provider.isLoading)
                 const Center(child: CircularProgressIndicator()),
-
-              // Conditionally show either POI info, favorite destinations, or hide both during routing
-              if (!provider.isRoutingMode)
-                provider.showPoiPopup
-                    ? const PoiPopup()
-                    : const FavoriteDestinationsSlider(),
-
-              // Routing UI components when in routing mode
-              const RoutingUI(),
-
-              // Search bar with dropdown at the top (put last to be on top of z-order)
+              if (provider.errorMessage != null)
+                ErrorView(message: provider.errorMessage!),
+              if (!provider.isRoutingMode) ...[
+                const CategoryButtons(),
+                const LocationButton(),
+                if (provider.showPoiPopup) const PoiPopup(),
+                if (provider.destinationsLoaded &&
+                    provider.topDestinations.isNotEmpty)
+                  const FavoriteDestinationsSlider(),
+              ] else ...[
+                const RoutingUI(),
+              ],
               const map_search.SearchBar(),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
