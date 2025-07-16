@@ -8,9 +8,11 @@ import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../Models/selling_link/selling_link.dart';
 import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
 import '../../providers/tag_provider.dart';
+import '../../services/selling_link_service.dart';
 import '../../utils/constants.dart';
 import '../../Models/interaction/item_type.dart';
 import '../../utils/string_helper.dart';
@@ -18,6 +20,7 @@ import '../../widget/data_field_row.dart';
 import '../../widget/description_fm.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
 import '../../widget/ocop_product_widget/rating_star_widget.dart';
+import '../../widget/selling_link_widget/selling_link_list.dart';
 
 class OcopProductDetailScreen extends StatefulWidget {
   final String id;
@@ -35,14 +38,16 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   late OcopProduct ocopProductDetail;
   bool _isLoading = true;
   bool _isExpanded = false;
+  late List<SellingLink> _sellingLinks;
+
 
   Timer? _interactionTimer;
 
   @override
   void initState() {
     super.initState();
-    fetchOcopProduct(widget.id);
-
+    // fetchOcopProduct(widget.id);
+    loadData();
     // Đặt timer 8 giây để log interaction
     _interactionTimer = Timer(Duration(seconds: 8), () {
       // Gọi provider để add log
@@ -66,6 +71,26 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
     await Future.wait(urls.map(
       (url) => precacheImage(CachedNetworkImageProvider(url), context),
     ));
+  }
+
+  Future<void> loadData() async {
+    await Future.wait([
+      fetchOcopProduct(widget.id),
+      fetchOcopSellingLink(widget.id),
+    ]);
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  
+  Future<void> fetchOcopSellingLink(String id) async {
+    final data = await SellingLinkService().getSellingLinkByOcopId(id);
+    setState(() {
+      _sellingLinks = data;
+    });
   }
 
   Future<void> fetchOcopProduct(String id) async {
@@ -92,7 +117,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
     if (mounted) {
       setState(() {
         ocopProductDetail = data;
-        _isLoading = false;
       });
     }
   }
@@ -366,7 +390,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             Row(
                               children: [
                                 Text(
-                                  AppLocalizations.of(context)!.referencePrice,
+                                  'Ocop Point',
                                   style: const TextStyle(fontSize: 16),
                                 ),
                                 const Spacer(),
@@ -379,14 +403,30 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               height: 10,
                             ),
                             DataFieldRow(
-                              title: AppLocalizations.of(context)!.yearRelease,
+                              title: 'Ocop type',
                               value:
-                                  ocopProductDetail.ocopYearRelease.toString(),
+                              ocopProductDetail.ocopType!.ocopTypeName,
                             ),
                             DataFieldRow(
                               title: AppLocalizations.of(context)!.yearRelease,
                               value:
                                   ocopProductDetail.ocopYearRelease.toString(),
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Selling links',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                                const Spacer(),
+                                SellingLinkList(sellingLinks: _sellingLinks),
+                              ],
+                            ),
+                            Divider(
+                              color: Colors.grey.withOpacity(0.1),
+                              thickness: 0.4,
+                              height: 10,
                             ),
                           ],
                         ),

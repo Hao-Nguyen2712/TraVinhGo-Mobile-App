@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:here_sdk/core.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/services/destination_service.dart';
@@ -24,7 +22,6 @@ import '../../utils/string_helper.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../widget/map/map_ui_utils.dart';
 import '../../widget/review_widget/review_item.dart';
 import 'comment_screen.dart';
 
@@ -59,8 +56,9 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
   // for comment
   final TextEditingController _commentController = TextEditingController();
 
-  var ratingData = [];
-
+  var ratingData = [
+  ];
+  
   @override
   void initState() {
     super.initState();
@@ -72,7 +70,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     _interactionTimer = Timer(Duration(seconds: 8), () {
       // Gọi provider để add log
       final interactionLogProvider =
-          InteractionLogProvider.of(context, listen: false);
+      InteractionLogProvider.of(context, listen: false);
       interactionLogProvider.addInteracLog(
         widget.id,
         ItemType.Destination,
@@ -102,7 +100,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   Future<void> preloadImages(List<String> urls) async {
     await Future.wait(urls.map(
-      (url) => precacheImage(CachedNetworkImageProvider(url), context),
+          (url) => precacheImage(CachedNetworkImageProvider(url), context),
     ));
   }
 
@@ -145,6 +143,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     if (reviewList == null) return;
     _isReviewsAllowed = reviewList.hasReviewed;
     _ratingSummary = reviewList.ratingSummary;
+    
 
     if (mounted) {
       setState(() {
@@ -159,6 +158,68 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
       });
     }
   }
+
+  // void updateRating() {
+  //   // clear old data
+  //   setState(() {
+  //     _ratingSummary = null;
+  //     ratingData = [];
+  //   });
+  //  
+  //   int oneStar = 0;
+  //   int twoStar = 0;
+  //   int threeStar = 0;
+  //   int fourStar = 0;
+  //   int fiveStar = 0;
+  //
+  //   for (var review in reviews) {
+  //     switch (review.rating) {
+  //       case 1:
+  //         oneStar++;
+  //         break;
+  //       case 2:
+  //         twoStar++;
+  //         break;
+  //       case 3:
+  //         threeStar++;
+  //         break;
+  //       case 4:
+  //         fourStar++;
+  //         break;
+  //       case 5:
+  //         fiveStar++;
+  //         break;
+  //     }
+  //   }
+  //
+  //   int total = reviews.length;
+  //
+  //   double getPercent(int count) => total == 0 ? 0 : (count / total) * 100;
+  //  
+  //
+  //   setState(() {
+  //     _ratingSummary = RatingSummary(
+  //       oneStar: oneStar,
+  //       twoStar: twoStar,
+  //       threeStar: threeStar,
+  //       fourStar: fourStar,
+  //       fiveStar: fiveStar,
+  //       oneStarPercent: getPercent(oneStar),
+  //       twoStarPercent: getPercent(twoStar),
+  //       threeStarPercent: getPercent(threeStar),
+  //       fourStarPercent: getPercent(fourStar),
+  //       fiveStarPercent: getPercent(fiveStar),
+  //     );
+  //    
+  //     ratingData = [
+  //       {'stars': 5, 'percent': _ratingSummary!.fiveStarPercent},
+  //       {'stars': 4, 'percent': _ratingSummary!.fourStarPercent},
+  //       {'stars': 3, 'percent': _ratingSummary!.threeStarPercent},
+  //       {'stars': 2, 'percent': _ratingSummary!.twoStarPercent},
+  //       {'stars': 1, 'percent': _ratingSummary!.oneStarPercent},
+  //     ];
+  //   });
+  // }
 
   void updateRating() {
     // clear old data
@@ -193,11 +254,25 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
       }
     }
 
-    int total = reviews.length;
+    int totalReviews = reviews.length;
 
-    double getPercent(int count) => total == 0 ? 0 : (count / total) * 100;
+    // --- PHẦN SỬA LỖI LOGIC VÀ KIỂU DỮ LIỆU NẰM Ở ĐÂY ---
+
+    // 1. Tính tổng số điểm (sum of all ratings)
+    int sumOfRatings = (oneStar * 1) + (twoStar * 2) + (threeStar * 3) + (fourStar * 4) + (fiveStar * 5);
+
+    double rawAverageRating = totalReviews == 0 ? 0.0 : sumOfRatings / totalReviews;
+
+    // 2. Làm tròn đến 1 chữ số thập phân
+    double averageRating = double.parse(rawAverageRating.toStringAsFixed(1));
+
+    // Hàm tính phần trăm
+    double getPercent(int count) => totalReviews == 0 ? 0 : (count / totalReviews) * 100;
 
     setState(() {
+      // 3. Gán giá trị trung bình đã tính toán (kiểu double)
+      destinationDetail.avarageRating = averageRating;
+
       _ratingSummary = RatingSummary(
         oneStar: oneStar,
         twoStar: twoStar,
@@ -221,6 +296,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     });
   }
 
+
+
   String timeAgo(DateTime date) {
     final duration = DateTime.now().difference(date);
     if (duration.inMinutes < 1) return 'Just now';
@@ -233,10 +310,6 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     final favoriteProvider = FavoriteProvider.of(context);
-    final tagProvider = TagProvider.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     void _toggleExpanded() {
       setState(() {
@@ -244,403 +317,390 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
       });
     }
 
+    final tagProvider = TagProvider.of(context);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        DestinationDetailImageSlider(
+                          onChange: (index) {
+                            setState(() {
+                              currentImage = index;
+                            });
+                            // Preload ảnh liền kề để tránh load chậm khi vuốt nhanh
+                            if (index + 1 < allImageDestination.length) {
+                              precacheImage(
+                                  CachedNetworkImageProvider(
+                                      allImageDestination[index + 1]),
+                                  context);
+                            }
+                            if (index - 1 >= 0) {
+                              precacheImage(
+                                  CachedNetworkImageProvider(
+                                      allImageDestination[index - 1]),
+                                  context);
+                            }
+                          },
+                          imageList: allImageDestination,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 8,
+                    right: 8,
+                    child: Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey.withOpacity(0.5),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Center(
+                                  child: IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: Image.asset(
+                                          'assets/images/navigations/leftarrowwhile.png')),
+                                ),
+                              )),
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: IconButton(
+                                  iconSize: 18,
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  icon: Image.asset(
+                                      'assets/images/navigations/share.png')),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 230,
+                    left: 8,
+                    right: 8,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                          allImageDestination.length,
+                              (index) =>
+                              AnimatedContainer(
+                                duration:
+                                const Duration(microseconds: 300),
+                                width: 20,
+                                height: 8,
+                                margin: EdgeInsets.only(right: 3),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: currentImage == index
+                                      ? Colors.white
+                                      : Colors.grey,
+                                ),
+                              )),
+                    ),
+                  ),
+                  Positioned(
+                    top: 210,
+                    right: 16,
+                    child: GestureDetector(
+                      onTap: () {
+                        favoriteProvider
+                            .toggleDestinationFavorite(destinationDetail);
+                      },
+                      child: Icon(
+                        favoriteProvider.isExist(destinationDetail.id)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 8,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Column(
                   children: [
-                    Stack(
+                    Row(
                       children: [
-                        SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              DestinationDetailImageSlider(
-                                onChange: (index) {
-                                  setState(() {
-                                    currentImage = index;
-                                  });
-                                  // Preload ảnh liền kề để tránh load chậm khi vuốt nhanh
-                                  if (index + 1 < allImageDestination.length) {
-                                    precacheImage(
-                                        CachedNetworkImageProvider(
-                                            allImageDestination[index + 1]),
-                                        context);
-                                  }
-                                  if (index - 1 >= 0) {
-                                    precacheImage(
-                                        CachedNetworkImageProvider(
-                                            allImageDestination[index - 1]),
-                                        context);
-                                  }
-                                },
-                                imageList: allImageDestination,
-                              ),
-                            ],
-                          ),
+                        Image.network(
+                          tagProvider
+                              .getTagById(destinationDetail.tagId)
+                              .image,
+                          width: 36,
+                          height: 36,
                         ),
-                        Positioned(
-                          top: 12,
-                          left: 8,
-                          right: 8,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.black.withOpacity(0.5),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(4.0),
-                                      child: Center(
-                                        child: IconButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            icon: Image.asset(
-                                                'assets/images/navigations/leftarrowwhile.png')),
-                                      ),
-                                    )),
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.black.withOpacity(0.5),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: IconButton(
-                                        iconSize: 18,
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        icon: Image.asset(
-                                            'assets/images/navigations/share.png')),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        const SizedBox(
+                          width: 10,
                         ),
-                        Positioned(
-                          top: 230,
-                          left: 8,
-                          right: 8,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                                allImageDestination.length,
-                                (index) => AnimatedContainer(
-                                      duration:
-                                          const Duration(microseconds: 300),
-                                      width: 20,
-                                      height: 8,
-                                      margin: const EdgeInsets.only(right: 3),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: currentImage == index
-                                            ? colorScheme.primary
-                                            : colorScheme.onSurface
-                                                .withOpacity(0.3),
-                                      ),
-                                    )),
-                          ),
+                        Text(
+                          AppLocalizations.of(context)!.destination,
+                          style: const TextStyle(fontSize: 16),
                         ),
-                        Positioned(
-                          top: 210,
-                          right: 16,
-                          child: GestureDetector(
-                            onTap: () {
-                              favoriteProvider
-                                  .toggleDestinationFavorite(destinationDetail);
-                            },
-                            child: Icon(
-                              favoriteProvider.isExist(destinationDetail.id)
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: colorScheme.error,
-                              size: 40,
-                            ),
-                          ),
+                        const Spacer(),
+                        const Icon(
+                          Icons.favorite_sharp,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        const Text(
+                          "82",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        Text(
+                          AppLocalizations.of(context)!.favorite,
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
                     const SizedBox(
                       height: 8,
                     ),
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          destinationDetail.name,
+                          style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                              color: kprimaryColor),
+                        )),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    if (desc.isNotEmpty || history.isNotEmpty)
+                      DescriptionFm(
+                        description: [desc, history]
+                            .where((e) => e.isNotEmpty)
+                            .join('<br>'),
+                        isExpanded: _isExpanded,
+                        onToggle: _toggleExpanded,
+                      ),
+                    Divider(
+                      color: Colors.grey.withOpacity(0.1),
+                      thickness: 0.4,
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.openingHours,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const Spacer(),
+                        Text(
+                          AppLocalizations.of(context)!.opening,
+                          style: const TextStyle(
+                              fontSize: 16, color: kprimaryColor),
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        if (destinationDetail.openingHours != null)
+                          Text(
+                            '${destinationDetail.openingHours?.openTime
+                                .toString() ?? AppLocalizations.of(context)!
+                                .notAvailable} - ${destinationDetail
+                                .openingHours?.closeTime.toString() ??
+                                AppLocalizations.of(context)!.notAvailable}',
+                            style: const TextStyle(fontSize: 16),
+                          )
+                        else
+                          Text(
+                            AppLocalizations.of(context)!.notAvailable,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.grey),
+                          ),
+                      ],
+                    ),
+                    Divider(
+                      color: Colors.grey.withOpacity(0.1),
+                      thickness: 0.4,
+                      height: 10,
+                    ),
+                    DataFieldRow(
+                      title: AppLocalizations.of(context)!.ticket,
+                      value: StringHelper.normalizeName(
+                          destinationDetail.ticket) ??
+                          AppLocalizations.of(context)!.notAvailable,
+                    ),
+                    DataFieldRow(
+                      title: AppLocalizations.of(context)!.type,
+                      value: StringHelper.toTitleCase(
+                          destinationTypeProvider
+                              .getDestinationtypeById(
+                              destinationDetail.destinationTypeId)
+                              .name),
+                    ),
+                    DataFieldRow(
+                      title: AppLocalizations.of(context)!.address,
+                      value: destinationDetail.address,
+                    ),
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          AppLocalizations.of(context)!.location,
+                          style: const TextStyle(
+                              fontSize: 24, color: kprimaryColor),
+                        )),
+                    Divider(
+                      color: Colors.grey.withOpacity(0.1),
+                      thickness: 0.4,
+                      height: 10,
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          AppLocalizations.of(context)!.rating(
+                              destinationDetail.avarageRating.toString()),
+                          style: const TextStyle(
+                              fontSize: 24, color: kprimaryColor),
+                        )),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Image.network(
-                                tagProvider
-                                    .getTagById(destinationDetail.tagId)
-                                    .image,
-                                width: 36,
-                                height: 36,
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!.destination,
-                                style: TextStyle(
-                                    fontSize: 16, color: colorScheme.onSurface),
-                              ),
-                              const Spacer(),
-                              Icon(
-                                Icons.favorite_sharp,
-                                color: colorScheme.error,
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                "82",
-                                style: TextStyle(
-                                    fontSize: 16, color: colorScheme.onSurface),
-                              ),
-                              const SizedBox(
-                                width: 6,
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!.favorite,
-                                style: TextStyle(
-                                    fontSize: 16, color: colorScheme.onSurface),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                destinationDetail.name,
-                                style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.white
-                                        : colorScheme.primary),
-                              )),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          if (desc.isNotEmpty || history.isNotEmpty)
-                            DescriptionFm(
-                              description: [desc, history]
-                                  .where((e) => e.isNotEmpty)
-                                  .join('<br>'),
-                              isExpanded: _isExpanded,
-                              onToggle: _toggleExpanded,
-                            ),
-                          DataFieldRow(
-                            title: AppLocalizations.of(context)!.openingHours,
-                            value:
-                                '${destinationDetail.openingHours?.openTime?.toString() ?? AppLocalizations.of(context)!.notAvailable} - ${destinationDetail.openingHours?.closeTime?.toString() ?? AppLocalizations.of(context)!.notAvailable}',
-                          ),
-                          DataFieldRow(
-                            title: AppLocalizations.of(context)!.ticket,
-                            value: StringHelper.normalizeName(
-                                    destinationDetail.ticket) ??
-                                AppLocalizations.of(context)!.notAvailable,
-                          ),
-                          DataFieldRow(
-                            title: AppLocalizations.of(context)!.type,
-                            value: StringHelper.toTitleCase(
-                                destinationTypeProvider
-                                    .getDestinationtypeById(
-                                        destinationDetail.destinationTypeId)
-                                    .name),
-                          ),
-                          DataFieldRow(
-                            title: AppLocalizations.of(context)!.address,
-                            value: destinationDetail.address,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                AppLocalizations.of(context)!.location,
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    color: isDarkMode
-                                        ? Colors.white
-                                        : colorScheme.primary),
-                              )),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          SizedBox(
-                            height: 200,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: LocationPreview(
-                                location: GeoCoordinates(
-                                    destinationDetail.location.coordinates![1],
-                                    destinationDetail.location.coordinates![0]),
-                                onTap: () {
-                                  GoRouter.of(context).push(
-                                      '/map?lat=${destinationDetail.location.coordinates![1]}&lon=${destinationDetail.location.coordinates![0]}&name=${Uri.encodeComponent(destinationDetail.name)}');
-                                },
-                              ),
-                            ),
-                          ),
-                          Divider(
-                            color: Theme.of(context).dividerColor,
-                            thickness: 0.4,
-                            height: 10,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                AppLocalizations.of(context)!.rating(
-                                    destinationDetail.avarageRating.toString()),
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    color: isDarkMode
-                                        ? Colors.white
-                                        : colorScheme.primary),
-                              )),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: ratingData.map((data) {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Row(
+                        children: ratingData.map((data) {
+                          return Padding(
+                            padding:
+                            const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              children: [
+                                Text('${data['stars']}'),
+                                const SizedBox(width: 4),
+                                Icon(Icons.star,
+                                    color: Colors.amber, size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Stack(
                                     children: [
-                                      Text(
-                                        '${data['stars']}',
-                                        style: TextStyle(
-                                            color: colorScheme.onSurface),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Icon(Icons.star,
-                                          color: colorScheme.secondary,
-                                          size: 16),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Stack(
-                                          children: [
-                                            Container(
-                                              height: 10,
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    colorScheme.surfaceVariant,
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                            ),
-                                            FractionallySizedBox(
-                                              widthFactor:
-                                                  (data['percent'] ?? 0)
-                                                          .toDouble() /
-                                                      100,
-                                              child: Container(
-                                                height: 10,
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme.secondary,
-                                                  borderRadius:
-                                                      BorderRadius.circular(5),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                      Container(
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade300,
+                                          borderRadius:
+                                          BorderRadius.circular(5),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
-                                      SizedBox(
-                                        width: 60,
-                                        child: Text(
-                                          '${(data['percent'] ?? 0).toStringAsFixed(1)}%',
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                              color: colorScheme.onSurface),
+                                      FractionallySizedBox(
+                                        widthFactor: (data['percent'] ?? 0).toDouble() / 100,
+                                        child: Container(
+                                          height: 10,
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber,
+                                            borderRadius:
+                                            BorderRadius.circular(5),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                );
-                              }).toList(),
+                                ),
+                                const SizedBox(width: 8),
+                                SizedBox(
+                                  width: 60, 
+                                  child: Text(
+                                    '${(data['percent'] ?? 0).toStringAsFixed(1)}%',
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Reviews',
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    color: isDarkMode
-                                        ? Colors.white
-                                        : colorScheme.primary),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  final updatedReviews = await Navigator.push<
-                                      List<ReviewResponse>>(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => CommentScreen(
-                                        destination: destinationDetail,
-                                        reviews: reviews,
-                                        isReviewsAllowed: _isReviewsAllowed,
-                                      ),
-                                    ),
-                                  );
-
-                                  // Nếu có dữ liệu trả về thì cập nhật lại
-                                  if (updatedReviews != null && mounted) {
-                                    setState(() {
-                                      reviews = updatedReviews;
-                                      updateRating();
-                                    });
-                                  }
-                                },
-                                child: Text('Show all',
-                                    style:
-                                        TextStyle(color: colorScheme.primary)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Column(
-                            children: reviews.map((review) {
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                child: ReviewItem(review: review),
-                              );
-                            }).toList(),
-                          ),
-                        ],
+                          );
+                        }).toList(),
                       ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Reviews', style: TextStyle(fontSize: 24, color: kprimaryColor),),
+                        TextButton(
+                          onPressed: () async {
+                            final updatedReviews = await Navigator.push<List<ReviewResponse>>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CommentScreen(
+                                  destination: destinationDetail,
+                                  reviews: reviews,
+                                  isReviewsAllowed: _isReviewsAllowed,
+                                ),
+                              ),
+                            );
+
+                            // Nếu có dữ liệu trả về thì cập nhật lại
+                            if (updatedReviews != null && mounted) {
+                              setState(() {
+                                reviews = updatedReviews;
+                                updateRating();
+                              });
+                            }
+                          },
+                          child: Text('Show all', style: TextStyle(color: kprimaryColor)),
+                        ),
+
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Column(
+                      children: reviews.take(5).map((review) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: ReviewItem(review: review),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
               ),
+            ],
+          ),
+        ),
       ),
     );
   }
