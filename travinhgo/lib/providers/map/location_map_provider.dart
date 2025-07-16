@@ -12,6 +12,9 @@ class LocationMapProvider {
   final BaseMapProvider baseMapProvider;
   final MarkerMapProvider markerMapProvider;
 
+  // Callback for when position is updated
+  Function? onPositionUpdated;
+
   // User's current position
   Position? currentPosition;
   String? locationErrorMessage;
@@ -110,6 +113,11 @@ class LocationMapProvider {
           "Could not determine your location. Please check your device settings.";
       developer.log("Error getting current position: ${e.toString()}",
           name: 'LocationMapProvider');
+    }
+
+    // Notify listeners that the position has been updated
+    if (onPositionUpdated != null) {
+      onPositionUpdated!();
     }
   }
 

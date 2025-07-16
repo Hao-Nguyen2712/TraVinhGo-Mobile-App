@@ -132,7 +132,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -179,7 +178,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                       height: 40,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Colors.grey.withOpacity(0.5),
+                                        color: Colors.black.withOpacity(0.3),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(4.0),
@@ -197,7 +196,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                     height: 40,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.grey.withOpacity(0.5),
+                                      color: Colors.black.withOpacity(0.3),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.all(2.0),
@@ -230,8 +229,13 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                           borderRadius:
                                               BorderRadius.circular(10),
                                           color: currentImage == index
-                                              ? Colors.white
-                                              : Colors.grey,
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.3),
                                         ),
                                       )),
                             ),
@@ -248,7 +252,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 favoriteProvider.isExist(ocopProductDetail.id)
                                     ? Icons.favorite
                                     : Icons.favorite_border,
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                                 size: 40,
                               ),
                             ),
@@ -289,10 +293,14 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 child: Text(
                                   StringHelper.toTitleCase(
                                       ocopProductDetail.productName),
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                      color: kprimaryColor),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
                                 )),
                             const SizedBox(
                               height: 8,
@@ -305,7 +313,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 onToggle: _toggleExpanded,
                               ),
                             Divider(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Theme.of(context).dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),
@@ -324,7 +332,10 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                     StringHelper.toUpperCase(
                                         ocopProductDetail.company.name),
                                     style: TextStyle(
-                                        fontSize: 18, color: kprimaryColor),
+                                        fontSize: 18,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -332,7 +343,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               ],
                             ),
                             Divider(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Theme.of(context).dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),
@@ -349,17 +360,21 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                       TextSpan(
                                         text: StringHelper.formatCurrency(
                                             ocopProductDetail.productPrice),
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             fontSize: 18,
-                                            color: Colors.black,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onBackground,
                                             fontWeight: FontWeight.w800),
                                       ),
                                       TextSpan(
                                         text: AppLocalizations.of(context)!
                                             .currencyVnd,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 14,
-                                          color: Colors.black,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onBackground,
                                         ),
                                       ),
                                     ],
@@ -368,7 +383,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               ],
                             ),
                             Divider(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Theme.of(context).dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),
@@ -383,7 +398,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               ],
                             ),
                             Divider(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Theme.of(context).dividerColor,
                               thickness: 0.4,
                               height: 10,
                             ),

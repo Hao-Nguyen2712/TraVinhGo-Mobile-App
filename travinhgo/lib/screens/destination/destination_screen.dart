@@ -66,110 +66,118 @@ class _DestinationScreenState extends State<DestinationScreen> {
   @override
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    floating: true,
-                    snap: true,
-                    backgroundColor: Colors.white,
-                    title: Text(AppLocalizations.of(context)!.destination),
-                    centerTitle: true,
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Autocomplete<String>(
-                          optionsBuilder: (TextEditingValue textEditingValue) {
-                            if (textEditingValue.text.isEmpty)
-                              return const Iterable<String>.empty();
-                            return _destinationNames.where((name) => name
-                                .toLowerCase()
-                                .contains(textEditingValue.text.toLowerCase()));
-                          },
-                          onSelected: (String selection) {
-                            setState(() {
-                              _searchQuery = selection;
-                            });
-                          },
-                          fieldViewBuilder:
-                              (context, controller, focusNode, onFieldSubmitted) {
-                            return TextField(
-                              controller: controller,
-                              focusNode: focusNode,
-                              onSubmitted: (value) {
-                                setState(() {
-                                  _searchQuery = value;
-                                });
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              title: Text(AppLocalizations.of(context)!.destination),
+              centerTitle: true,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty)
+                        return const Iterable<String>.empty();
+                      return _destinationNames.where((name) => name
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase()));
+                    },
+                    onSelected: (String selection) {
+                      setState(() {
+                        _searchQuery = selection;
+                      });
+                    },
+                    fieldViewBuilder:
+                        (context, controller, focusNode, onFieldSubmitted) {
+                      return TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        onSubmitted: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText:
+                              AppLocalizations.of(context)!.searchOcopProduct,
+                          prefixIcon: Icon(Icons.search,
+                              color: theme.colorScheme.onSurfaceVariant),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(60),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor:
+                              theme.colorScheme.surfaceVariant.withOpacity(0.6),
+                        ),
+                      );
+                    },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: theme.colorScheme.outline
+                                      .withOpacity(0.2)),
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final option = options.elementAt(index);
+                                return InkWell(
+                                  onTap: () {
+                                    onSelected(option);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12.0, vertical: 12.0),
+                                    child: Text(
+                                      option,
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                );
                               },
-                              decoration: InputDecoration(
-                                hintText: AppLocalizations.of(context)!.searchOcopProduct,
-                                prefixIcon: const Icon(Icons.search),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(60),
-                                  borderSide: BorderSide.none,
-                                ),
-                                filled: true,
-                                fillColor: kSearchBackgroundColor,
-                              ),
-                            );
-                          },
-                          optionsViewBuilder: (context, onSelected, options) {
-                            return Align(
-                              alignment: Alignment.topLeft,
-                              child: Material(
-                                elevation: 4,
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.9,
-                                  constraints: const BoxConstraints(maxHeight: 200),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: ListView.builder(
-                                    padding: EdgeInsets.zero,
-                                    itemCount: options.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                      final option = options.elementAt(index);
-                                      return InkWell(
-                                        onTap: () {
-                                          onSelected(option);
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12.0, vertical: 12.0),
-                                          child: Text(
-                                            option,
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        )),
-                  ),
-                  _isLoading ? const SliverToBoxAdapter(
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  )),
+            ),
+            _isLoading
+                ? const SliverToBoxAdapter(
                     child: Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 32),
                         child: CircularProgressIndicator(),
                       ),
                     ),
-                  ) :
-                  SliverToBoxAdapter(
+                  )
+                : SliverToBoxAdapter(
                     child: Container(
                       margin: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
@@ -191,28 +199,27 @@ class _DestinationScreenState extends State<DestinationScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.rectangle,
                                   color: _selectedDestinationTypeId == null
-                                      ? kprimaryColor
-                                      : Colors.white,
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.surfaceVariant,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 20, vertical: 10),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.apps,
-                                        size: 20,
-                                        color:
-                                            _selectedDestinationTypeId == null
-                                                ? Colors.white
-                                                : Colors.black),
+                                    Icon(
+                                      Icons.apps,
+                                      size: 20,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
                                     const SizedBox(width: 5),
                                     Text(
                                       AppLocalizations.of(context)!.all,
                                       style: TextStyle(
                                         color:
                                             _selectedDestinationTypeId == null
-                                                ? Colors.white
-                                                : Colors.black,
+                                                ? theme.colorScheme.onPrimary
+                                                : theme.colorScheme.onSurface,
                                       ),
                                     ),
                                   ],
@@ -232,8 +239,8 @@ class _DestinationScreenState extends State<DestinationScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.rectangle,
                                 color: type.id == _selectedDestinationTypeId
-                                    ? kprimaryColor
-                                    : Colors.white,
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.surfaceVariant,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               padding: const EdgeInsets.symmetric(
@@ -251,8 +258,8 @@ class _DestinationScreenState extends State<DestinationScreen> {
                                     style: TextStyle(
                                       color:
                                           type.id == _selectedDestinationTypeId
-                                              ? Colors.white
-                                              : Colors.black,
+                                              ? theme.colorScheme.onPrimary
+                                              : theme.colorScheme.onSurface,
                                     ),
                                   ),
                                 ],
@@ -265,28 +272,27 @@ class _DestinationScreenState extends State<DestinationScreen> {
                       ),
                     ),
                   ),
-                  SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 20,
-                        mainAxisSpacing: 20,
-                        childAspectRatio: 0.58,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return DestinationItem(
-                            destination: _filteredDestinations[index],
-                          );
-                        },
-                        childCount: _filteredDestinations.length,
-                      ),
-                    ),
-                  ),
-                ],
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: 0.58,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return DestinationItem(
+                      destination: _filteredDestinations[index],
+                    );
+                  },
+                  childCount: _filteredDestinations.length,
+                ),
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
