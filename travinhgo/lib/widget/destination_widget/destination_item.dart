@@ -28,7 +28,7 @@ class DestinationItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         interactionProvider.addInterac(destination.id, ItemType.Destination);
-        context.go('/tourist-destination-detail/${destination.id}');
+        context.pushNamed('/tourist-destination-detail/${destination.id}');
       },
       child: Stack(
         children: [

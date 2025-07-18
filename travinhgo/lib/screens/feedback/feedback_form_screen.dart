@@ -64,7 +64,7 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    if (text.length < 10 || text.length > 1000) {
+    if (text.length > 1000) {
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -214,8 +214,10 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                     children: [
                       TextField(
                         controller: _controller,
+                        maxLength: 1000,
                         minLines: 3,
                         maxLines: 4,
+                        keyboardType: TextInputType.multiline,
                         style: TextStyle(
                             fontSize: 16, color: colorScheme.onSurface),
                         decoration: InputDecoration(

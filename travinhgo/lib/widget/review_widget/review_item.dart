@@ -16,9 +16,8 @@ String timeAgo(DateTime date) {
 
 class ReviewItem extends StatefulWidget {
   final ReviewResponse review;
-  final void Function(ReplyUserInformation replyUserInformation)? onReplyTap;
 
-  const ReviewItem({super.key, required this.review, this.onReplyTap});
+  const ReviewItem({super.key, required this.review});
 
   @override
   State<ReviewItem> createState() => _ReviewItemState();
@@ -94,7 +93,9 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                         image: DecorationImage(
                           image: (review.avatar != null &&
                                   review.avatar!.isNotEmpty)
-                              ? NetworkImage(review.avatar!)
+                              ? NetworkImage(
+                                  review.avatar!,
+                                )
                               : const AssetImage(
                                       'assets/images/profile/profile.png')
                                   as ImageProvider,
@@ -256,237 +257,11 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                             },
                           ),
                         ),
-
-                      // Enhanced reply button
-                      GestureDetector(
-                        onTap: () {
-                          if (widget.onReplyTap != null) {
-                            widget.onReplyTap!(ReplyUserInformation(
-                              reviewId: review.id,
-                              userId: review.userId,
-                              fullname: review.userName,
-                            ));
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceVariant.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: theme.dividerColor),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.reply,
-                                  size: 16,
-                                  color: colorScheme.onSurfaceVariant),
-                              const SizedBox(width: 6),
-                              Text(
-                                "Reply",
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ],
             ),
-
-            // Replies section with animation
-            if (replies.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    child: Column(
-                      children: repliesToShow.map((reply) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Reply indicator line
-                              Container(
-                                width: 2,
-                                height: 40,
-                                margin:
-                                    const EdgeInsets.only(right: 12, left: 24),
-                                decoration: BoxDecoration(
-                                  color: theme.dividerColor,
-                                  borderRadius: BorderRadius.circular(1),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primaryContainer
-                                        .withOpacity(0.4),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border:
-                                        Border.all(color: colorScheme.primary),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                image: (reply.avatar != null &&
-                                                        reply
-                                                            .avatar!.isNotEmpty)
-                                                    ? NetworkImage(
-                                                        reply.avatar!)
-                                                    : const AssetImage(
-                                                            'assets/images/profile/profile.png')
-                                                        as ImageProvider,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            clipBehavior: Clip.antiAlias,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              reply.userName,
-                                              style: theme.textTheme.bodyMedium
-                                                  ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                                color: colorScheme
-                                                    .onPrimaryContainer,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            timeAgo(reply.createdAt.toLocal()),
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                              color: colorScheme
-                                                  .onPrimaryContainer
-                                                  .withOpacity(0.8),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      if (reply.content != null &&
-                                          reply.content!.isNotEmpty)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 8),
-                                          child: Text(
-                                            reply.content!,
-                                            style: theme.textTheme.bodyMedium
-                                                ?.copyWith(
-                                              height: 1.4,
-                                              color: colorScheme
-                                                  .onPrimaryContainer,
-                                            ),
-                                          ),
-                                        ),
-                                      if (reply.images != null &&
-                                          reply.images!.isNotEmpty)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 8),
-                                          child: SizedBox(
-                                            height: 60,
-                                            child: ListView.builder(
-                                              scrollDirection: Axis.horizontal,
-                                              shrinkWrap: true,
-                                              itemCount: reply.images!.length,
-                                              itemBuilder: (context, index) {
-                                                return Container(
-                                                  margin: const EdgeInsets.only(
-                                                      right: 8),
-                                                  width: 60,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    image: DecorationImage(
-                                                      image: NetworkImage(
-                                                          reply.images![index]),
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                  clipBehavior: Clip.antiAlias,
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  // Enhanced show more/less button
-                  if (replies.length > 1)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 38),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isExpanded = !isExpanded;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color:
-                                colorScheme.secondaryContainer.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isExpanded
-                                    ? Icons.expand_less
-                                    : Icons.expand_more,
-                                size: 16,
-                                color: colorScheme.onSecondaryContainer,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                isExpanded
-                                    ? "Show less"
-                                    : "Show ${replies.length - 1} more ${replies.length - 1 == 1 ? 'reply' : 'replies'}",
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: colorScheme.onSecondaryContainer,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
           ],
         ),
       ),

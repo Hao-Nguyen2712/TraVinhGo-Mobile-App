@@ -92,6 +92,7 @@ class ReviewService {
       String destinationId) async {
     try {
       var sessionId = await AuthService().getSessionId();
+      debugPrint('sessionId: '+ sessionId.toString());
       var endPoint = '${_baseUrl}FilterReviewsMobileAsync';
       final response = await dio.get(endPoint,
           queryParameters: {'destinationId': destinationId},
