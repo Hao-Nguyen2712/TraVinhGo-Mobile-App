@@ -122,10 +122,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await authProvider.signOut();
               userProvider.clearUserProfile();
 
-              // Dismiss loading dialog and navigate to login
+              // Dismiss loading dialog and navigate to home
               if (mounted) {
                 Navigator.of(context).pop();
-                context.go('/login');
+                context.go('/home');
               }
             },
             child: Text(

@@ -170,7 +170,7 @@ class CategoryMapProvider {
   /// Build the list of categories by combining hardcoded and dynamic destination types
   Future<void> buildCategories(DestinationProvider destinationProvider) async {
     // Fetch all destination data (including types and markers)
-    await destinationProvider.fetchAllDestinations();
+    await destinationProvider.fetchDestinations(isRefresh: true);
 
     // Create CategoryType objects from destination types
     final destinationTypeCategories =

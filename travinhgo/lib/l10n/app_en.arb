@@ -191,6 +191,7 @@
     "selectWardCommune": "Select ward/commune",
     "wardCommuneRequired": "Ward/commune is required",
     "streetAddressRequired": "Street address is required",
+    "profileUpdatedSuccessfully": "Profile updated successfully!",
     "changePassword": "Change Password",
     "changePasswordComingSoon": "Change Password feature coming soon",
     "darkMode": "Dark Mode",
@@ -200,4 +201,4 @@
     "light": "Light",
     "dark": "Dark",
     "accommodation": "Accommodation"
-} 
+}

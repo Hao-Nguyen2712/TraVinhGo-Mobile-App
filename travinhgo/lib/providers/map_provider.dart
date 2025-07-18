@@ -79,7 +79,7 @@ class DestinationMapProvider {
       if (_allDestinations.isEmpty) {
         developer.log('No destinations loaded. Fetching destinations...',
             name: 'DestinationMapProvider');
-        await destinationProvider.fetchAllDestinations();
+        await destinationProvider.fetchDestinations(isRefresh: true);
         _allDestinations = destinationProvider.destinations;
         dataWasFetched = true;
       }

@@ -14,6 +14,7 @@ import 'package:travinhgo/providers/ocop_type_provider.dart';
 import 'package:travinhgo/providers/setting_provider.dart';
 import 'package:travinhgo/providers/user_provider.dart';
 import 'package:travinhgo/router/app_router.dart';
+import 'package:travinhgo/providers/destination_provider.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
@@ -186,6 +187,7 @@ class _MyAppState extends State<MyApp> {
               return mapProvider;
             },
           ),
+          ChangeNotifierProvider(create: (_) => DestinationProvider()),
           ChangeNotifierProvider(create: (_) => DestinationTypeProvider()),
           ChangeNotifierProvider(create: (_) => TagProvider()),
           ChangeNotifierProvider(create: (_) => OcopTypeProvider()),

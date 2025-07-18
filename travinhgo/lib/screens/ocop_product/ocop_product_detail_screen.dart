@@ -40,7 +40,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   bool _isExpanded = false;
   late List<SellingLink> _sellingLinks;
 
-
   Timer? _interactionTimer;
 
   @override
@@ -85,7 +84,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
       });
     }
   }
-  
+
   Future<void> fetchOcopSellingLink(String id) async {
     final data = await SellingLinkService().getSellingLinkByOcopId(id);
     setState(() {
@@ -188,7 +187,11 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         child: Center(
                                           child: IconButton(
                                               onPressed: () {
-                                                context.pop();
+                                                if (context.canPop()) {
+                                                  context.pop();
+                                                } else {
+                                                  context.go('/home');
+                                                }
                                               },
                                               icon: Image.asset(
                                                   'assets/images/navigations/leftarrowwhile.png')),
@@ -399,8 +402,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                             DataFieldRow(
                               title: 'Ocop type',
-                              value:
-                              ocopProductDetail.ocopType!.ocopTypeName,
+                              value: ocopProductDetail.ocopType!.ocopTypeName,
                             ),
                             DataFieldRow(
                               title: AppLocalizations.of(context)!.yearRelease,

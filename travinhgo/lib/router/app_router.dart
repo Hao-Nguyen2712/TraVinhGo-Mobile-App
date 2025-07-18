@@ -12,7 +12,6 @@ import 'package:travinhgo/screens/splash/splash_screen.dart';
 import 'package:travinhgo/utils/router_logger.dart';
 
 import '../Models/itinerary_plan/itinerary_plan.dart';
-import '../main.dart';
 import '../screens/destination/destination_detail_screen.dart';
 import '../screens/event_festival/event_fesftival_detail_screen.dart';
 import '../screens/favorite/favorite_screen.dart';
@@ -214,58 +213,52 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/event-festival-detail/:id',
-        name: 'EventFestivalDetail',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return EventFesftivalDetailScreen(
-            id: id,
-          );
-        },
-      ),
-      GoRoute(
         path: '/ocop-product-detail/:id',
         name: 'OcopProductDetail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return OcopProductDetailScreen(
-            id: id,
+          return AuthRequiredScreen(
+            message: 'Please login to use this feature',
+            child: OcopProductDetailScreen(
+              id: id,
+            ),
           );
         },
-      ),
-      GoRoute(
-        path: '/destination-detail/:id',
-        name: 'DestinationDetail',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return DestinationDetailScreen(
-            id: id,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/notification',
-        name: 'Notification',
-        builder: (context, state) => MessageScreen(),
-      ),
-      GoRoute(
-        path: '/itinerary-plan',
-        name: 'ItineraryPlan',
-        builder: (context, state) => ItineraryPlanScreen(),
-      ),
-      GoRoute(
-        path: '/feedback',
-        name: 'Feedback',
-        builder: (context, state) => FeedbackFormScreen(),
       ),
       GoRoute(
         path: '/tourist-destination-detail/:id',
         name: 'TouristDestinationDetail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return DestinationDetailScreen(
-            id: id,
+          return AuthRequiredScreen(
+            message: 'Please login to use this feature',
+            child: DestinationDetailScreen(
+              id: id,
+            ),
           );
+        },
+      ),
+      GoRoute(
+        path: '/notification',
+        name: 'Notification',
+        builder: (context, state) => const MessageScreen(),
+      ),
+      GoRoute(
+        path: '/itinerary-plan',
+        name: 'ItineraryPlan',
+        builder: (context, state) => const ItineraryPlanScreen(),
+      ),
+      GoRoute(
+        path: '/feedback',
+        name: 'Feedback',
+        builder: (context, state) => const FeedbackFormScreen(),
+      ),
+      GoRoute(
+        path: '/event-festival-detail/:id',
+        name: 'EventFestivalDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return EventFesftivalDetailScreen(id: id);
         },
       ),
 
@@ -397,23 +390,28 @@ class AppRouter {
           state.matchedLocation == '/home' ||
           state.matchedLocation == '/map' ||
           state.matchedLocation.startsWith('/local-specialty-detail/') ||
-          state.matchedLocation.startsWith('/event-festival-detail/') ||
-          state.matchedLocation.startsWith('/ocop-product-detail/') ||
-          state.matchedLocation.startsWith('/tourist-destination-detail/');
+          state.matchedLocation.startsWith('/event-festival-detail/');
 
       // Protected tab routes that should show the AuthRequiredScreen
       final isProtectedTabRoute = state.matchedLocation == '/events' ||
           state.matchedLocation == '/favorites' ||
           state.matchedLocation == '/profile';
 
+      // Routes that are protected but should display the AuthRequiredScreen in place
+      final isAuthRequiredScreenRoute =
+          state.uri.path.startsWith('/ocop-product-detail/') ||
+              state.uri.path.startsWith('/tourist-destination-detail/');
+
       debugPrint("Log_Auth_flow: ROUTER - Is public route: $isPublicRoute");
       debugPrint(
           "Log_Auth_flow: ROUTER - Is protected tab: $isProtectedTabRoute");
+      debugPrint(
+          "Log_Auth_flow: ROUTER - Is AuthRequiredScreen route: $isAuthRequiredScreenRoute");
 
-      if (isPublicRoute || isProtectedTabRoute) {
-        if (isProtectedTabRoute) {
+      if (isPublicRoute || isProtectedTabRoute || isAuthRequiredScreenRoute) {
+        if (isProtectedTabRoute || isAuthRequiredScreenRoute) {
           debugPrint(
-              "Log_Auth_flow: ROUTER - ALLOWING PROTECTED TAB: ${state.matchedLocation} to show AuthRequiredScreen");
+              "Log_Auth_flow: ROUTER - ALLOWING IN-PLACE AUTH SCREEN: ${state.matchedLocation} to show AuthRequiredScreen");
         }
         debugPrint(
             "Log_Auth_flow: ROUTER - No redirect needed - allowing to reach destination: ${state.matchedLocation}");

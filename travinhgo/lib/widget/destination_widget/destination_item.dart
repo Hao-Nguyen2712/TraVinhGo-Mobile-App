@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/screens/destination/destination_detail_screen.dart';
@@ -27,12 +28,7 @@ class DestinationItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         interactionProvider.addInterac(destination.id, ItemType.Destination);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => DestinationDetailScreen(
-                      id: destination.id,
-                    )));
+        context.go('/tourist-destination-detail/${destination.id}');
       },
       child: Stack(
         children: [

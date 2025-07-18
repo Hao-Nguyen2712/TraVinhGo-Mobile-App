@@ -13,6 +13,7 @@ String timeAgo(DateTime date) {
   if (duration.inDays < 1) return '${duration.inHours} hr ago';
   return '${duration.inDays} day(s) ago';
 }
+
 class ReviewItem extends StatefulWidget {
   final ReviewResponse review;
   final void Function(ReplyUserInformation replyUserInformation)? onReplyTap;
@@ -52,15 +53,17 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
     final review = widget.review;
     final replies = review.reply ?? [];
     final repliesToShow = isExpanded ? replies : replies.take(1).toList();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: theme.shadowColor.withOpacity(0.1),
             spreadRadius: 0,
             blurRadius: 10,
             offset: const Offset(0, 2),
@@ -85,13 +88,16 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: kprimaryColor.withOpacity(0.3),
+                          color: colorScheme.primary.withOpacity(0.3),
                           width: 2,
                         ),
                         image: DecorationImage(
-                          image: (review.avatar != null && review.avatar!.isNotEmpty)
+                          image: (review.avatar != null &&
+                                  review.avatar!.isNotEmpty)
                               ? NetworkImage(review.avatar!)
-                              : const AssetImage('assets/images/profile/profile.png') as ImageProvider,
+                              : const AssetImage(
+                                      'assets/images/profile/profile.png')
+                                  as ImageProvider,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -107,7 +113,7 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           color: Colors.green,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: theme.cardColor, width: 2),
                         ),
                       ),
                     ),
@@ -128,37 +134,33 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                               children: [
                                 Text(
                                   review.userName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
+                                  style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   timeAgo(review.createdAt.toLocal()),
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                  ),
+                                  style: theme.textTheme.bodySmall,
                                 ),
                               ],
                             ),
                           ),
                           // Enhanced rating badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               gradient: LinearGradient(
                                 colors: [
-                                  kprimaryColor,
-                                  kprimaryColor.withOpacity(0.8),
+                                  colorScheme.primary,
+                                  colorScheme.primary.withOpacity(0.8),
                                 ],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: kprimaryColor.withOpacity(0.3),
+                                  color: colorScheme.primary.withOpacity(0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -169,14 +171,15 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                               children: [
                                 Text(
                                   review.rating.toStringAsFixed(1),
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: colorScheme.onPrimary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                const Icon(Icons.star, size: 14, color: Colors.white),
+                                Icon(Icons.star,
+                                    size: 14, color: colorScheme.onPrimary),
                               ],
                             ),
                           ),
@@ -190,16 +193,15 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
+                            color: colorScheme.surfaceVariant.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[200]!),
+                            border: Border.all(color: theme.dividerColor),
                           ),
                           child: Text(
                             review.comment!,
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               height: 1.4,
-                              color: Colors.black87,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -219,7 +221,8 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                 onTap: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text("Viewing image ${index + 1}"),
+                                      content:
+                                          Text("Viewing image ${index + 1}"),
                                       duration: const Duration(seconds: 1),
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
@@ -234,12 +237,14 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
                                     image: DecorationImage(
-                                      image: NetworkImage(review.images![index]),
+                                      image:
+                                          NetworkImage(review.images![index]),
                                       fit: BoxFit.cover,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.grey.withOpacity(0.2),
+                                        color:
+                                            theme.shadowColor.withOpacity(0.2),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
@@ -264,23 +269,25 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: colorScheme.surfaceVariant.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.grey[300]!),
+                            border: Border.all(color: theme.dividerColor),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.reply, size: 16, color: Colors.grey[600]),
+                              Icon(Icons.reply,
+                                  size: 16,
+                                  color: colorScheme.onSurfaceVariant),
                               const SizedBox(width: 6),
                               Text(
                                 "Reply",
-                                style: TextStyle(
-                                  color: Colors.grey[600],
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 13,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -312,9 +319,10 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                               Container(
                                 width: 2,
                                 height: 40,
-                                margin: const EdgeInsets.only(right: 12, left: 24),
+                                margin:
+                                    const EdgeInsets.only(right: 12, left: 24),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[300],
+                                  color: theme.dividerColor,
                                   borderRadius: BorderRadius.circular(1),
                                 ),
                               ),
@@ -322,12 +330,15 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                 child: Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Color(0xffeffff6),
+                                    color: colorScheme.primaryContainer
+                                        .withOpacity(0.4),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Color(0xff2a8855)!),
+                                    border:
+                                        Border.all(color: colorScheme.primary),
                                   ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
@@ -337,10 +348,14 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               image: DecorationImage(
-                                                image: (reply.avatar != null && reply.avatar!.isNotEmpty)
-                                                    ? NetworkImage(reply.avatar!)
-                                                    : const AssetImage('assets/images/profile/profile.png')
-                                                as ImageProvider,
+                                                image: (reply.avatar != null &&
+                                                        reply
+                                                            .avatar!.isNotEmpty)
+                                                    ? NetworkImage(
+                                                        reply.avatar!)
+                                                    : const AssetImage(
+                                                            'assets/images/profile/profile.png')
+                                                        as ImageProvider,
                                                 fit: BoxFit.cover,
                                               ),
                                             ),
@@ -350,37 +365,45 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                           Expanded(
                                             child: Text(
                                               reply.userName,
-                                              style: const TextStyle(
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 13,
-                                                color: Colors.black87,
+                                                color: colorScheme
+                                                    .onPrimaryContainer,
                                               ),
                                             ),
                                           ),
                                           Text(
                                             timeAgo(reply.createdAt.toLocal()),
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 11,
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              color: colorScheme
+                                                  .onPrimaryContainer
+                                                  .withOpacity(0.8),
                                             ),
                                           ),
                                         ],
                                       ),
-                                      if (reply.content != null && reply.content!.isNotEmpty)
+                                      if (reply.content != null &&
+                                          reply.content!.isNotEmpty)
                                         Padding(
-                                          padding: const EdgeInsets.only(top: 8),
+                                          padding:
+                                              const EdgeInsets.only(top: 8),
                                           child: Text(
                                             reply.content!,
-                                            style: const TextStyle(
-                                              fontSize: 13,
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
                                               height: 1.4,
-                                              color: Colors.black87,
+                                              color: colorScheme
+                                                  .onPrimaryContainer,
                                             ),
                                           ),
                                         ),
-                                      if (reply.images != null && reply.images!.isNotEmpty)
+                                      if (reply.images != null &&
+                                          reply.images!.isNotEmpty)
                                         Padding(
-                                          padding: const EdgeInsets.only(top: 8),
+                                          padding:
+                                              const EdgeInsets.only(top: 8),
                                           child: SizedBox(
                                             height: 60,
                                             child: ListView.builder(
@@ -389,12 +412,16 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                               itemCount: reply.images!.length,
                                               itemBuilder: (context, index) {
                                                 return Container(
-                                                  margin: const EdgeInsets.only(right: 8),
+                                                  margin: const EdgeInsets.only(
+                                                      right: 8),
                                                   width: 60,
                                                   decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(8),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
                                                     image: DecorationImage(
-                                                      image: NetworkImage(reply.images![index]),
+                                                      image: NetworkImage(
+                                                          reply.images![index]),
                                                       fit: BoxFit.cover,
                                                     ),
                                                   ),
@@ -426,28 +453,31 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           });
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Color(0xffc5f8da),
+                            color:
+                                colorScheme.secondaryContainer.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(15),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                isExpanded ? Icons.expand_less : Icons.expand_more,
+                                isExpanded
+                                    ? Icons.expand_less
+                                    : Icons.expand_more,
                                 size: 16,
-                                color: Colors.grey[600],
+                                color: colorScheme.onSecondaryContainer,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 isExpanded
                                     ? "Show less"
                                     : "Show ${replies.length - 1} more ${replies.length - 1 == 1 ? 'reply' : 'replies'}",
-                                style: TextStyle(
-                                  color: Colors.grey[600],
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  color: colorScheme.onSecondaryContainer,
                                 ),
                               ),
                             ],
