@@ -13,11 +13,11 @@ String timeAgo(DateTime date) {
   if (duration.inDays < 1) return '${duration.inHours} hr ago';
   return '${duration.inDays} day(s) ago';
 }
+
 class ReviewItem extends StatefulWidget {
   final ReviewResponse review;
-  final void Function(ReplyUserInformation replyUserInformation)? onReplyTap;
 
-  const ReviewItem({super.key, required this.review, this.onReplyTap});
+  const ReviewItem({super.key, required this.review});
 
   @override
   State<ReviewItem> createState() => _ReviewItemState();
@@ -89,9 +89,13 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           width: 2,
                         ),
                         image: DecorationImage(
-                          image: (review.avatar != null && review.avatar!.isNotEmpty)
-                              ? NetworkImage(review.avatar!)
-                              : const AssetImage('assets/images/profile/profile.png') as ImageProvider,
+                          image: (review.avatar != null &&
+                                  review.avatar!.isNotEmpty)
+                              ? NetworkImage(
+                                  review.avatar!,)
+                              : const AssetImage(
+                                      'assets/images/profile/profile.png')
+                                  as ImageProvider,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -147,7 +151,8 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           ),
                           // Enhanced rating badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               gradient: LinearGradient(
@@ -176,7 +181,8 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                const Icon(Icons.star, size: 14, color: Colors.white),
+                                const Icon(Icons.star,
+                                    size: 14, color: Colors.white),
                               ],
                             ),
                           ),
@@ -219,7 +225,8 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                 onTap: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text("Viewing image ${index + 1}"),
+                                      content:
+                                          Text("Viewing image ${index + 1}"),
                                       duration: const Duration(seconds: 1),
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
@@ -234,7 +241,8 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
                                     image: DecorationImage(
-                                      image: NetworkImage(review.images![index]),
+                                      image:
+                                          NetworkImage(review.images![index]),
                                       fit: BoxFit.cover,
                                     ),
                                     boxShadow: [
@@ -251,212 +259,11 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                             },
                           ),
                         ),
-
-                      // Enhanced reply button
-                      GestureDetector(
-                        onTap: () {
-                          if (widget.onReplyTap != null) {
-                            widget.onReplyTap!(ReplyUserInformation(
-                              reviewId: review.id,
-                              userId: review.userId,
-                              fullname: review.userName,
-                            ));
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.grey[300]!),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.reply, size: 16, color: Colors.grey[600]),
-                              const SizedBox(width: 6),
-                              Text(
-                                "Reply",
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ],
             ),
-
-            // Replies section with animation
-            if (replies.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    child: Column(
-                      children: repliesToShow.map((reply) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Reply indicator line
-                              Container(
-                                width: 2,
-                                height: 40,
-                                margin: const EdgeInsets.only(right: 12, left: 24),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(1),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xffeffff6),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Color(0xff2a8855)!),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                image: (reply.avatar != null && reply.avatar!.isNotEmpty)
-                                                    ? NetworkImage(reply.avatar!)
-                                                    : const AssetImage('assets/images/profile/profile.png')
-                                                as ImageProvider,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            clipBehavior: Clip.antiAlias,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              reply.userName,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 13,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            timeAgo(reply.createdAt.toLocal()),
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 11,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      if (reply.content != null && reply.content!.isNotEmpty)
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 8),
-                                          child: Text(
-                                            reply.content!,
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              height: 1.4,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ),
-                                      if (reply.images != null && reply.images!.isNotEmpty)
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 8),
-                                          child: SizedBox(
-                                            height: 60,
-                                            child: ListView.builder(
-                                              scrollDirection: Axis.horizontal,
-                                              shrinkWrap: true,
-                                              itemCount: reply.images!.length,
-                                              itemBuilder: (context, index) {
-                                                return Container(
-                                                  margin: const EdgeInsets.only(right: 8),
-                                                  width: 60,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    image: DecorationImage(
-                                                      image: NetworkImage(reply.images![index]),
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                  clipBehavior: Clip.antiAlias,
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  // Enhanced show more/less button
-                  if (replies.length > 1)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 38),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isExpanded = !isExpanded;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Color(0xffc5f8da),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isExpanded ? Icons.expand_less : Icons.expand_more,
-                                size: 16,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                isExpanded
-                                    ? "Show less"
-                                    : "Show ${replies.length - 1} more ${replies.length - 1 == 1 ? 'reply' : 'replies'}",
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
           ],
         ),
       ),

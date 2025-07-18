@@ -35,6 +35,22 @@ class StringHelper {
     return toTitleCase(removeExtraSpaces(input));
   }
 
+  static String capitalizeFirstHtmlTextContent(String input) {
+    if (!input.contains('<')) {
+      // Plain text → viết hoa chữ đầu tiên
+      return input.trimLeft().isNotEmpty
+          ? input.trimLeft()[0].toUpperCase() + input.trimLeft().substring(1)
+          : input;
+    }
+
+    // HTML content → viết hoa chữ đầu tiên giữa các thẻ
+    final regex = RegExp(r'(?<=>)([^<])'); // ký tự đầu tiên sau '>'
+    return input.replaceFirstMapped(regex, (match) {
+      final char = match.group(1)!;
+      return char.toUpperCase();
+    });
+  }
+
   static String formatDate(String? dateString) {
     try {
       if (dateString == null) return "N/A";
