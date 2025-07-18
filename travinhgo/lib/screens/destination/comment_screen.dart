@@ -39,9 +39,7 @@ class _CommentScreenState extends State<CommentScreen> {
 
   late List<String> allImageDestination;
   String _error='';
-
-  ReplyUserInformation? _selectedResponseUser = null;
-
+  
   @override
   void initState() {
     super.initState();
@@ -51,6 +49,9 @@ class _CommentScreenState extends State<CommentScreen> {
         _isCommentNotEmpty = _commentController.text.trim().isNotEmpty;
       });
     });
+    debugPrint('Error during get destination list');
+    debugPrint(widget.isReviewsAllowed.toString());
+    
   }
 
   @override
@@ -157,28 +158,6 @@ class _CommentScreenState extends State<CommentScreen> {
       setState(() {
         _selectedImages.clear();
       });
-    }
-  }
-
-  Future<void> sendReply(ReplyRequest replyRequest) async {
-    Reply? responseData = await ReviewService().sendReply(replyRequest);
-
-    _commentController.clear();
-    
-    if(responseData != null) {
-      setState(() {
-        final index = widget.reviews.indexWhere((review) => review.id == _selectedResponseUser?.reviewId);
-        if (index != -1) {
-          widget.reviews[index].reply.add(responseData); 
-        }
-        _selectedImages.clear();
-        _selectedResponseUser = null;
-      });
-    }else {
-      setState(() {
-        _selectedImages.clear();
-        _selectedResponseUser = null;
-      }); 
     }
   }
   
@@ -311,20 +290,29 @@ class _CommentScreenState extends State<CommentScreen> {
                                 ),
                               ],
                             ),
+                            widget.reviews.isEmpty
+                                ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 32.0),
+                                child: Text(
+                                  // Giả sử bạn có một chuỗi localization cho việc này
+                                  // AppLocalizations.of(context)!.noReviewsYet ?? 'Chưa có đánh giá nào.',
+                                  'Chưa có đánh giá nào.',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ) :
                             Column(
                               children: widget.reviews.map((review) {
                                 return Padding(
                                   padding:
-                                      const EdgeInsets.symmetric(vertical: 10),
+                                      const EdgeInsets.symmetric(vertical: 9),
                                   child: ReviewItem(
                                     review: review,
-                                    onReplyTap: (replyUserInformation) {
-                                      setState(() {
-                                        _selectedResponseUser = replyUserInformation;
-                                        debugPrint(
-                                            "Reply : $_selectedResponseUser");
-                                      });
-                                    },
                                   ),
                                 );
                               }).toList(),
@@ -336,7 +324,8 @@ class _CommentScreenState extends State<CommentScreen> {
             ),
 
             // Phần nhập comment + ảnh (nằm dưới cùng, không bị đẩy lên)
-            AnimatedPadding(
+            if (widget.isReviewsAllowed)
+              AnimatedPadding(
               duration: const Duration(milliseconds: 200),
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -352,55 +341,6 @@ class _CommentScreenState extends State<CommentScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_selectedResponseUser != null) ...[
-                      SizedBox(
-                        height: 50,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text.rich(
-                                TextSpan(
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Reply to ',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    TextSpan(
-                                      text: _selectedResponseUser!.fullname,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold, 
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedResponseUser = null;
-                                  });
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  child: const Text(
-                                    "Cancel",
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
                     if (_selectedImages.isNotEmpty) ...[
                       SizedBox(
                         height: 100,
@@ -497,15 +437,6 @@ class _CommentScreenState extends State<CommentScreen> {
                             ),
                             onPressed: () {
                               final images = List<File>.from(_selectedImages);
-
-                              if (_selectedResponseUser != null) {
-                                ReplyRequest replyRequest = ReplyRequest(
-                                  id: _selectedResponseUser!.reviewId!,
-                                  content: _commentController.text,
-                                  images: images,
-                                );
-                                sendReply(replyRequest);
-                              } else {
                                 if (!widget.isReviewsAllowed) {
                                   showDialog(
                                     context: context,
@@ -576,7 +507,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                     },
                                   ); 
                                 }
-                              }
+                              
                             },
                           ),
                       ],

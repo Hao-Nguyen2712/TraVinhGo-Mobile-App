@@ -687,7 +687,30 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    Column(
+                    // Column(
+                    //   children: reviews.take(5).map((review) {
+                    //     return Padding(
+                    //       padding: const EdgeInsets.symmetric(vertical: 10),
+                    //       child: ReviewItem(review: review),
+                    //     );
+                    //   }).toList(),
+                    // ),
+                    // PHẦN CODE ĐƯỢC SỬA ĐỔI
+                    reviews.isEmpty
+                        ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32.0),
+                        child: Text(
+                          'There are no reviews yet.',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                        : Column(
                       children: reviews.take(5).map((review) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),

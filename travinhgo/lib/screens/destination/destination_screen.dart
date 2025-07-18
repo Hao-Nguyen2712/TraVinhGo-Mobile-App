@@ -210,7 +210,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
                                     Icon(
                                       Icons.apps,
                                       size: 20,
-                                      color: theme.colorScheme.onSurface,
+                                      color: _selectedDestinationTypeId == null
+                                          ? theme.colorScheme.onPrimary
+                                          : theme.colorScheme.onSurface,
                                     ),
                                     const SizedBox(width: 5),
                                     Text(
