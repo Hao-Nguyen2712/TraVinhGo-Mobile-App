@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/destination_widget/destination_item.dart';
@@ -26,187 +26,128 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
     final ocops = favoriteProvider.ocopProductList;
     final locals = favoriteProvider.localSpecialteList;
 
-    // Số item cho một hàng
+    if (destinations.isEmpty && ocops.isEmpty && locals.isEmpty) {
+      return const EmptyFavoritesPlaceholder();
+    }
+
     const int destinationPerRow = 2;
     const int ocopPerRow = 2;
     const int localPerRow = 1;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(8.0),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // DESTINATION
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.destination,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+          // Destinations Section
+          if (destinations.isNotEmpty)
+            _buildSection(
+              context,
+              title: AppLocalizations.of(context)!.destination,
+              itemCount: destinations.length,
+              items: destinations,
+              itemBuilder: (context, index) =>
+                  DestinationItem(destination: destinations[index]),
+              crossAxisCount: destinationPerRow,
+              childAspectRatio: 0.58,
+              showAll: showAllDestinations,
+              onToggleShowAll: () {
+                setState(() => showAllDestinations = !showAllDestinations);
+              },
             ),
-          ),
-          destinations.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Text(
-                      AppLocalizations.of(context)!.noFavoriteDestinations),
-                )
-              : Column(
-                  children: [
-                    GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: showAllDestinations
-                          ? destinations.length
-                          : (destinations.length > destinationPerRow
-                              ? destinationPerRow
-                              : destinations.length),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: destinationPerRow,
-                        crossAxisSpacing: 20,
-                        mainAxisSpacing: 20,
-                        childAspectRatio: 0.58,
-                      ),
-                      itemBuilder: (context, index) {
-                        return DestinationItem(
-                            destination: destinations[index]);
-                      },
-                    ),
-                    if (destinations.length > destinationPerRow)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              showAllDestinations = !showAllDestinations;
-                            });
-                          },
-                          child: Text(
-                            showAllDestinations
-                                ? AppLocalizations.of(context)!.less
-                                : AppLocalizations.of(context)!.more,
-                            style: const TextStyle(color: Colors.green),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-          // OCOP
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.ocop,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+
+          // OCOP Products Section
+          if (ocops.isNotEmpty)
+            _buildSection(
+              context,
+              title: AppLocalizations.of(context)!.ocop,
+              itemCount: ocops.length,
+              items: ocops,
+              itemBuilder: (context, index) =>
+                  OcopProductItem(ocopProduct: ocops[index]),
+              crossAxisCount: ocopPerRow,
+              childAspectRatio: 0.58,
+              showAll: showAllOcop,
+              onToggleShowAll: () {
+                setState(() => showAllOcop = !showAllOcop);
+              },
             ),
-          ),
-          ocops.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Text(AppLocalizations.of(context)!.noFavoriteOcop),
-                )
-              : Column(
-                  children: [
-                    GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: showAllOcop
-                          ? ocops.length
-                          : (ocops.length > ocopPerRow
-                              ? ocopPerRow
-                              : ocops.length),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: ocopPerRow,
-                        crossAxisSpacing: 20,
-                        mainAxisSpacing: 20,
-                        childAspectRatio: 0.58,
-                      ),
-                      itemBuilder: (context, index) {
-                        return OcopProductItem(ocopProduct: ocops[index]);
-                      },
-                    ),
-                    if (ocops.length > ocopPerRow)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              showAllOcop = !showAllOcop;
-                            });
-                          },
-                          child: Text(
-                            showAllOcop
-                                ? AppLocalizations.of(context)!.less
-                                : AppLocalizations.of(context)!.more,
-                            style: const TextStyle(color: Colors.green),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-          // LOCAL SPECIALTY
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.local,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+
+          // Local Specialties Section
+          if (locals.isNotEmpty)
+            _buildSection(
+              context,
+              title: AppLocalizations.of(context)!.local,
+              itemCount: locals.length,
+              items: locals,
+              itemBuilder: (context, index) =>
+                  LocalSpecialtyItem(localSpecialty: locals[index]),
+              crossAxisCount: localPerRow,
+              childAspectRatio: 1.5,
+              showAll: showAllLocals,
+              onToggleShowAll: () {
+                setState(() => showAllLocals = !showAllLocals);
+              },
             ),
-          ),
-          locals.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Text(AppLocalizations.of(context)!.noFavoriteLocal),
-                )
-              : Column(
-                  children: [
-                    GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: showAllLocals
-                          ? locals.length
-                          : (locals.length > localPerRow
-                              ? localPerRow
-                              : locals.length),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: localPerRow,
-                        childAspectRatio: 1.5,
-                      ),
-                      itemBuilder: (context, index) {
-                        return LocalSpecialtyItem(
-                            localSpecialty: locals[index]);
-                      },
-                    ),
-                    if (locals.length > localPerRow)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              showAllLocals = !showAllLocals;
-                            });
-                          },
-                          child: Text(
-                            showAllLocals
-                                ? AppLocalizations.of(context)!.less
-                                : AppLocalizations.of(context)!.more,
-                            style: const TextStyle(color: Colors.green),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSection(
+    BuildContext context, {
+    required String title,
+    required int itemCount,
+    required List<dynamic> items,
+    required Widget Function(BuildContext, int) itemBuilder,
+    required int crossAxisCount,
+    required double childAspectRatio,
+    required bool showAll,
+    required VoidCallback onToggleShowAll,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Text(
+            title,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: showAll
+              ? itemCount
+              : (itemCount > crossAxisCount ? crossAxisCount : itemCount),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemBuilder: itemBuilder,
+        ),
+        if (itemCount > crossAxisCount)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: onToggleShowAll,
+              child: Text(
+                showAll ? l10n.less : l10n.more,
+                style: TextStyle(color: theme.colorScheme.primary),
+              ),
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

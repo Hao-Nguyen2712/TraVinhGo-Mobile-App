@@ -34,6 +34,7 @@ class DestinationService {
     int pageSize = 10,
     String? searchQuery,
     String? sortOrder,
+    String? typeId,
   }) async {
     try {
       var endPoint = '${_baseUrl}GetTouristDestinationPaging';
@@ -43,6 +44,7 @@ class DestinationService {
         if (searchQuery != null && searchQuery.isNotEmpty)
           'Search': searchQuery,
         if (sortOrder != null) 'Sort': sortOrder,
+        if (typeId != null) 'DestinationTypeId': typeId,
       };
 
       final response = await dio.get(endPoint,
@@ -109,5 +111,34 @@ class DestinationService {
       debugPrint('Error during get destination list: $e');
       return [];
     }
+  }
+
+  Future<List<Destination>> getAllDestinations() async {
+    final List<Destination> allDestinations = [];
+    int pageIndex = 1;
+    const int pageSize = 10;
+    bool hasMore = true;
+
+    while (hasMore) {
+      try {
+        final List<Destination> pageOfDestinations = await getDestination(
+          pageIndex: pageIndex,
+          pageSize: pageSize,
+        );
+
+        if (pageOfDestinations.isNotEmpty) {
+          allDestinations.addAll(pageOfDestinations);
+          pageIndex++;
+        } else {
+          hasMore = false;
+        }
+      } catch (e) {
+        debugPrint('Error fetching page $pageIndex for all destinations: $e');
+        hasMore = false; // Stop on error
+      }
+    }
+    debugPrint(
+        'Fetched a total of ${allDestinations.length} destinations for the map.');
+    return allDestinations;
   }
 }

@@ -4,11 +4,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:here_sdk/core.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
 import 'package:travinhgo/services/destination_service.dart';
 import 'package:travinhgo/widget/data_field_row.dart';
 import 'package:travinhgo/widget/description_fm.dart';
+import 'package:travinhgo/widget/map/map_preview.dart';
 
 import '../../Models/review/rating_summary.dart';
 import '../../Models/review/reply.dart';
@@ -112,11 +114,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
           SnackBar(
               content: Text(AppLocalizations.of(context)!.noDestinationFound)),
         );
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/');
-        }
+        Navigator.pop(context);
       }
       return;
     }
@@ -388,23 +386,22 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                                 'assets/images/navigations/leftarrowwhile.png')),
                                       ),
                                     )),
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.grey.withOpacity(0.5),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(2.0),
-                                      child: IconButton(
-                                          iconSize: 18,
-                                          onPressed: null,
-                                          icon: Image.asset(
-                                              'assets/images/navigations/share.png')),
-                                    ),
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.withOpacity(0.5),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: IconButton(
+                                        iconSize: 18,
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        icon: Image.asset(
+                                            'assets/images/navigations/share.png')),
                                   ),
                                 ),
                               ],
@@ -484,7 +481,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              Text(
+                              const Text(
                                 "82",
                                 style: TextStyle(fontSize: 16),
                               ),
@@ -586,6 +583,30 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           Divider(
                             color: Colors.grey.withOpacity(0.1),
                             thickness: 0.4,
+                            height: 10,
+                          ),
+                          SizedBox(
+                            height: 200,
+                            child: MapPreview(
+                              location: GeoCoordinates(
+                                destinationDetail.location.coordinates![1],
+                                destinationDetail.location.coordinates![0],
+                              ),
+                              onTap: () {
+                                context.push(
+                                  '/map',
+                                  extra: {
+                                    'latitude': destinationDetail
+                                        .location.coordinates![1],
+                                    'longitude': destinationDetail
+                                        .location.coordinates![0],
+                                    'name': destinationDetail.name,
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(
                             height: 10,
                           ),
                           const SizedBox(
@@ -696,15 +717,38 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           const SizedBox(
                             height: 10,
                           ),
-                          Column(
-                            children: reviews.take(5).map((review) {
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                child: ReviewItem(review: review),
-                              );
-                            }).toList(),
-                          ),
+                          // Column(
+                          //   children: reviews.take(5).map((review) {
+                          //     return Padding(
+                          //       padding: const EdgeInsets.symmetric(vertical: 10),
+                          //       child: ReviewItem(review: review),
+                          //     );
+                          //   }).toList(),
+                          // ),
+                          reviews.isEmpty
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 32.0),
+                                    child: Text(
+                                      'There are no reviews yet.',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey[600],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                )
+                              : Column(
+                                  children: reviews.take(5).map((review) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: ReviewItem(review: review),
+                                    );
+                                  }).toList(),
+                                ),
                         ],
                       ),
                     ),

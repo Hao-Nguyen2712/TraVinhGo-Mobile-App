@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/services/auth_service.dart';
 import 'package:travinhgo/widget/status_dialog.dart';
+import 'package:travinhgo/widget/success_dialog.dart';
 import 'package:travinhgo/router/app_router.dart'
     hide Scaffold; // Import to access redirect path logic
 import 'package:travinhgo/utils/constants.dart'; // Fix import path
@@ -329,37 +330,41 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         // Show success dialog before navigating to home screen
         if (mounted) {
           debugPrint("OTP: Showing success dialog");
-          await StatusDialogs.showSuccessDialog(
+          await showDialog(
             context: context,
-            message: AppLocalizations.of(context)!.authSuccessful,
-            onOkPressed: () {
-              debugPrint("OTP: Success dialog dismissed, navigating back");
-              Navigator.of(context).pop(); // Dismiss dialog
-
-              // Get the closest GoRouter to access the redirect path
-              final router = GoRouter.of(context);
-
-              // Try to find the app router instance to get the redirect path
+            builder: (context) => SuccessDialog(
+              message: AppLocalizations.of(context)!.authSuccessful,
+            ),
+          ).then((_) {
+            if (mounted) {
               _navigateAfterSuccess(context);
-            },
-          );
+            }
+          });
         }
       } else {
         debugPrint("OTP: Verification failed");
 
         if (mounted) {
           debugPrint("OTP: Showing error dialog");
-          await StatusDialogs.showErrorDialog(
+          await showDialog(
             context: context,
-            message:
-                authProvider.error ?? AppLocalizations.of(context)!.authFailed,
-            onOkPressed: () {
-              debugPrint("OTP: Error dialog dismissed");
-              Navigator.of(context).pop(); // Dismiss dialog
-              setState(() {
-                _otpError = AppLocalizations.of(context)!.invalidOtp;
-              });
-            },
+            builder: (context) => AlertDialog(
+              title: Text(AppLocalizations.of(context)!.error),
+              content: Text(authProvider.error ??
+                  AppLocalizations.of(context)!.authFailed),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    debugPrint("OTP: Error dialog dismissed");
+                    Navigator.of(context).pop(); // Dismiss dialog
+                    setState(() {
+                      _otpError = AppLocalizations.of(context)!.invalidOtp;
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.ok),
+                ),
+              ],
+            ),
           );
         }
       }

@@ -52,11 +52,6 @@ class DataFieldRow extends StatelessWidget {
             ),
           ],
         ),
-        Divider(
-          color: colorScheme.outline.withOpacity(0.2),
-          thickness: 1,
-          height: 12,
-        ),
       ],
     );
   }

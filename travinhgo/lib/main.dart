@@ -23,6 +23,7 @@ import 'package:travinhgo/utils/app_theme.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
+import 'package:travinhgo/providers/local_specialty_provider.dart';
 import 'package:travinhgo/providers/ocop_product_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -195,6 +196,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(create: (_) => NotificationProvider()),
           ChangeNotifierProvider(create: (_) => FavoriteProvider()),
           ChangeNotifierProvider(create: (_) => OcopProductProvider()),
+          ChangeNotifierProvider(create: (_) => LocalSpecialtyProvider()),
         ],
         child: Consumer<SettingProvider>(
           builder: (context, settingProvider, child) {

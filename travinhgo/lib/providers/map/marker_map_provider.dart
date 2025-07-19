@@ -13,8 +13,8 @@ class MarkerMapProvider {
   final BaseMapProvider baseMapProvider;
 
   // Marker size constants
-  static const double markerMinSize = 40.0;
-  static const double markerMaxSize = 120.0;
+  static const double markerMinSize = 80.0;
+  static const double markerMaxSize = 200.0;
   static const double minZoomLevel = 5.0;
   static const double maxZoomLevel = 20.0;
 
@@ -223,7 +223,8 @@ class MarkerMapProvider {
       mapMarker.metadata = metadata; // Set metadata
 
       // Add text to marker for CATEGORY type markers
-      if (markerType == MARKER_TYPE_CATEGORY) {
+      if (markerType == MARKER_TYPE_CATEGORY ||
+          markerType == MARKER_TYPE_TOURIST_DESTINATION) {
         // Get place name from metadata
         String? placeName = metadata.getString("place_name");
         if (placeName != null && placeName.isNotEmpty) {
@@ -264,9 +265,9 @@ class MarkerMapProvider {
 
       // Set text properties - increased size per user request
       double textSizeInPixels =
-          32; // Increased from 16 to 24 for better visibility
+          40; // Increased from 16 to 24 for better visibility
       double textOutlineSizeInPixels =
-          5; // Increased outline for better contrast
+          6; // Increased outline for better contrast
 
       // Define text placement options
       List<MapMarkerTextStylePlacement> placements = [];

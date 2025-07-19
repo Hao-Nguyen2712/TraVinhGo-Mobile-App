@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/ocop_product_widget/ocop_product_item.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteOcopTab extends StatelessWidget {
   const FavoriteOcopTab({super.key});
@@ -14,13 +13,11 @@ class FavoriteOcopTab extends StatelessWidget {
     final ocops = favoriteProvider.ocopProductList;
 
     if (ocops.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.noFavoriteOcop),
-      );
+      return const EmptyFavoritesPlaceholder();
     }
 
     return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       shrinkWrap: true,
       padding: const EdgeInsets.all(8.0), // padding ở đây
       itemCount: ocops.length,

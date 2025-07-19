@@ -18,7 +18,6 @@ import '../screens/favorite/favorite_screen.dart';
 import '../screens/feedback/feedback_form_screen.dart';
 import '../screens/itinerary_plan/itinerary_plan_detail_screen.dart';
 import '../screens/itinerary_plan/itinerary_plan_list_screen.dart';
-import '../screens/itinerary_plan/itinerary_plan_screen.dart';
 import '../screens/local_specialty/local_specialty_detail_screen.dart';
 import '../screens/ocop_product/ocop_product_detail_screen.dart';
 import '../screens/map/map_screen.dart';
@@ -217,24 +216,8 @@ class AppRouter {
         name: 'OcopProductDetail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return AuthRequiredScreen(
-            message: 'Please login to use this feature',
-            child: OcopProductDetailScreen(
-              id: id,
-            ),
-          );
-        },
-      ),
-      GoRoute(
-        path: '/tourist-destination-detail/:id',
-        name: 'TouristDestinationDetail',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return AuthRequiredScreen(
-            message: 'Please login to use this feature',
-            child: DestinationDetailScreen(
-              id: id,
-            ),
+          return OcopProductDetailScreen(
+            id: id,
           );
         },
       ),
@@ -242,11 +225,6 @@ class AppRouter {
         path: '/notification',
         name: 'Notification',
         builder: (context, state) => const MessageScreen(),
-      ),
-      GoRoute(
-        path: '/itinerary-plan',
-        name: 'ItineraryPlan',
-        builder: (context, state) => const ItineraryPlanScreen(),
       ),
       GoRoute(
         path: '/feedback',
@@ -272,20 +250,32 @@ class AppRouter {
         },
         routes: [
           GoRoute(
+              path: '/tourist-destination-detail/:id',
+              name: 'TouristDestinationDetail',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return AuthRequiredScreen(
+                  message: 'Please login to use this feature',
+                  child: DestinationDetailScreen(
+                    id: id,
+                  ),
+                );
+              }),
+          GoRoute(
             path: '/home',
             name: 'home',
             builder: (context, state) => const HomeScreen(),
           ),
           GoRoute(
             path: '/map',
-            name: 'map',
+            name: 'map_shell',
             builder: (context, state) {
-              final double? lat =
-                  double.tryParse(state.uri.queryParameters['lat'] ?? '');
-              final double? lon =
-                  double.tryParse(state.uri.queryParameters['lon'] ?? '');
-              final String? name = state.uri.queryParameters['name'];
-              return MapScreen(latitude: lat, longitude: lon, name: name);
+              final args = state.extra as Map<String, dynamic>?;
+              return MapScreen(
+                latitude: args?['latitude'] as double?,
+                longitude: args?['longitude'] as double?,
+                name: args?['name'] as String?,
+              );
             },
           ),
           GoRoute(
@@ -477,7 +467,7 @@ class AppRouter {
 
         // Check if the redirect path is one of our tab routes to ensure correct tab selection
         // This ensures we return to the correct tab in the navigation bar
-        if (redirectTo == '/itinerary-plan' ||
+        if (redirectTo == '/events' ||
             redirectTo == '/favorites' ||
             redirectTo == '/profile' ||
             redirectTo == '/map' ||

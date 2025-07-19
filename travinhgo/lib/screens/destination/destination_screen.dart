@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../models/destination/destination.dart';
 import '../../providers/destination_provider.dart';
 import '../../widget/destination_widget/destination_item.dart';
 
@@ -16,6 +17,7 @@ class DestinationScreen extends StatefulWidget {
 class _DestinationScreenState extends State<DestinationScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedDestinationTypeId;
   Timer? _debounce;
@@ -37,6 +39,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
     _debounce?.cancel();
     _focusNode.dispose();
     super.dispose();
@@ -48,38 +51,33 @@ class _DestinationScreenState extends State<DestinationScreen> {
             _scrollController.position.maxScrollExtent - 200 &&
         !provider.isLoadingMore &&
         provider.hasMore) {
-      provider.fetchDestinations(
-        searchQuery: _searchQuery,
-        typeId: _selectedDestinationTypeId,
-      );
+      provider.fetchDestinations();
     }
   }
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      setState(() {
-        _searchQuery = query;
-      });
-      Provider.of<DestinationProvider>(context, listen: false)
-          .fetchDestinations(
-        isRefresh: true,
-        searchQuery: query,
-        typeId: _selectedDestinationTypeId,
-      );
+
+      final provider = Provider.of<DestinationProvider>(context, listen: false);
+      provider.applySearchQuery(query);
     });
   }
 
   void _onFilter(String? typeId) {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
     setState(() {
       _selectedDestinationTypeId = typeId;
     });
-    Provider.of<DestinationProvider>(context, listen: false).fetchDestinations(
-      isRefresh: true,
-      searchQuery: _searchQuery,
-      typeId: _selectedDestinationTypeId,
-    );
+    Provider.of<DestinationProvider>(context, listen: false)
+        .applyCategoryFilter(typeId);
   }
 
   @override
@@ -88,13 +86,12 @@ class _DestinationScreenState extends State<DestinationScreen> {
 
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Consumer<DestinationProvider>(
           builder: (context, provider, child) {
             return RefreshIndicator(
               onRefresh: () => provider.fetchDestinations(
                 isRefresh: true,
-                searchQuery: _searchQuery,
-                typeId: _selectedDestinationTypeId,
               ),
               child: CustomScrollView(
                 controller: _scrollController,
@@ -102,32 +99,42 @@ class _DestinationScreenState extends State<DestinationScreen> {
                   SliverAppBar(
                     floating: true,
                     snap: true,
-                    title: Text(AppLocalizations.of(context)!.destination),
+                    backgroundColor: theme.colorScheme.primary,
+                    title: Text(
+                      AppLocalizations.of(context)!.destination,
+                      style: const TextStyle(color: Colors.white),
+                    ),
                     centerTitle: true,
                     leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new),
+                      icon: const Icon(Icons.arrow_back_ios_new,
+                          color: Colors.white),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: TextField(
-                        focusNode: _focusNode,
-                        onChanged: _onSearchChanged,
-                        decoration: InputDecoration(
-                          hintText:
-                              AppLocalizations.of(context)!.searchDestination,
-                          prefixIcon: Icon(Icons.search,
-                              color: theme.colorScheme.onSurfaceVariant),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(60),
-                            borderSide: BorderSide.none,
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _searchController,
+                            focusNode: _focusNode,
+                            onChanged: _onSearchChanged,
+                            decoration: InputDecoration(
+                              hintText: AppLocalizations.of(context)!
+                                  .searchDestination,
+                              prefixIcon: Icon(Icons.search,
+                                  color: theme.colorScheme.onSurfaceVariant),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(60),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceVariant
+                                  .withOpacity(0.6),
+                            ),
                           ),
-                          filled: true,
-                          fillColor:
-                              theme.colorScheme.surfaceVariant.withOpacity(0.6),
-                        ),
+                        ],
                       ),
                     ),
                   ),

@@ -22,9 +22,11 @@ class LocalSpecialties {
       foodName: json['foodName'],
       description: json['description'],
       images: List<String>.from(json['images']),
-      locations: (json['locations'] as List)
-          .map((e) => LocalSpecialtyLocation.fromJson(e))
-          .toList(),
+      locations: json['locations'] == null
+          ? []
+          : (json['locations'] as List)
+              .map((e) => LocalSpecialtyLocation.fromJson(e))
+              .toList(),
       tagId: json['tagId'],
     );
   }

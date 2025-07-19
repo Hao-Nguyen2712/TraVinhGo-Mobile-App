@@ -151,6 +151,7 @@
     "errorLoadingProfile": "Error loading profile: {error}",
     "logOut": "Log Out",
     "logOutConfirmation": "Are you sure you want to log out?",
+    "logOutSuccess": "You have been logged out successfully.",
     "cancel": "Cancel",
     "loggingOut": "Logging out...",
     "profile": "Profile",
@@ -200,5 +201,16 @@
     "system": "System",
     "light": "Light",
     "dark": "Dark",
-    "accommodation": "Accommodation"
+    "accommodation": "Accommodation",
+    "reviews": "Reviews",
+    "seeAll": "See All",
+    "activities": "Activities",
+    "touristAttraction": "Tourist attraction",
+    "featuredOcopProducts": "Featured ocop products",
+    "addFavoriteSuccess": "Added to favorites successfully",
+    "removeFavoriteSuccess": "Removed from favorites successfully",
+    "noFavoritesYet": "No Favorites Yet",
+    "noFavoritesYetDescription": "Explore and add your favorite destinations, products, and local specialties here!",
+    "discoverNow": "Discover Now",
+    "search": "Search..."
 }

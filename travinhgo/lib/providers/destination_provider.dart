@@ -6,6 +6,7 @@ import 'package:travinhgo/services/destination_service.dart';
 import 'package:travinhgo/services/destination_type_service.dart';
 import 'package:travinhgo/services/marker_service.dart';
 import 'dart:developer' as developer;
+import 'package:diacritic/diacritic.dart';
 
 class DestinationProvider with ChangeNotifier {
   final DestinationService _destinationService = DestinationService();
@@ -14,7 +15,8 @@ class DestinationProvider with ChangeNotifier {
   final MarkerService _markerService = MarkerService();
 
   // --- State Variables ---
-  List<Destination> _destinations = [];
+  List<Destination> _allDestinations = []; // Master list for paginated items
+  List<Destination> _mapDestinations = []; // Complete list for the map
   List<DestinationType> _destinationTypes = [];
   List<Marker> _markers = [];
 
@@ -22,8 +24,9 @@ class DestinationProvider with ChangeNotifier {
   int _currentPage = 1;
   final int _pageSize = 10;
   bool _hasMore = true;
-  bool _isLoading = false; // For initial load
-  bool _isLoadingMore = false; // For subsequent loads
+  bool _isLoading = false; // For initial load (list)
+  bool _isLoadingMore = false; // For subsequent loads (list)
+  bool _isMapDataLoading = false; // For map data loading
   String? _errorMessage;
 
   // Filter/Search State
@@ -31,43 +34,68 @@ class DestinationProvider with ChangeNotifier {
   String? _currentTypeId;
 
   // --- Getters ---
-  List<Destination> get destinations => _destinations;
+  List<Destination> get destinations {
+    List<Destination> filtered = List.from(_allDestinations);
+
+    // Apply search query
+    if (_currentSearchQuery != null && _currentSearchQuery!.isNotEmpty) {
+      final a = _currentSearchQuery!.toLowerCase();
+      final formattedQuery = removeDiacritics(a);
+      filtered = filtered
+          .where((d) =>
+              removeDiacritics(d.name.toLowerCase()).contains(formattedQuery))
+          .toList();
+    }
+
+    // Apply type filter
+    if (_currentTypeId != null) {
+      filtered =
+          filtered.where((d) => d.destinationTypeId == _currentTypeId).toList();
+    }
+
+    return filtered;
+  }
+
+  List<Destination> get allDestinationsForMap => _mapDestinations;
+  List<Destination> get allDestinations => _allDestinations;
   List<DestinationType> get destinationTypes => _destinationTypes;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
+  bool get isMapDataLoading => _isMapDataLoading;
   bool get hasMore => _hasMore;
   String? get errorMessage => _errorMessage;
+
+  // --- Filter Management ---
+  void applySearchQuery(String? searchQuery) {
+    _currentSearchQuery = searchQuery;
+    notifyListeners();
+  }
+
+  Future<void> applyCategoryFilter(String? typeId) async {
+    _currentTypeId = typeId;
+    notifyListeners();
+    await fetchDestinations(isRefresh: true);
+  }
 
   // --- Main Data Fetching Method ---
   Future<void> fetchDestinations({
     bool isRefresh = false,
-    String? searchQuery,
-    String? typeId,
   }) async {
     // Prevent concurrent calls
     if (_isLoading || (_isLoadingMore && !isRefresh)) return;
 
-    // If the search query or filter has changed, force a refresh.
-    if (searchQuery != _currentSearchQuery || typeId != _currentTypeId) {
-      isRefresh = true;
-    }
-
     if (isRefresh) {
       _currentPage = 1;
       _hasMore = true;
-      _destinations = [];
-      _currentSearchQuery = searchQuery;
-      _currentTypeId = typeId;
+      _allDestinations = [];
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
     } else {
-      // If not a refresh, it's a "load more" action
       _isLoadingMore = true;
       notifyListeners();
     }
 
-    // If we've already loaded everything, don't make another API call
     if (!_hasMore && !isRefresh) {
       _isLoading = false;
       _isLoadingMore = false;
@@ -76,24 +104,22 @@ class DestinationProvider with ChangeNotifier {
     }
 
     try {
-      // Fetch data from the service with pagination and search parameters
       final newDestinations = await _destinationService.getDestination(
         pageIndex: _currentPage,
         pageSize: _pageSize,
         searchQuery: _currentSearchQuery,
-        // Assuming the service will be updated to handle typeId
-        // typeId: _currentTypeId,
+        typeId: _currentTypeId,
       );
 
       if (newDestinations.isEmpty || newDestinations.length < _pageSize) {
         _hasMore = false;
       }
 
-      _destinations.addAll(newDestinations);
+      _allDestinations.addAll(newDestinations);
       _currentPage++;
 
       developer.log(
-          'Fetched page $_currentPage. Has more: $_hasMore. Total items: ${_destinations.length}',
+          'Fetched page $_currentPage. Has more: $_hasMore. Total items: ${_allDestinations.length}',
           name: 'DestinationProvider');
     } catch (e) {
       _errorMessage = "Failed to load destination data: ${e.toString()}";
@@ -101,6 +127,29 @@ class DestinationProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       _isLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  // --- Helper method to fetch all destinations for the map ---
+  Future<void> fetchAllDestinationsForMap() async {
+    if (_mapDestinations.isNotEmpty || _isMapDataLoading) {
+      return; // Avoid refetching if already loaded or loading
+    }
+    _isMapDataLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _mapDestinations = await _destinationService.getAllDestinations();
+      developer.log(
+          'Fetched all ${_mapDestinations.length} destinations for map view.',
+          name: 'DestinationProvider');
+    } catch (e) {
+      _errorMessage = "Failed to load map destination data: ${e.toString()}";
+      developer.log(_errorMessage!, name: 'DestinationProvider');
+    } finally {
+      _isMapDataLoading = false;
       notifyListeners();
     }
   }

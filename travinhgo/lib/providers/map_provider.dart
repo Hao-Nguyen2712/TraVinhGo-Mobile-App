@@ -15,7 +15,7 @@ import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'dart:ui' show Color;
 
-import '../Models/Maps/top_favorite_destination.dart';
+import '../models/maps/top_favorite_destination.dart';
 import '../services/map_service.dart';
 import 'ocop_product_provider.dart';
 
@@ -76,12 +76,16 @@ class DestinationMapProvider {
 
     try {
       // Fetch data only if it hasn't been loaded yet
-      if (_allDestinations.isEmpty) {
-        developer.log('No destinations loaded. Fetching destinations...',
+      if (destinationProvider.allDestinationsForMap.isEmpty) {
+        developer.log(
+            'No map destinations loaded. Fetching all destinations for map...',
             name: 'DestinationMapProvider');
-        await destinationProvider.fetchDestinations(isRefresh: true);
-        _allDestinations = destinationProvider.destinations;
+        await destinationProvider.fetchAllDestinationsForMap();
+        _allDestinations = destinationProvider.allDestinationsForMap;
         dataWasFetched = true;
+      } else {
+        // If data is already loaded, just use it
+        _allDestinations = destinationProvider.allDestinationsForMap;
       }
 
       if (_allDestinations.isEmpty) {
@@ -138,9 +142,9 @@ class DestinationMapProvider {
           'Raw coordinates for ${destination.name}: ${destination.location.coordinates}',
           name: 'DestinationMapProvider');
 
-      // Extract coordinates - API provides [latitude, longitude]
-      final double latitude = destination.location.coordinates![0];
-      final double longitude = destination.location.coordinates![1];
+      // Extract coordinates - API provides [longitude, latitude]
+      final double longitude = destination.location.coordinates![0];
+      final double latitude = destination.location.coordinates![1];
 
       // Check for invalid coordinate values
       if (longitude < -180 ||
@@ -923,11 +927,20 @@ class MapProvider extends ChangeNotifier {
 
   /// Updates the current destination index and moves to that destination
   void updateCurrentDestination(int index) {
+    // When user interacts with the slider, close any open POI popup
+    if (showPoiPopup) {
+      closePoiPopup();
+    }
+
     currentDestinationIndex = index;
 
-    // Move to the destination on the map
-    if (topDestinations.isNotEmpty && topDestinations[index].id != null) {
-      moveToDestination(topDestinations[index].id!);
+    if (topDestinations.isNotEmpty && index < topDestinations.length) {
+      final destination = topDestinations[index];
+      if (destination.latitude != null && destination.longitude != null) {
+        final coordinates =
+            GeoCoordinates(destination.latitude!, destination.longitude!);
+        moveCamera(coordinates, 1000.0); // Zoom closer
+      }
     }
 
     notifyListeners();
@@ -946,20 +959,42 @@ class MapProvider extends ChangeNotifier {
   /// Loads top favorite destinations from the service
   Future<void> loadTopDestinations() async {
     try {
-      isLoading = true;
-      notifyListeners();
+      // Ensure all destinations are loaded for the map first
+      if (_destinationProvider.allDestinationsForMap.isEmpty) {
+        await _destinationProvider.fetchAllDestinationsForMap();
+      }
 
-      final destinations = await _mapService.getTopFavoriteDestinations();
+      // Get the full list of destinations
+      final allDestinations = _destinationProvider.allDestinationsForMap;
 
-      topDestinations = destinations;
+      // Sort destinations by average rating in descending order
+      allDestinations.sort(
+          (a, b) => (b.avarageRating ?? 0.0).compareTo(a.avarageRating ?? 0.0));
+
+      // Take the top 5
+      final top5 = allDestinations.take(5).toList();
+
+      // Convert Destination objects to TopFavoriteDestination objects
+      topDestinations = top5.map((dest) {
+        return TopFavoriteDestination(
+          dest.id,
+          dest.name,
+          dest.images.isNotEmpty ? dest.images.first : '',
+          dest.avarageRating,
+          dest.description ?? '',
+          dest.location.coordinates?[1], // Latitude
+          dest.location.coordinates?[0], // Longitude
+        );
+      }).toList();
+
       destinationsLoaded = true;
-      isLoading = false;
-      notifyListeners();
+      developer.log(
+          'Loaded top 5 destinations based on rating: ${topDestinations.map((d) => d.name).join(', ')}',
+          name: 'MapProvider');
     } catch (e) {
-      developer.log('Error loading top destinations: $e', name: 'MapProvider');
-      isLoading = false;
-      destinationsLoaded = false;
-      topDestinations = [];
+      errorMessage = "Failed to load top destinations: ${e.toString()}";
+      developer.log(errorMessage!, name: 'MapProvider');
+    } finally {
       notifyListeners();
     }
   }

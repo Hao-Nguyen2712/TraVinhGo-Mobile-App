@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/local_specialty_widget/local_specialty_item.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteLocalTab extends StatelessWidget {
   const FavoriteLocalTab({super.key});
@@ -14,13 +13,11 @@ class FavoriteLocalTab extends StatelessWidget {
     final locals = favoriteProvider.localSpecialteList;
 
     if (locals.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.noFavoriteLocal),
-      );
+      return const EmptyFavoritesPlaceholder();
     }
 
     return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       shrinkWrap: true,
       padding: const EdgeInsets.all(8.0), // padding ở đây
       itemCount: locals.length,
