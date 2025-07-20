@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
 import '../../Models/tip/tip.dart';
 import '../../providers/tag_provider.dart';
@@ -22,13 +23,19 @@ class _TipScreenState extends State<TipScreen> {
   bool _isLoading = true;
   List<bool> _expandedList = [];
 
-  String _searchQuery = '';
   String? _selectedTipTypeId;
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     fetchTips();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchTips() async {
@@ -47,8 +54,14 @@ class _TipScreenState extends State<TipScreen> {
       final matchesType =
           _selectedTipTypeId == null || tip.tagId == _selectedTipTypeId;
 
-      final matchesSearch = _searchQuery.isEmpty ||
-          tip.title.toLowerCase().contains(_searchQuery.toLowerCase());
+      final searchQuery = _searchController.text;
+      final normalizedQuery =
+          StringHelper.removeDiacritics(searchQuery.toLowerCase());
+      final normalizedTitle =
+          StringHelper.removeDiacritics(tip.title.toLowerCase());
+
+      final matchesSearch =
+          searchQuery.isEmpty || normalizedTitle.contains(normalizedQuery);
 
       return matchesType && matchesSearch;
     }).toList();
@@ -68,302 +81,165 @@ class _TipScreenState extends State<TipScreen> {
         statusBarBrightness: isDarkMode ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: kbackgroundColor,
-        body: SafeArea(
-          top: false,
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                floating: true,
-                snap: true,
-                elevation: 0,
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                title: Text(
-                  AppLocalizations.of(context)!.tipTravel,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                centerTitle: true,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
+        backgroundColor: theme.colorScheme.surface,
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              elevation: 0,
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              title: Text(
+                AppLocalizations.of(context)!.tipTravel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-
-              // Search field
-              SliverToBoxAdapter(
-                child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Autocomplete<String>(
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty)
-                          return const Iterable<String>.empty();
-                        return _nameTips.where((name) => name
-                            .toLowerCase()
-                            .contains(textEditingValue.text.toLowerCase()));
-                      },
-                      onSelected: (String selection) {
-                        setState(() {
-                          _searchQuery = selection;
-                        });
-                      },
-                      fieldViewBuilder:
-                          (context, controller, focusNode, onFieldSubmitted) {
-                        return TextField(
-                          controller: controller,
-                          focusNode: focusNode,
-                          onSubmitted: (value) {
-                            setState(() {
-                              _searchQuery = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText:
-                                AppLocalizations.of(context)!.searchOcopProduct,
-                            prefixIcon: const Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(60),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: kSearchBackgroundColor,
-                          ),
-                        );
-                      },
-                      optionsViewBuilder: (context, onSelected, options) {
-                        return Align(
-                          alignment: Alignment.topLeft,
-                          child: Material(
-                            elevation: 4,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              constraints: const BoxConstraints(maxHeight: 200),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: ListView.builder(
-                                padding: EdgeInsets.zero,
-                                itemCount: options.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final option = options.elementAt(index);
-                                  return InkWell(
-                                    onTap: () {
-                                      onSelected(option);
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12.0, vertical: 12.0),
-                                      child: Text(
-                                        option,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    )),
+              centerTitle: true,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  height: 40,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: tagProvider.tags.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedTipTypeId = null;
-                              _searchQuery = '';
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              color: _selectedTipTypeId == null
-                                  ? kprimaryColor
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: _selectedTipTypeId == null
-                                    ? kprimaryColor
-                                    : Colors.grey.shade300,
-                                width: 1.5,
-                              ),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            child: Row(
-                              children: [
-                                Icon(Icons.apps,
-                                    size: 20,
-                                    color: _selectedTipTypeId == null
-                                        ? Colors.white
-                                        : Colors.black),
-                                const SizedBox(width: 5),
-                                Text(
-                                  AppLocalizations.of(context)!.all,
-                                  style: TextStyle(
-                                    color: _selectedTipTypeId == null
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-                      final tag = tagProvider.tags[index - 1];
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedTipTypeId = tag.id;
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            color: tag.id == _selectedTipTypeId
-                                ? kprimaryColor
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: tag.id == _selectedTipTypeId
-                                  ? kprimaryColor
-                                  : Colors.grey.shade300,
-                              width: 1.5,
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              Image.network(
-                                tag.image ?? "",
-                                width: 20,
-                                height: 20,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                tag.name,
-                                style: TextStyle(
-                                  color: tag.id == _selectedTipTypeId
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+            ),
+          ],
+          body: Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() {});
                     },
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 10),
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.search,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(60),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor:
+                          theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                    ),
                   ),
                 ),
-              ),
-
-              // Loading or list of tips
-              _isLoading
-                  ? const SliverToBoxAdapter(
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
+                Expanded(
+                  child: _isLoading
+                      ? const Center(
                           child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final tip = _filteredTips[index];
-                          final tag = tagProvider.getTagById(tip.tagId);
-                          return Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        StringHelper.toTitleCase(tip.title),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(8),
+                          itemCount: _filteredTips.length,
+                          itemBuilder: (context, index) {
+                            final tip = _filteredTips[index];
+                            final tag = tagProvider.getTagById(tip.tagId);
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      StringHelper.toTitleCase(tip.title),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                          child: Image.network(
+                                            tag.image,
+                                            width: 20,
+                                            height: 20,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          tag.name,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: theme
+                                                .colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Html(
+                                      data: tip.content,
+                                      style: {
+                                        "body": Style(
+                                          maxLines:
+                                              _expandedList[index] ? 1000 : 3,
+                                          textOverflow: TextOverflow.ellipsis,
+                                          fontSize: FontSize(15),
+                                          color: theme
+                                              .colorScheme.onSurfaceVariant,
+                                        ),
+                                      },
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: TextButton.icon(
+                                        onPressed: () {
+                                          setState(() {
+                                            _expandedList[index] =
+                                                !_expandedList[index];
+                                          });
+                                        },
+                                        icon: Text(
+                                          _expandedList[index]
+                                              ? AppLocalizations.of(context)!
+                                                  .collapse
+                                              : AppLocalizations.of(context)!
+                                                  .seeMore,
+                                          style: TextStyle(
+                                              color: theme.colorScheme.primary),
+                                        ),
+                                        label: Icon(
+                                          _expandedList[index]
+                                              ? Icons.expand_less
+                                              : Icons.expand_more,
+                                          color: theme.colorScheme.primary,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                            child: Image.network(
-                                              tag.image,
-                                              width: 26,
-                                              height: 26,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 4,
-                                          ),
-                                          Text(
-                                            tag.name,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                  trailing: Icon(_expandedList[index]
-                                      ? Icons.expand_less
-                                      : Icons.expand_more),
-                                  onTap: () {
-                                    setState(() {
-                                      _expandedList[index] =
-                                          !_expandedList[index];
-                                    });
-                                  },
+                                    )
+                                  ],
                                 ),
-                                if (_expandedList[index])
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                    child: Text(
-                                      tip.content,
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                        childCount: _filteredTips.length,
-                      ),
-                    ),
-            ],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

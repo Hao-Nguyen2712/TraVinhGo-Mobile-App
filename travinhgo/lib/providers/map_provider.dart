@@ -842,8 +842,12 @@ class MapProvider extends ChangeNotifier {
   /// Select a departure suggestion
   void selectDepartureSuggestion(Suggestion suggestion) {
     _searchMapProvider.selectDepartureSuggestion(suggestion,
-        (coordinates, name) {
+        (coordinates, name) async {
       _navigationMapProvider.addDepartureMarker(coordinates, name);
+      await _navigationMapProvider.updateAddressesFromCoordinates();
+      // Batch state updates and notify once to prevent race conditions
+      _navigationMapProvider.hideDepartureInput();
+      _searchMapProvider.clearSearchResults();
       notifyListeners();
     });
   }

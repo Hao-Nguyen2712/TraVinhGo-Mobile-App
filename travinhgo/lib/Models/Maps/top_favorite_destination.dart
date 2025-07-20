@@ -12,7 +12,7 @@ class TopFavoriteDestination {
 
   factory TopFavoriteDestination.fromJson(Map<String, dynamic> json) {
     return TopFavoriteDestination(
-      json['Id'] as String?,
+      json['id'] as String?,
       json['name'] as String?,
       json['image'] as String?,
       (json['averageRating'] as num?)?.toDouble() ?? 0.0,

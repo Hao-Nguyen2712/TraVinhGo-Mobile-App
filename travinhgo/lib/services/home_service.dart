@@ -42,7 +42,7 @@ class HomeService {
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data['data'];
-        debugPrint('data: ${data.toString()}');  // cách đơn giản
+        debugPrint('Home_data: ${data.toString()}'); // cách đơn giản
         return HomePageData.fromJson(data);
       } else {
         return null;

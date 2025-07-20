@@ -29,14 +29,17 @@ class NotificationItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  textAlign: TextAlign.left,
-                  StringHelper.toTitleCase(userNotification.title),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    textAlign: TextAlign.left,
+                    StringHelper.toTitleCase(userNotification.title),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -53,7 +56,8 @@ class NotificationItem extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Html(
-              data: StringHelper.capitalizeFirstHtmlTextContent(userNotification.content ?? 'N/A'),
+              data: StringHelper.capitalizeFirstHtmlTextContent(
+                  userNotification.content ?? 'N/A'),
               style: _htmlStyle(context),
             ),
           ],
