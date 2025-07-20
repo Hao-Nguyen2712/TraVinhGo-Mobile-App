@@ -86,30 +86,70 @@ class LocationSelectionPanel extends StatelessWidget {
                   isDeparture: true,
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 4.0, horizontal: 40.0),
-                  child: Divider(
-                      height: 1,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withOpacity(0.5)),
-                ),
+                if (!provider.isShowingDepartureInput) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4.0, horizontal: 40.0),
+                    child: Divider(
+                        height: 1,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withOpacity(0.5)),
+                  ),
+                  _buildRoutePoint(
+                    context: context,
+                    icon: Icons.location_on,
+                    iconColor: Theme.of(context).colorScheme.error,
+                    title: AppLocalizations.of(context)!.destinationPoint,
+                    locationName: provider.destinationName ?? "Không xác định",
+                    locationAddress: provider.destinationAddress,
+                    onTap: () {
+                      // Destination is not editable directly from here
+                    },
+                    isEditable: false,
+                  ),
+                ],
 
-                // Destination point
-                _buildRoutePoint(
-                  context: context,
-                  icon: Icons.location_on,
-                  iconColor: Theme.of(context).colorScheme.error,
-                  title: AppLocalizations.of(context)!.destinationPoint,
-                  locationName: provider.destinationName ?? "Không xác định",
-                  locationAddress: provider.destinationAddress,
-                  onTap: () {
-                    // Destination is not editable directly from here
-                  },
-                  isEditable: false,
-                ),
+                // Search suggestions for departure
+                if (provider.isShowingDepartureInput &&
+                    provider.searchSuggestions.isNotEmpty)
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 240),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1, indent: 16, endIndent: 16),
+                      itemCount: provider.searchSuggestions.length,
+                      itemBuilder: (context, index) {
+                        // Guard against RangeError if the list is modified during build
+                        if (index >= provider.searchSuggestions.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final suggestion = provider.searchSuggestions[index];
+                        return ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 0),
+                          leading: Icon(Icons.location_on_outlined,
+                              size: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
+                          title: Text(
+                            suggestion.title ?? "Unnamed location",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          onTap: () {
+                            provider.selectDepartureSuggestion(suggestion);
+                            departureController.text = suggestion.title ?? "";
+                            FocusScope.of(context).unfocus(); // Hide keyboard
+                          },
+                        );
+                      },
+                    ),
+                  ),
               ],
             ),
           ),
@@ -118,8 +158,15 @@ class LocationSelectionPanel extends StatelessWidget {
           if (provider.isShowingDepartureInput &&
               provider.searchSuggestions.isEmpty)
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: colorScheme.primaryContainer,
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16.0),
+                  bottomRight: Radius.circular(16.0),
+                ),
+              ),
               child: Row(
                 children: [
                   Icon(Icons.touch_app,
@@ -231,10 +278,10 @@ class LocationSelectionPanel extends StatelessWidget {
                     errorBorder: InputBorder.none,
                     disabledBorder: InputBorder.none,
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.white : null,
                   ),
                 )
               :
@@ -618,72 +665,6 @@ class _RoutingUIState extends State<RoutingUI> {
                 panel: _buildDraggablePanel(provider, isDarkMode),
                 collapsed: _buildCollapsedPanel(provider, isDarkMode),
                 body: Container(), // The underlying map is the body
-              ),
-
-            // Search suggestions for departure (positioned at the end of Stack to ensure it's on top)
-            if (provider.isShowingDepartureInput &&
-                provider.searchSuggestions.isNotEmpty)
-              Positioned(
-                top: MediaQuery.of(context).padding.top +
-                    100, // Adjusted position to account for the swap button and increased height
-                left: 40,
-                right: 40,
-                child: Material(
-                  elevation: 30, // Increased elevation for higher z-index
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    constraints: BoxConstraints(
-                        maxHeight:
-                            240), // Increased max height to show more results
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withOpacity(0.5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .shadow
-                              .withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      separatorBuilder: (context, index) => Divider(height: 1),
-                      itemCount: provider.searchSuggestions.length,
-                      itemBuilder: (context, index) {
-                        final suggestion = provider.searchSuggestions[index];
-                        return ListTile(
-                          dense: true,
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                          leading: Icon(Icons.location_on_outlined,
-                              size: 18,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant),
-                          title: Text(
-                            suggestion.title ?? "Unnamed location",
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          onTap: () {
-                            provider.selectDepartureSuggestion(suggestion);
-                            _departureController.text = suggestion.title ?? "";
-                            FocusScope.of(context).unfocus(); // Hide keyboard
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
               ),
           ],
         );

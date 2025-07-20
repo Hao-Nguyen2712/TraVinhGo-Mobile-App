@@ -620,6 +620,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     : AppLocalizations.of(context)!
                         .edit, // Change text based on mode
                 style: GoogleFonts.montserrat(
+                  color: theme.colorScheme.onPrimary,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),

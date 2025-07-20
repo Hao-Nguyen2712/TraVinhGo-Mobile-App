@@ -9,8 +9,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../providers/tag_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
+import '../../widget/event_festival_widget/event_festival_content_tab.dart';
 import '../../widget/event_festival_widget/event_festival_image_slider_tab.dart';
-import '../../widget/event_festival_widget/description_event_tab.dart';
 import '../../widget/event_festival_widget/event_festival_information_tab.dart';
 
 class EventFesftivalDetailScreen extends StatefulWidget {
@@ -26,18 +26,18 @@ class EventFesftivalDetailScreen extends StatefulWidget {
 class _EventFesftivalDetailScreenState
     extends State<EventFesftivalDetailScreen> {
   late EventAndFestival eventAndFestival;
-  int currentIndexTab = 0;
   bool _isLoading = true;
 
   late List<Widget> screensTab;
 
   @override
   void initState() {
-    fetchEventFestival(widget.id);
     super.initState();
+    fetchEventFestival(widget.id);
   }
 
   Future<void> preloadImages(List<String> urls) async {
+    if (!mounted) return;
     await Future.wait(urls.map(
       (url) => precacheImage(CachedNetworkImageProvider(url), context),
     ));
@@ -70,7 +70,7 @@ class _EventFesftivalDetailScreenState
           EventFestivalInformationTab(
             eventAndFestival: eventAndFestival,
           ),
-          DescriptionEventTab(description: eventAndFestival.description),
+          EventFestivalContentTab(description: eventAndFestival.description),
           EventFestivalImageSliderTab(
             onChange: (index) {},
             imageList: eventAndFestival.images,
@@ -84,279 +84,210 @@ class _EventFesftivalDetailScreenState
   @override
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
-    return Scaffold(
-      body: SafeArea(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 300,
-                        child: Stack(
-                          children: [
-                            ClipRRect(
-                              child: CachedNetworkImage(
-                                imageUrl: eventAndFestival.images.first,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                                placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator()),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
-                              ),
-                            ),
-                            Positioned.fill(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 12,
-                              left: 8,
-                              right: 8,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.black.withOpacity(0.3),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: Center(
-                                            child: IconButton(
-                                                onPressed: () {
-                                                  context.pop();
-                                                },
-                                                icon: Image.asset(
-                                                    'assets/images/navigations/leftarrowwhile.png')),
-                                          ),
-                                        )),
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.black.withOpacity(0.3),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(2.0),
-                                        child: IconButton(
-                                            iconSize: 18,
-                                            onPressed: () {
-                                              context.pop();
-                                            },
-                                            icon: Image.asset(
-                                                'assets/images/navigations/share.png')),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : NestedScrollView(
+                headerSliverBuilder:
+                    (BuildContext context, bool innerBoxIsScrolled) {
+                  return <Widget>[
+                    SliverAppBar(
+                      expandedHeight: 250.0,
+                      floating: false,
+                      pinned: true,
+                      stretch: true,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      leading: Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon:
+                              const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => context.pop(),
                         ),
                       ),
-                      const SizedBox(
-                        height: 8,
+                      actions: [
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.favorite_border,
+                                color: Colors.white),
+                            onPressed: () {},
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.share, color: Colors.white),
+                            onPressed: () {},
+                          ),
+                        ),
+                      ],
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: PageView.builder(
+                          itemCount: eventAndFestival.images.length,
+                          itemBuilder: (context, index) {
+                            return CachedNetworkImage(
+                              imageUrl: eventAndFestival.images[index],
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator()),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                            );
+                          },
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  StringHelper.toTitleCase(
-                                      eventAndFestival.nameEvent),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w900,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                )),
+                            Text(
+                              StringHelper.toTitleCase(
+                                  eventAndFestival.nameEvent),
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Image.network(
                                   tagProvider
                                       .getTagById(eventAndFestival.tagId)
                                       .image,
-                                  width: 36,
-                                  height: 36,
+                                  width: 24,
+                                  height: 24,
                                 ),
-                                const SizedBox(
-                                  width: 8,
-                                ),
+                                const SizedBox(width: 8),
                                 Text(
                                   StringHelper.toTitleCase(
                                       eventAndFestival.category),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ],
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 12,
+                    ),
+                    SliverPersistentHeader(
+                      delegate: _SliverAppBarDelegate(
+                        TabBar(
+                          labelColor: Theme.of(context).colorScheme.primary,
+                          unselectedLabelColor: Colors.grey,
+                          indicatorColor: Theme.of(context).colorScheme.primary,
+                          tabs: [
+                            Tab(
+                                text:
+                                    AppLocalizations.of(context)!.information),
+                            Tab(text: AppLocalizations.of(context)!.content),
+                            Tab(text: AppLocalizations.of(context)!.pictures),
+                          ],
+                        ),
                       ),
-                      Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 50),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                OutlinedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      this.currentIndexTab = 0;
-                                    });
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 18, vertical: 1),
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(13),
-                                        bottomRight: Radius.circular(13),
-                                      ),
-                                    ),
-                                    side: BorderSide(
-                                        color: Theme.of(context).dividerColor),
-                                    backgroundColor: this.currentIndexTab == 0
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.surface,
-                                  ),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.information,
-                                    style: TextStyle(
-                                        color: this.currentIndexTab == 0
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .onPrimary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w900),
-                                  ),
-                                ),
-                                OutlinedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      this.currentIndexTab = 1;
-                                    });
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 18, vertical: 1),
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(13),
-                                        bottomRight: Radius.circular(13),
-                                      ),
-                                    ),
-                                    side: BorderSide(
-                                        color: Theme.of(context).dividerColor),
-                                    backgroundColor: this.currentIndexTab == 1
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.surface,
-                                  ),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.content,
-                                    style: TextStyle(
-                                        color: this.currentIndexTab == 1
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .onPrimary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w900),
-                                  ),
-                                ),
-                                OutlinedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      this.currentIndexTab = 2;
-                                    });
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 18),
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(13),
-                                        bottomRight: Radius.circular(13),
-                                      ),
-                                    ),
-                                    side: BorderSide(
-                                        color: Theme.of(context).dividerColor),
-                                    backgroundColor: this.currentIndexTab == 2
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.surface,
-                                  ),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.pictures,
-                                    style: TextStyle(
-                                        color: this.currentIndexTab == 2
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .onPrimary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w900),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Container(
-                                margin: const EdgeInsets.only(top: 3),
-                                color: Theme.of(context).dividerColor,
-                                height: 1.3),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      screensTab[currentIndexTab],
-                    ],
-                  ),
-                )),
+                      pinned: true,
+                    ),
+                  ];
+                },
+                body: TabBarView(
+                  children: screensTab,
+                ),
+              ),
+        bottomNavigationBar: _isLoading ? null : _buildBottomButtons(context),
+      ),
     );
+  }
+
+  Widget _buildBottomButtons(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.event_available, color: Colors.white),
+                label: const Text(
+                  "Tham gia sự kiện",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF39B54A),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 1,
+              child: OutlinedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.directions),
+                label: const Text("Chỉ đường"),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: BorderSide(color: Colors.grey.shade400),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
   }
 }

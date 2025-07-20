@@ -70,26 +70,28 @@ class _MessageScreenState extends State<MessageScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: colorScheme.primary,
       body: SafeArea(
+        bottom: false,
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               floating: true,
               snap: true,
-              backgroundColor: colorScheme.surface,
+              backgroundColor: colorScheme.primary,
+              elevation: 0,
               title: Text(
-                AppLocalizations.of(context)!.notificationTitle(
-                    notificationProvider.userNotification.length),
+                AppLocalizations.of(context)!
+                    .notificationTitle(_userNotification.length),
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: colorScheme.onPrimary,
                 ),
               ),
               centerTitle: true,
               leading: IconButton(
                 icon: Icon(
                   Icons.arrow_back_ios_new,
-                  color: colorScheme.onSurface,
+                  color: colorScheme.onPrimary,
                 ),
                 onPressed: () {
                   final router = GoRouter.of(context);
@@ -101,53 +103,48 @@ class _MessageScreenState extends State<MessageScreen> {
                 },
               ),
             ),
-            _isLoading
-                ? SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
+            SliverFillRemaining(
+              hasScrollBody: true,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(0),
+                    topRight: Radius.circular(0),
+                  ),
+                ),
+                child: _isLoading
+                    ? Center(
                         child: CircularProgressIndicator(
                           color: colorScheme.primary,
                         ),
-                      ),
-                    ),
-                  )
-                : SliverPadding(
-                    padding: const EdgeInsets.all(2),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 1, childAspectRatio: 2.8),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: _userNotification.length,
+                        itemBuilder: (context, index) {
                           final isNew = index <
                               notificationProvider.userNotification.length;
+                          final notification = _userNotification[index];
 
-                          // return NotificationItem(
-                          //   userNotification: _userNotification[index],
-                          //   isNew: isNew,
-                          // );
                           return GestureDetector(
-                            onTap: () {
-                              final notification = _userNotification[index]; // Lấy thông báo hiện tại
-                              _showNotificationDetailsDialog(notification);
-                            },
+                            onTap: () =>
+                                _showNotificationDetailsDialog(notification),
                             child: NotificationItem(
-                              userNotification: _userNotification[index], // Truyền notification đã lấy
+                              userNotification: notification,
                               isNew: isNew,
                             ),
                           );
                         },
-                        childCount: _userNotification.length,
                       ),
-                    ),
-                  ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-  
+
   // Thêm hàm này vào trong class _MessageScreenState
   void _showNotificationDetailsDialog(UserNotification notification) {
     // Lấy theme hiện tại để style cho dialog
@@ -207,7 +204,8 @@ class _MessageScreenState extends State<MessageScreen> {
                   padding: HtmlPaddings.symmetric(horizontal: 15, vertical: 8),
                   margin: Margins.symmetric(vertical: 10),
                   backgroundColor: colorScheme.surfaceVariant,
-                  border: Border(left: BorderSide(color: colorScheme.outline, width: 4)),
+                  border: Border(
+                      left: BorderSide(color: colorScheme.outline, width: 4)),
                 ),
                 "ul": Style(margin: Margins.only(left: 20, bottom: 10)),
                 "ol": Style(margin: Margins.only(left: 20, bottom: 10)),
@@ -217,7 +215,8 @@ class _MessageScreenState extends State<MessageScreen> {
                   textDecoration: TextDecoration.underline,
                 ),
                 "table": Style(
-                    border: Border.all(color: colorScheme.outline.withOpacity(0.5))),
+                    border: Border.all(
+                        color: colorScheme.outline.withOpacity(0.5))),
                 "th": Style(
                   padding: HtmlPaddings.all(6),
                   backgroundColor: colorScheme.surfaceVariant,
@@ -225,7 +224,8 @@ class _MessageScreenState extends State<MessageScreen> {
                 ),
                 "td": Style(
                   padding: HtmlPaddings.all(6),
-                  border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
+                  border:
+                      Border.all(color: colorScheme.outline.withOpacity(0.5)),
                 ),
               },
             ),
@@ -245,5 +245,4 @@ class _MessageScreenState extends State<MessageScreen> {
       },
     );
   }
-
 }

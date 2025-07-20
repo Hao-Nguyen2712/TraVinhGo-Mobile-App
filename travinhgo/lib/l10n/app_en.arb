@@ -212,5 +212,7 @@
     "noFavoritesYet": "No Favorites Yet",
     "noFavoritesYetDescription": "Explore and add your favorite destinations, products, and local specialties here!",
     "discoverNow": "Discover Now",
-    "search": "Search..."
+    "search": "Search...",
+    "seeMore": "See More",
+    "collapse": "Collapse"
 }
