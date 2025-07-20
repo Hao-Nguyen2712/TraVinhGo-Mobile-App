@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../providers/user_provider.dart';
@@ -59,29 +60,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.initState();
     _loadAddressData();
     _loadUserData();
-    _setupFocusListeners();
   }
 
   Future<void> _loadAddressData() async {
     await _addressService.loadAddressData();
     setState(() {
       _provinces = _addressService.getProvinceNames();
-    });
-  }
-
-  void _setupFocusListeners() {
-    // Setup listeners to rebuild UI when focus changes
-    _fullNameFocus.addListener(() {
-      setState(() {});
-    });
-    _phoneFocus.addListener(() {
-      setState(() {});
-    });
-    _addressFocus.addListener(() {
-      setState(() {});
-    });
-    _streetAddressFocus.addListener(() {
-      setState(() {});
     });
   }
 
@@ -253,11 +237,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-                  onPrimary: Theme.of(context).colorScheme.onPrimary,
-                  surface: Theme.of(context).colorScheme.surface,
-                  onSurface: Theme.of(context).colorScheme.onSurface,
-                ),
             dialogBackgroundColor: Theme.of(context).colorScheme.surface,
           ),
           child: child!,
@@ -409,9 +388,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_emailController.text.isNotEmpty) {
       final emailError = _validateEmail(_emailController.text);
       if (emailError != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(emailError)),
-        );
+        _showErrorDialog(emailError);
         return;
       }
     }
@@ -420,44 +397,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_phoneController.text.isNotEmpty) {
       final phoneError = _validateVietnamesePhone(_phoneController.text);
       if (phoneError != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(phoneError)),
-        );
+        _showErrorDialog(phoneError);
         return;
       }
     }
 
     // Additional validation for address fields
     if (_streetAddressController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(AppLocalizations.of(context)!.streetAddressRequired)),
-      );
+      _showErrorDialog(AppLocalizations.of(context)!.streetAddressRequired);
       return;
     }
 
     if (_selectedProvince == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(AppLocalizations.of(context)!.provinceCityRequired)),
-      );
+      _showErrorDialog(AppLocalizations.of(context)!.provinceCityRequired);
       return;
     }
 
     if (_selectedDistrict == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text(AppLocalizations.of(context)!.districtCountyRequired)),
-      );
+      _showErrorDialog(AppLocalizations.of(context)!.districtCountyRequired);
       return;
     }
 
     if (_selectedWard == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(AppLocalizations.of(context)!.wardCommuneRequired)),
-      );
+      _showErrorDialog(AppLocalizations.of(context)!.wardCommuneRequired);
       return;
     }
 
@@ -560,10 +522,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             builder: (context) => StatusDialog(
               isSuccess: true,
               title: AppLocalizations.of(context)!.success,
-              message: AppLocalizations.of(context)!.feedbackSentSuccess,
+              message: AppLocalizations.of(context)!.profileUpdatedSuccessfully,
               onOkPressed: () {
                 Navigator.of(context).pop(); // Close dialog
-                //  Navigator.of(context).pop(); // Return to profile screen
               },
             ),
           );
@@ -605,48 +566,73 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  // Helper function to show a consistent error dialog
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => StatusDialog(
+        isSuccess: false,
+        title: AppLocalizations.of(context)!.error,
+        message: message,
+        onOkPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          AppLocalizations.of(context)!.editProfile,
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _toggleEditMode,
-            child: Text(
-              _editMode
-                  ? AppLocalizations.of(context)!.done
-                  : AppLocalizations.of(context)!
-                      .edit, // Change text based on mode
-              style: GoogleFonts.montserrat(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: theme.colorScheme.primary,
+        statusBarIconBrightness:
+            isDarkMode ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDarkMode ? Brightness.dark : Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: AppBar(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            AppLocalizations.of(context)!.editProfile,
+            style: GoogleFonts.montserrat(
+              fontWeight: FontWeight.w600,
+              fontSize: 20,
             ),
           ),
-        ],
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: _isLoading ? null : _toggleEditMode,
+              child: Text(
+                _editMode
+                    ? AppLocalizations.of(context)!.done
+                    : AppLocalizations.of(context)!
+                        .edit, // Change text based on mode
+                style: GoogleFonts.montserrat(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : _buildEditForm(),
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : _buildEditForm(),
     );
   }
 
@@ -695,52 +681,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 16),
 
                   // Email (conditionally editable)
-                  _buildLabelText(AppLocalizations.of(context)!.email),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _emailController.text.isEmpty && _editMode
-                              ? TextFormField(
-                                  controller: _emailController,
-                                  keyboardType: TextInputType.emailAddress,
-                                  style: GoogleFonts.montserrat(fontSize: 16),
-                                  decoration: InputDecoration(
-                                    hintText: AppLocalizations.of(context)!
-                                        .enterValidEmail,
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                  validator: _validateEmail,
-                                  onChanged: (_) {
-                                    setState(() {
-                                      _formChanged = true;
-                                    });
-                                  },
-                                )
-                              : Text(
-                                  _emailController.text.isEmpty
-                                      ? AppLocalizations.of(context)!
-                                          .noEmailAvailable
-                                      : _emailController.text,
-                                  style: GoogleFonts.montserrat(fontSize: 16),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                        ),
-                        if (!_editMode) // Only show check in view mode
-                          Icon(Icons.check,
-                              color: Theme.of(context).colorScheme.secondary),
-                      ],
-                    ),
+                  _buildEditableField(
+                    label: AppLocalizations.of(context)!.email,
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: _validateEmail,
+                    hint: AppLocalizations.of(context)!.enterValidEmail,
+                    emptyStateText:
+                        AppLocalizations.of(context)!.noEmailAvailable,
                   ),
                   const SizedBox(height: 16),
 
@@ -796,52 +744,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 16),
 
                   // Phone number - conditionally editable
-                  _buildLabelText(AppLocalizations.of(context)!.phoneNumber),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _phoneController.text.isEmpty && _editMode
-                              ? TextFormField(
-                                  controller: _phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  style: GoogleFonts.montserrat(fontSize: 16),
-                                  decoration: InputDecoration(
-                                    hintText: AppLocalizations.of(context)!
-                                        .enterPhoneNumber,
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                  validator: _validateVietnamesePhone,
-                                  onChanged: (_) {
-                                    setState(() {
-                                      _formChanged = true;
-                                    });
-                                  },
-                                )
-                              : Text(
-                                  _phoneController.text.isEmpty
-                                      ? AppLocalizations.of(context)!
-                                          .noPhoneAvailable
-                                      : _phoneController.text,
-                                  style: GoogleFonts.montserrat(fontSize: 16),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                        ),
-                        if (!_editMode) // Only show check in view mode
-                          Icon(Icons.check,
-                              color: Theme.of(context).colorScheme.secondary),
-                      ],
-                    ),
+                  _buildEditableField(
+                    label: AppLocalizations.of(context)!.phoneNumber,
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    validator: _validateVietnamesePhone,
+                    hint: AppLocalizations.of(context)!.enterPhoneNumber,
+                    emptyStateText:
+                        AppLocalizations.of(context)!.noPhoneAvailable,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                   const SizedBox(height: 16),
 
@@ -1005,8 +916,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     String? Function(String?)? validator,
     TextAlign textAlign = TextAlign.start,
   }) {
-    final bool isFocused = focusNode.hasFocus;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1098,6 +1007,136 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Widget _buildEditableField({
+    required String label,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+    String? hint,
+    required String emptyStateText,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabelText(label),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _editMode
+                    ? TextFormField(
+                        controller: controller,
+                        keyboardType: keyboardType,
+                        inputFormatters: inputFormatters,
+                        style: GoogleFonts.montserrat(fontSize: 16),
+                        decoration: InputDecoration(
+                          hintText: hint,
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        validator: validator,
+                        onChanged: (_) {
+                          setState(() {
+                            _formChanged = true;
+                          });
+                        },
+                      )
+                    : Text(
+                        controller.text.isEmpty
+                            ? emptyStateText
+                            : controller.text,
+                        style: GoogleFonts.montserrat(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
+              if (!_editMode)
+                Icon(Icons.check,
+                    color: Theme.of(context).colorScheme.secondary),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String label,
+    required String? value,
+    required String hint,
+    required List<String> items,
+    required void Function(String?)? onChanged,
+    required bool showError,
+    required String errorText,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabelText(label),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(8),
+            border: showError
+                ? Border.all(
+                    color: Theme.of(context).colorScheme.error, width: 1)
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: value,
+                  hint: Text(
+                    hint,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  isExpanded: true,
+                  items: items.map((String item) {
+                    return DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(
+                        item,
+                        style: GoogleFonts.montserrat(fontSize: 16),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: onChanged,
+                ),
+              ),
+              if (showError)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    errorText,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   // Build the address section with dropdowns when in edit mode
   Widget _buildAddressSection() {
     if (_editMode) {
@@ -1141,180 +1180,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SizedBox(height: 16),
 
           // Province Dropdown
-          _buildLabelText(AppLocalizations.of(context)!.provinceCity),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(8),
-              border: _formSubmitted && _selectedProvince == null
-                  ? Border.all(
-                      color: Theme.of(context).colorScheme.error, width: 1)
-                  : null,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedProvince,
-                    hint: Text(
-                      AppLocalizations.of(context)!.selectProvinceCity,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    isExpanded: true,
-                    items: _provinces.map((String province) {
-                      return DropdownMenuItem<String>(
-                        value: province,
-                        child: Text(
-                          province,
-                          style: GoogleFonts.montserrat(fontSize: 16),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: _onProvinceChanged,
-                  ),
-                ),
-                if (_formSubmitted && _selectedProvince == null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      AppLocalizations.of(context)!.provinceCityRequired,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          _buildDropdownField(
+            label: AppLocalizations.of(context)!.provinceCity,
+            value: _selectedProvince,
+            hint: AppLocalizations.of(context)!.selectProvinceCity,
+            items: _provinces,
+            onChanged: _onProvinceChanged,
+            showError: _formSubmitted && _selectedProvince == null,
+            errorText: AppLocalizations.of(context)!.provinceCityRequired,
           ),
           const SizedBox(height: 16),
 
           // District Dropdown
-          _buildLabelText(AppLocalizations.of(context)!.districtCounty),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(8),
-              border: _formSubmitted &&
-                      _selectedProvince != null &&
-                      _selectedDistrict == null
-                  ? Border.all(
-                      color: Theme.of(context).colorScheme.error, width: 1)
-                  : null,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedDistrict,
-                    hint: Text(
-                      AppLocalizations.of(context)!.selectDistrictCounty,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    isExpanded: true,
-                    items: _districts.map((String district) {
-                      return DropdownMenuItem<String>(
-                        value: district,
-                        child: Text(
-                          district,
-                          style: GoogleFonts.montserrat(fontSize: 16),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged:
-                        _selectedProvince == null ? null : _onDistrictChanged,
-                  ),
-                ),
-                if (_formSubmitted &&
-                    _selectedProvince != null &&
-                    _selectedDistrict == null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      AppLocalizations.of(context)!.districtCountyRequired,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          _buildDropdownField(
+            label: AppLocalizations.of(context)!.districtCounty,
+            value: _selectedDistrict,
+            hint: AppLocalizations.of(context)!.selectDistrictCounty,
+            items: _districts,
+            onChanged: _selectedProvince == null ? null : _onDistrictChanged,
+            showError: _formSubmitted &&
+                _selectedProvince != null &&
+                _selectedDistrict == null,
+            errorText: AppLocalizations.of(context)!.districtCountyRequired,
           ),
           const SizedBox(height: 16),
 
           // Ward Dropdown
-          _buildLabelText(AppLocalizations.of(context)!.wardCommune),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(8),
-              border: _formSubmitted &&
-                      _selectedDistrict != null &&
-                      _selectedWard == null
-                  ? Border.all(
-                      color: Theme.of(context).colorScheme.error, width: 1)
-                  : null,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedWard,
-                    hint: Text(
-                      AppLocalizations.of(context)!.selectWardCommune,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    isExpanded: true,
-                    items: _wards.map((String ward) {
-                      return DropdownMenuItem<String>(
-                        value: ward,
-                        child: Text(
-                          ward,
-                          style: GoogleFonts.montserrat(fontSize: 16),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged:
-                        _selectedDistrict == null ? null : _onWardChanged,
-                  ),
-                ),
-                if (_formSubmitted &&
-                    _selectedDistrict != null &&
-                    _selectedWard == null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      AppLocalizations.of(context)!.wardCommuneRequired,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          _buildDropdownField(
+            label: AppLocalizations.of(context)!.wardCommune,
+            value: _selectedWard,
+            hint: AppLocalizations.of(context)!.selectWardCommune,
+            items: _wards,
+            onChanged: _selectedDistrict == null ? null : _onWardChanged,
+            showError: _formSubmitted &&
+                _selectedDistrict != null &&
+                _selectedWard == null,
+            errorText: AppLocalizations.of(context)!.wardCommuneRequired,
           ),
         ],
       );

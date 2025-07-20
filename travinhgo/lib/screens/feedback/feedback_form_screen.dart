@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -149,174 +148,180 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return CupertinoPageScaffold(
+    return Scaffold(
       backgroundColor: colorScheme.surface,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(
+      appBar: AppBar(
+        backgroundColor: colorScheme.primary,
+        elevation: 0,
+        title: Text(
           AppLocalizations.of(context)!.feedbackTitle,
-          style: TextStyle(
-            color: colorScheme.primary, // Green color
+          style: const TextStyle(
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
-          child: Icon(CupertinoIcons.back, color: colorScheme.onSurface),
         ),
-        backgroundColor:
-            CupertinoTheme.of(context).barBackgroundColor.withOpacity(1.0),
-        border: null,
       ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                Text(
-                  AppLocalizations.of(context)!.feedbackQuote,
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                    fontSize: 15,
-                    color: colorScheme.onSurface,
-                  ),
+      body: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                AppLocalizations.of(context)!.feedbackQuote,
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  fontSize: 16,
+                  color: colorScheme.onSurface,
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  AppLocalizations.of(context)!.addFeedback,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                    fontSize: 16,
-                  ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context)!.addFeedback,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                  fontSize: 16,
                 ),
-                const SizedBox(height: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.shadow.withOpacity(0.07),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      )
-                    ],
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _controller,
-                        maxLength: 1000,
-                        minLines: 3,
-                        maxLines: 4,
-                        keyboardType: TextInputType.multiline,
-                        style: TextStyle(
-                            fontSize: 16, color: colorScheme.onSurface),
-                        decoration: InputDecoration(
-                          hintText:
-                              AppLocalizations.of(context)!.typeFeedbackHint,
-                          hintStyle:
-                              TextStyle(color: colorScheme.onSurfaceVariant),
-                          filled: true,
-                          fillColor: colorScheme.surface,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 12),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.shadow.withOpacity(0.07),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _controller,
+                      maxLength: 1000,
+                      minLines: 3,
+                      maxLines: 4,
+                      keyboardType: TextInputType.multiline,
+                      style:
+                          TextStyle(fontSize: 16, color: colorScheme.onSurface),
+                      decoration: InputDecoration(
+                        hintText:
+                            AppLocalizations.of(context)!.typeFeedbackHint,
+                        hintStyle:
+                            TextStyle(color: colorScheme.onSurfaceVariant),
+                        filled: true,
+                        fillColor: colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
                         ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 12),
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          GestureDetector(
-                            onTap: _pickImage,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                CupertinoIcons.photo_on_rectangle,
-                                color: colorScheme.onPrimaryContainer,
-                                size: 28,
-                              ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.add_photo_alternate_outlined,
+                              color: colorScheme.onPrimaryContainer,
+                              size: 28,
                             ),
                           ),
-                          if (_selectedImage != null) ...[
-                            const SizedBox(width: 8),
-                            Stack(
-                              alignment: Alignment.topRight,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.file(
-                                    _selectedImage!,
-                                    width: 40,
-                                    height: 40,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () =>
-                                      setState(() => _selectedImage = null),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.surface,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(2),
-                                    child: Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: colorScheme.error,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                        ),
+                        if (_selectedImage != null) ...[
                           const SizedBox(width: 8),
-                          CupertinoButton(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 8),
-                            color:
+                          Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.file(
+                                  _selectedImage!,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectedImage = null),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surface,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(2),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color: colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
                                 (_controller.text.trim().isEmpty || _isSending)
                                     ? colorScheme.onSurface.withOpacity(0.5)
                                     : colorScheme.primary,
-                            borderRadius: BorderRadius.circular(8),
-                            onPressed:
-                                (_controller.text.trim().isEmpty || _isSending)
-                                    ? null
-                                    : _sendFeedback,
-                            child: _isSending
-                                ? const CupertinoActivityIndicator(radius: 10)
-                                : Text(
-                                    AppLocalizations.of(context)!.send,
-                                    style: TextStyle(
-                                      color: colorScheme.onPrimary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                            foregroundColor: colorScheme.onPrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 8),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                          onPressed:
+                              (_controller.text.trim().isEmpty || _isSending)
+                                  ? null
+                                  : _sendFeedback,
+                          child: _isSending
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  AppLocalizations.of(context)!.send,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

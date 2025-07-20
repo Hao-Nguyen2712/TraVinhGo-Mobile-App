@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../Models/Maps/top_favorite_destination.dart';
 import '../../../widget/home_widget/destination/slider_destination_card.dart';
 
@@ -22,11 +23,23 @@ class ImageSliderDestination extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           final destination = favoriteDestinations[index];
-          return SliderDestinationCard(
-            id: destination.id!,
-            title: destination.name!,
-            imageUrl: destination.image!,
-            averageRating: destination.averageRating,
+          if (destination.id == null ||
+              destination.name == null ||
+              destination.image == null) {
+            // Return an empty container or a placeholder for invalid data
+            return Container();
+          }
+          return GestureDetector(
+            onTap: () {
+              context.pushNamed('TouristDestinationDetail',
+                  pathParameters: {'id': destination.id!});
+            },
+            child: SliderDestinationCard(
+              id: destination.id!,
+              title: destination.name!,
+              imageUrl: destination.image!,
+              averageRating: destination.averageRating,
+            ),
           );
         },
       ),

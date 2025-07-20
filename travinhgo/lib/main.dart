@@ -14,6 +14,7 @@ import 'package:travinhgo/providers/ocop_type_provider.dart';
 import 'package:travinhgo/providers/setting_provider.dart';
 import 'package:travinhgo/providers/user_provider.dart';
 import 'package:travinhgo/router/app_router.dart';
+import 'package:travinhgo/providers/destination_provider.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/providers/marker_provider.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
@@ -22,6 +23,7 @@ import 'package:travinhgo/utils/app_theme.dart';
 import 'package:travinhgo/utils/env_config.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
+import 'package:travinhgo/providers/local_specialty_provider.dart';
 import 'package:travinhgo/providers/ocop_product_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -186,6 +188,7 @@ class _MyAppState extends State<MyApp> {
               return mapProvider;
             },
           ),
+          ChangeNotifierProvider(create: (_) => DestinationProvider()),
           ChangeNotifierProvider(create: (_) => DestinationTypeProvider()),
           ChangeNotifierProvider(create: (_) => TagProvider()),
           ChangeNotifierProvider(create: (_) => OcopTypeProvider()),
@@ -193,6 +196,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider(create: (_) => NotificationProvider()),
           ChangeNotifierProvider(create: (_) => FavoriteProvider()),
           ChangeNotifierProvider(create: (_) => OcopProductProvider()),
+          ChangeNotifierProvider(create: (_) => LocalSpecialtyProvider()),
         ],
         child: Consumer<SettingProvider>(
           builder: (context, settingProvider, child) {

@@ -191,6 +191,7 @@
     "selectWardCommune": "Chọn phường/xã",
     "wardCommuneRequired": "Phường/xã là bắt buộc",
     "streetAddressRequired": "Địa chỉ đường là bắt buộc",
+    "profileUpdatedSuccessfully": "Cập nhật hồ sơ thành công!",
     "changePassword": "Đổi mật khẩu",
     "changePasswordComingSoon": "Tính năng đổi mật khẩu sắp ra mắt",
     "darkMode": "Chế độ tối",
@@ -199,5 +200,16 @@
     "system": "Hệ thống",
     "light": "Sáng",
     "dark": "Tối",
-    "accommodation": "Chỗ ở"
-} 
+    "accommodation": "Chỗ ở",
+    "reviews": "Đánh giá",
+    "seeAll": "Xem tất cả",
+    "activities": "Hoạt động",
+    "touristAttraction": "Điểm du lịch",
+    "featuredOcopProducts": "Sản phẩm OCOP nổi bật",
+    "addFavoriteSuccess": "Thêm vào yêu thích thành công",
+    "removeFavoriteSuccess": "Xóa khỏi yêu thích thành công",
+    "noFavoritesYet": "Chưa có yêu thích nào",
+    "noFavoritesYetDescription": "Hãy khám phá và thêm những điểm đến, sản phẩm yêu thích của bạn vào đây nhé!",
+    "discoverNow": "Khám phá ngay",
+    "search": "Tìm kiếm..."
+}

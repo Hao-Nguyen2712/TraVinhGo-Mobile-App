@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:travinhgo/models/destination/destination.dart';
+import 'package:travinhgo/widget/success_dialog.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
 import 'package:travinhgo/screens/destination/destination_detail_screen.dart';
 import 'package:travinhgo/utils/constants.dart';
@@ -15,6 +18,18 @@ class DestinationItem extends StatelessWidget {
 
   const DestinationItem({super.key, required this.destination});
 
+  void _showFavoriteDialog(BuildContext context, bool isFavorite) {
+    final message = isFavorite
+        ? AppLocalizations.of(context)!.addFavoriteSuccess
+        : AppLocalizations.of(context)!.removeFavoriteSuccess;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SuccessDialog(message: message);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -27,12 +42,7 @@ class DestinationItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         interactionProvider.addInterac(destination.id, ItemType.Destination);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => DestinationDetailScreen(
-                      id: destination.id,
-                    )));
+        context.push('/tourist-destination-detail/${destination.id}');
       },
       child: Stack(
         children: [
@@ -75,8 +85,11 @@ class DestinationItem extends StatelessWidget {
                         right: 12,
                         child: GestureDetector(
                           onTap: () {
+                            final isCurrentlyFavorite =
+                                favoriteProvider.isExist(destination.id);
                             favoriteProvider
                                 .toggleDestinationFavorite(destination);
+                            _showFavoriteDialog(context, !isCurrentlyFavorite);
                           },
                           child: Icon(
                             favoriteProvider.isExist(destination.id)

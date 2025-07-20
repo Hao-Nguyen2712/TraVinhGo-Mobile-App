@@ -12,7 +12,7 @@ import 'dart:developer' as developer;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-import '../../Models/Maps/top_favorite_destination.dart';
+import '../../models/maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
 import '../../providers/map/marker_map_provider.dart';
 import '../../widget/map/search_bar.dart' as map_search;
@@ -324,7 +324,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                 const LocationButton(),
                 if (provider.showPoiPopup) const PoiPopup(),
                 if (provider.destinationsLoaded &&
-                    provider.topDestinations.isNotEmpty)
+                    provider.topDestinations.isNotEmpty &&
+                    !provider.showPoiPopup)
                   const FavoriteDestinationsSlider(),
               ] else ...[
                 const RoutingUI(),

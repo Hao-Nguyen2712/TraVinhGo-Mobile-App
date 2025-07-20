@@ -52,15 +52,17 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
     final review = widget.review;
     final replies = review.reply ?? [];
     final repliesToShow = isExpanded ? replies : replies.take(1).toList();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: theme.shadowColor.withOpacity(0.1),
             spreadRadius: 0,
             blurRadius: 10,
             offset: const Offset(0, 2),
@@ -85,14 +87,15 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: kprimaryColor.withOpacity(0.3),
+                          color: colorScheme.primary.withOpacity(0.3),
                           width: 2,
                         ),
                         image: DecorationImage(
                           image: (review.avatar != null &&
                                   review.avatar!.isNotEmpty)
                               ? NetworkImage(
-                                  review.avatar!,)
+                                  review.avatar!,
+                                )
                               : const AssetImage(
                                       'assets/images/profile/profile.png')
                                   as ImageProvider,
@@ -111,7 +114,7 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           color: Colors.green,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: theme.cardColor, width: 2),
                         ),
                       ),
                     ),
@@ -132,19 +135,14 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                               children: [
                                 Text(
                                   review.userName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
+                                  style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   timeAgo(review.createdAt.toLocal()),
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                  ),
+                                  style: theme.textTheme.bodySmall,
                                 ),
                               ],
                             ),
@@ -157,13 +155,13 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(20),
                               gradient: LinearGradient(
                                 colors: [
-                                  kprimaryColor,
-                                  kprimaryColor.withOpacity(0.8),
+                                  colorScheme.primary,
+                                  colorScheme.primary.withOpacity(0.8),
                                 ],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: kprimaryColor.withOpacity(0.3),
+                                  color: colorScheme.primary.withOpacity(0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -174,15 +172,15 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                               children: [
                                 Text(
                                   review.rating.toStringAsFixed(1),
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: colorScheme.onPrimary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                const Icon(Icons.star,
-                                    size: 14, color: Colors.white),
+                                Icon(Icons.star,
+                                    size: 14, color: colorScheme.onPrimary),
                               ],
                             ),
                           ),
@@ -196,16 +194,15 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
+                            color: colorScheme.surfaceVariant.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[200]!),
+                            border: Border.all(color: theme.dividerColor),
                           ),
                           child: Text(
                             review.comment!,
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               height: 1.4,
-                              color: Colors.black87,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -247,7 +244,8 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.grey.withOpacity(0.2),
+                                        color:
+                                            theme.shadowColor.withOpacity(0.2),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),

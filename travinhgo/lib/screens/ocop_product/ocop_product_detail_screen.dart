@@ -40,7 +40,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   bool _isExpanded = false;
   late List<SellingLink> _sellingLinks;
 
-
   Timer? _interactionTimer;
 
   @override
@@ -85,7 +84,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
       });
     }
   }
-  
+
   Future<void> fetchOcopSellingLink(String id) async {
     final data = await SellingLinkService().getSellingLinkByOcopId(id);
     setState(() {
@@ -188,7 +187,11 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         child: Center(
                                           child: IconButton(
                                               onPressed: () {
-                                                context.pop();
+                                                if (context.canPop()) {
+                                                  context.pop();
+                                                } else {
+                                                  context.go('/home');
+                                                }
                                               },
                                               icon: Image.asset(
                                                   'assets/images/navigations/leftarrowwhile.png')),
@@ -313,11 +316,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 isExpanded: _isExpanded,
                                 onToggle: _toggleExpanded,
                               ),
-                            Divider(
-                              color: theme.dividerColor,
-                              thickness: 0.4,
-                              height: 10,
-                            ),
+                            const SizedBox(height: 16),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -341,11 +340,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 )
                               ],
                             ),
-                            Divider(
-                              color: theme.dividerColor,
-                              thickness: 0.4,
-                              height: 10,
-                            ),
+                            const SizedBox(height: 16),
                             Row(
                               children: [
                                 Text(
@@ -377,11 +372,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 ),
                               ],
                             ),
-                            Divider(
-                              color: theme.dividerColor,
-                              thickness: 0.4,
-                              height: 10,
-                            ),
+                            const SizedBox(height: 16),
                             Row(
                               children: [
                                 Text(
@@ -392,21 +383,18 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 RatingStarWidget(ocopProductDetail.ocopPoint)
                               ],
                             ),
-                            Divider(
-                              color: theme.dividerColor,
-                              thickness: 0.4,
-                              height: 10,
-                            ),
+                            const SizedBox(height: 16),
                             DataFieldRow(
                               title: 'Ocop type',
-                              value:
-                              ocopProductDetail.ocopType!.ocopTypeName,
+                              value: ocopProductDetail.ocopType!.ocopTypeName,
                             ),
+                            const SizedBox(height: 16),
                             DataFieldRow(
                               title: AppLocalizations.of(context)!.yearRelease,
                               value:
                                   ocopProductDetail.ocopYearRelease.toString(),
                             ),
+                            const SizedBox(height: 16),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -417,11 +405,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 const Spacer(),
                                 SellingLinkList(sellingLinks: _sellingLinks),
                               ],
-                            ),
-                            Divider(
-                              color: Colors.grey.withOpacity(0.1),
-                              thickness: 0.4,
-                              height: 10,
                             ),
                           ],
                         ),

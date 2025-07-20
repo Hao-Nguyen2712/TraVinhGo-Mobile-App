@@ -29,17 +29,32 @@ class DestinationService {
 
   final Dio dio = Dio();
 
-  Future<List<Destination>> getDestination() async {
+  Future<List<Destination>> getDestination({
+    int pageIndex = 1,
+    int pageSize = 10,
+    String? searchQuery,
+    String? sortOrder,
+    String? typeId,
+  }) async {
     try {
-      var endPoint = '${_baseUrl}GetAllDestinations';
+      var endPoint = '${_baseUrl}GetTouristDestinationPaging';
+      final params = {
+        'PageIndex': pageIndex.toString(),
+        'PageSize': pageSize.toString(),
+        if (searchQuery != null && searchQuery.isNotEmpty)
+          'Search': searchQuery,
+        if (sortOrder != null) 'Sort': sortOrder,
+        if (typeId != null) 'DestinationTypeId': typeId,
+      };
 
       final response = await dio.get(endPoint,
+          queryParameters: params,
           options: Options(headers: {
-            'Content-Type': 'application/json charset=UTF-8',
+            'Content-Type': 'application/json; charset=UTF-8',
           }));
 
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data'];
+        List<dynamic> data = response.data['data']['data'];
         List<Destination> destinations =
             data.map((item) => Destination.fromJson(item)).toList();
         return destinations;
@@ -73,9 +88,9 @@ class DestinationService {
       return null;
     }
   }
-  
+
   Future<List<Destination>> getDestinationsByIds(List<String> ids) async {
-    try{
+    try {
       var endPoint = '${_baseUrl}GetDestinationsByIds';
 
       final response = await dio.post(endPoint,
@@ -87,15 +102,43 @@ class DestinationService {
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
         List<Destination> destinations =
-        data.map((item) => Destination.fromJson(item)).toList();
+            data.map((item) => Destination.fromJson(item)).toList();
         return destinations;
       } else {
         return [];
       }
-      
-    }catch(e) {
+    } catch (e) {
       debugPrint('Error during get destination list: $e');
       return [];
     }
+  }
+
+  Future<List<Destination>> getAllDestinations() async {
+    final List<Destination> allDestinations = [];
+    int pageIndex = 1;
+    const int pageSize = 10;
+    bool hasMore = true;
+
+    while (hasMore) {
+      try {
+        final List<Destination> pageOfDestinations = await getDestination(
+          pageIndex: pageIndex,
+          pageSize: pageSize,
+        );
+
+        if (pageOfDestinations.isNotEmpty) {
+          allDestinations.addAll(pageOfDestinations);
+          pageIndex++;
+        } else {
+          hasMore = false;
+        }
+      } catch (e) {
+        debugPrint('Error fetching page $pageIndex for all destinations: $e');
+        hasMore = false; // Stop on error
+      }
+    }
+    debugPrint(
+        'Fetched a total of ${allDestinations.length} destinations for the map.');
+    return allDestinations;
   }
 }

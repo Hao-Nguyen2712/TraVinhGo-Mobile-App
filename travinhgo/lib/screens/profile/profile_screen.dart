@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/setting_provider.dart';
+import '../../widget/success_dialog.dart';
 import 'edit_profile_screen.dart';
-import 'settings_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -122,10 +123,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await authProvider.signOut();
               userProvider.clearUserProfile();
 
-              // Dismiss loading dialog and navigate to login
+              // Dismiss loading dialog and navigate to home
               if (mounted) {
                 Navigator.of(context).pop();
-                context.go('/login');
+                showDialog(
+                  context: context,
+                  builder: (context) => SuccessDialog(
+                    message: AppLocalizations.of(context)!.logOutSuccess,
+                  ),
+                ).then((_) {
+                  if (mounted) {
+                    context.go('/home');
+                  }
+                });
               }
             },
             child: Text(
@@ -143,13 +153,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: colorScheme.primary,
         elevation: 0,
         centerTitle: true,
         title: Text(
           AppLocalizations.of(context)!.profile,
           style: GoogleFonts.montserrat(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),
@@ -158,9 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: Icon(
               Icons.edit,
-              color: _hasError
-                  ? Theme.of(context).disabledColor
-                  : Theme.of(context).colorScheme.primary,
+              color: _hasError ? Colors.white54 : Colors.white,
               size: 24,
             ),
             onPressed: _hasError
@@ -186,9 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ? _buildErrorProfileSection()
                       : _buildProfileDataSection(),
 
-                  // Divider between profile and menu
-                  const Divider(thickness: 0.5),
-
+                  //const SizedBox(height: 10),
                   // Menu section - always visible
                   _buildMenuSection(),
                 ],
@@ -261,13 +270,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 35, horizontal: 20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Profile avatar
           CircleAvatar(
-            radius: 50,
+            radius: 75,
             backgroundColor: Colors.transparent,
             backgroundImage: profile.avatar.isNotEmpty
                 ? NetworkImage(profile.avatar)
@@ -299,6 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildMenuSection() {
+    final settingProvider = Provider.of<SettingProvider>(context);
     return Column(
       children: [
         _buildMenuItem(
@@ -310,20 +320,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           },
         ),
-        const Divider(height: 1, indent: 16, endIndent: 16),
-        _buildMenuItem(
-          icon: Icons.settings,
-          title: AppLocalizations.of(context)!.setting,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
+
+        // Dark Mode Switch
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.dark_mode_outlined,
+                size: 24,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            );
-          },
+              const SizedBox(width: 20),
+              Text(
+                AppLocalizations.of(context)!.darkMode,
+                style: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Spacer(),
+              DropdownButton<ThemeMode>(
+                value: settingProvider.themeMode,
+                onChanged: (ThemeMode? newValue) {
+                  if (newValue != null) {
+                    settingProvider.setTheme(newValue);
+                  }
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: ThemeMode.system,
+                    child: Text(AppLocalizations.of(context)!.system),
+                  ),
+                  DropdownMenuItem(
+                    value: ThemeMode.light,
+                    child: Text(AppLocalizations.of(context)!.light),
+                  ),
+                  DropdownMenuItem(
+                    value: ThemeMode.dark,
+                    child: Text(AppLocalizations.of(context)!.dark),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        const Divider(height: 1, indent: 16, endIndent: 16),
+
         _buildMenuItem(
           icon: Icons.logout,
           title: AppLocalizations.of(context)!.logOut,

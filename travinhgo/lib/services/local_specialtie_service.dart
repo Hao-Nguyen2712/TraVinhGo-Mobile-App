@@ -26,14 +26,13 @@ class LocalSpecialtieService {
     };
   }
 
-  final String _baseUrl =
-      '${Base_api}LocalSpecialties/'; 
+  final String _baseUrl = '${Base_api}LocalSpecialties/';
 
   final Dio dio = Dio();
 
   Future<List<LocalSpecialties>> getLocalSpecialtie() async {
     try {
-      var endPoint = '${_baseUrl}all';
+      var endPoint = '${_baseUrl}active';
 
       final response = await dio.get(endPoint,
           options: Options(headers: {
@@ -41,16 +40,20 @@ class LocalSpecialtieService {
           }));
 
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data'];
+        final List<dynamic>? data = response.data['data'];
+        if (data == null) {
+          return [];
+        }
         List<LocalSpecialties> localSpecialties =
             data.map((item) => LocalSpecialties.fromJson(item)).toList();
         return localSpecialties;
       } else {
-        return [];
+        throw Exception(
+            'Failed to load local specialties. Status code: ${response.statusCode}');
       }
     } catch (e) {
       debugPrint('Error during get local specialties list: $e');
-      return [];
+      rethrow;
     }
   }
 
@@ -64,7 +67,10 @@ class LocalSpecialtieService {
           }));
 
       if (response.statusCode == 200) {
-        dynamic data = response.data['data'];
+        final dynamic data = response.data['data'];
+        if (data == null) {
+          return null;
+        }
         LocalSpecialties localSpecialtie = LocalSpecialties.fromJson(data);
         return localSpecialtie;
       } else {
@@ -72,12 +78,13 @@ class LocalSpecialtieService {
       }
     } catch (e) {
       debugPrint('Error during get local specialtie : $e');
-      return null;
+      rethrow;
     }
   }
 
-  Future<List<LocalSpecialties>> getLocalSpecialtiesByIds(List<String> ids) async {
-    try{
+  Future<List<LocalSpecialties>> getLocalSpecialtiesByIds(
+      List<String> ids) async {
+    try {
       var endPoint = '${_baseUrl}GetLocalSpecialtiByIds';
 
       final response = await dio.post(endPoint,
@@ -87,17 +94,20 @@ class LocalSpecialtieService {
           }));
 
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data'];
+        final List<dynamic>? data = response.data['data'];
+        if (data == null) {
+          return [];
+        }
         List<LocalSpecialties> localSpecialties =
-        data.map((item) => LocalSpecialties.fromJson(item)).toList();
+            data.map((item) => LocalSpecialties.fromJson(item)).toList();
         return localSpecialties;
       } else {
-        return [];
+        throw Exception(
+            'Failed to load local specialties by ids. Status code: ${response.statusCode}');
       }
-
-    }catch(e) {
+    } catch (e) {
       debugPrint('Error during get local specialties list: $e');
-      return [];
+      rethrow;
     }
   }
 }

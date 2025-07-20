@@ -115,52 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           children: [
                             // Welcome message
-                            const SizedBox(height: 15),
-                            // Search bar
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(60),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: colorScheme.shadow
-                                            .withOpacity(0.15),
-                                        blurRadius: 5),
-                                  ],
-                                ),
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText: AppLocalizations.of(context)!
-                                        .searchHere,
-                                    hintStyle: TextStyle(
-                                        fontSize: 20,
-                                        color: isDarkMode
-                                            ? Colors.white
-                                            : colorScheme.onSurfaceVariant),
-                                    border: InputBorder.none,
-                                    icon: Padding(
-                                      padding: const EdgeInsets.only(left: 10),
-                                      child: Image.asset(
-                                        "assets/images/navigations/search.png",
-                                        scale: 25,
-                                        color: isDarkMode
-                                            ? Colors.white
-                                            : colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                  onSubmitted: (value) {
-                                    print("địa chỉ được nhập là " + value);
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 15),
+                            const SizedBox(height: 35),
+
                             // Image slider
                             ImageSlider(imageList: imageListHome),
                             // Categories grid - now using the CategoryGrid widget
@@ -170,18 +126,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const EdgeInsets.symmetric(horizontal: 12),
                               child: Column(
                                 children: [
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "Activities",
-                                      style: TextStyle(
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 9.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .activities,
+                                        style: TextStyle(
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ),
                                   Padding(
@@ -191,18 +151,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       topEvents: _topEvents,
                                     ),
                                   ),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "Tourist attraction",
-                                      style: TextStyle(
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 9.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .touristAttraction,
+                                        style: TextStyle(
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ),
                                   Padding(
@@ -213,18 +177,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                           _favoriteDestinations,
                                     ),
                                   ),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "Featured ocop products",
-                                      style: TextStyle(
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 9.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .featuredOcopProducts,
+                                        style: TextStyle(
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ),
                                   Padding(

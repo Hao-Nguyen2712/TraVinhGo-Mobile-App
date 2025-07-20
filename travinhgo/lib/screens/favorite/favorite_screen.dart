@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../utils/constants.dart';
+import 'package:provider/provider.dart';
+import 'package:travinhgo/providers/favorite_provider.dart';
 import 'favorite_tab/favorite_all_tab.dart';
 import 'favorite_tab/favorite_destination_tab.dart';
 import 'favorite_tab/favorite_local_tab.dart';
@@ -28,47 +29,51 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final destinationCount = favoriteProvider.destinationList.length;
+    final ocopCount = favoriteProvider.ocopProductList.length;
+    final localCount = favoriteProvider.localSpecialteList.length;
+    final allCount = destinationCount + ocopCount + localCount;
+
+    final counts = [allCount, destinationCount, ocopCount, localCount];
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SafeArea(
+        top: false,
+        bottom: false,
         child: CustomScrollView(
           slivers: [
-            // AppBar
             SliverAppBar(
               floating: true,
               snap: true,
-              backgroundColor: colorScheme.surface,
+              backgroundColor: colorScheme.primary,
+              elevation: 0,
               automaticallyImplyLeading: false,
               title: Text(
                 AppLocalizations.of(context)!.favoriteTitle,
-                style: TextStyle(
-                  color: colorScheme.primary,
+                style: const TextStyle(
+                  color: Colors.white,
                   fontWeight: FontWeight.w600,
                   fontSize: 20,
                 ),
               ),
               centerTitle: true,
             ),
-            // Tabbar
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: List.generate(
-                      _tabs.length,
-                          (index) => Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: _buildTab(index),
-                      ),
-                    ),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                color: colorScheme.primary,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(
+                    _tabs.length,
+                    (index) => _buildTab(index, counts[index]),
                   ),
                 ),
               ),
             ),
-            // Nội dung thay đổi theo tab
             SliverFillRemaining(
               hasScrollBody: true,
               child: _buildTabContent(),
@@ -79,40 +84,65 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     );
   }
 
-  Widget _buildTab(int index) {
+  Widget _buildTab(int index, int count) {
     final bool isSelected = _selectedTab == index;
     final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = index;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary : colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: colorScheme.outline.withOpacity(0.5),
+    final primaryColor = colorScheme.primary;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedTab = index;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 4.0),
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : [],
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: colorScheme.primary.withOpacity(0.18),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _tabs[index],
+                style: TextStyle(
+                  color: isSelected ? primaryColor : Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isSelected ? primaryColor : Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  count.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
                   ),
-                ]
-              : [],
-        ),
-        child: Text(
-          _tabs[index],
-          style: TextStyle(
-            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
-            fontWeight: FontWeight.w500,
-            fontSize: 15,
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_html/flutter_html.dart';
 
-import '../../Models/Maps/top_favorite_destination.dart';
+import '../../models/maps/top_favorite_destination.dart';
 import '../../providers/map_provider.dart';
 
 /// Favorite destinations carousel slider
@@ -105,7 +106,7 @@ class _FavoriteDestinationsSliderState
           bottom: MediaQuery.of(context).padding.bottom + 20,
           left: 0,
           right: 0,
-          height: 100,
+          height: 120,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -175,20 +176,26 @@ class _FavoriteDestinationsSliderState
                                       SizedBox(height: 3),
                                       _buildDestinationRating(
                                           destination.averageRating ?? 0),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        destination.description ??
-                                            AppLocalizations.of(context)!
-                                                .noDescriptionAvailable,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant
-                                              .withAlpha(230),
+                                      SizedBox(height: 0),
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          child: Html(
+                                            data: destination.description ??
+                                                AppLocalizations.of(context)!
+                                                    .noDescriptionAvailable,
+                                            style: {
+                                              "body": Style(
+                                                fontSize: FontSize(11),
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant
+                                                    .withAlpha(230),
+                                                margin: Margins.zero,
+                                                padding: HtmlPaddings.zero,
+                                              ),
+                                            },
+                                          ),
                                         ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),

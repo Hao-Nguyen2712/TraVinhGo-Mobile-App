@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/destination_widget/destination_item.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoriteDestinationTab extends StatelessWidget {
   const FavoriteDestinationTab({super.key});
@@ -14,13 +13,11 @@ class FavoriteDestinationTab extends StatelessWidget {
     final destinations = favoriteProvider.destinationList;
 
     if (destinations.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.noFavoriteDestinations),
-      );
+      return const EmptyFavoritesPlaceholder();
     }
 
     return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       shrinkWrap: true,
       padding: const EdgeInsets.all(8.0), // padding ở đây
       itemCount: destinations.length,

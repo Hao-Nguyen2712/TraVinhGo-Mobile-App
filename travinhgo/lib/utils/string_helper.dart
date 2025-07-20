@@ -84,4 +84,16 @@ class StringHelper {
       return "Liên hệ";
     }
   }
+
+  static String removeDiacritics(String str) {
+    const withDiacritics =
+        'áàảãạăắằẳẵặâấầẩẫậđéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ';
+    const withoutDiacritics =
+        'aaaaaaaaaaaaaaaaadeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyy';
+
+    for (int i = 0; i < withDiacritics.length; i++) {
+      str = str.replaceAll(withDiacritics[i], withoutDiacritics[i]);
+    }
+    return str;
+  }
 }

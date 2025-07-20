@@ -22,6 +22,15 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<OcopProductProvider>(context, listen: false)
+          .fetchOcopProducts();
+    });
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ocopProducts = Provider.of<OcopProductProvider>(context).ocopProducts;

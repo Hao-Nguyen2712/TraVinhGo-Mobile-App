@@ -1,12 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
-import 'package:travinhgo/services/local_specialtie_service.dart';
+import 'package:travinhgo/providers/local_specialty_provider.dart';
 import 'package:travinhgo/widget/local_specialty_widget/local_specialty_item.dart';
-
-import '../../utils/constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../utils/constants.dart';
+import '../../utils/string_helper.dart';
 
 class LocalSpecialtyScreen extends StatefulWidget {
   const LocalSpecialtyScreen({super.key});
@@ -16,94 +16,74 @@ class LocalSpecialtyScreen extends StatefulWidget {
 }
 
 class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
-  List<String> _localSpecialtyName = [];
-  List<LocalSpecialties> _localSpecialties = [];
-  bool _isLoading = true;
-
   String _searchQuery = '';
 
   @override
   void initState() {
-    fetchLocalSpecialty();
     super.initState();
-  }
-
-  Future<void> fetchLocalSpecialty() async {
-    final data = await LocalSpecialtieService().getLocalSpecialtie();
-
-    for (final localItem in data) {
-      if (localItem.images.isNotEmpty) {
-        await precacheImage(
-          CachedNetworkImageProvider(localItem.images.first),
-          context,
-        );
-      }
-    }
-
-    setState(() {
-      _localSpecialties = data;
-      _localSpecialtyName = data.map((e) => e.foodName).toList();
-      _isLoading = false;
+    // Fetch initial data using the provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LocalSpecialtyProvider>(context, listen: false)
+          .fetchLocalSpecialties();
     });
-  }
-
-  List<LocalSpecialties> get _filteredLocals {
-    return _localSpecialties.where((local) {
-      final matchesSearch = _searchQuery.isEmpty ||
-          local.foodName.toLowerCase().contains(_searchQuery.toLowerCase());
-
-      return matchesSearch;
-    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-          child: CustomScrollView(slivers: [
-        SliverAppBar(
-          floating: true,
-          snap: true,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Text(AppLocalizations.of(context)!.localSpecialty),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-            SliverToBoxAdapter(
-              child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Autocomplete<String>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty)
-                        return const Iterable<String>.empty();
-                      return _localSpecialtyName.where((name) => name
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase()));
-                    },
-                    onSelected: (String selection) {
-                      setState(() {
-                        _searchQuery = selection;
-                      });
-                    },
-                    fieldViewBuilder:
-                        (context, controller, focusNode, onFieldSubmitted) {
-                      return TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        onSubmitted: (value) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: theme.colorScheme.primary,
+        statusBarIconBrightness:
+            isDarkMode ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDarkMode ? Brightness.dark : Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        body: SafeArea(
+          top: false, // We handle the top padding with the AppBar
+          child: Consumer<LocalSpecialtyProvider>(
+            builder: (context, provider, child) {
+              final filteredLocals = provider.localSpecialties.where((local) {
+                final normalizedQuery =
+                    StringHelper.removeDiacritics(_searchQuery.toLowerCase());
+                final normalizedFoodName =
+                    StringHelper.removeDiacritics(local.foodName.toLowerCase());
+
+                return _searchQuery.isEmpty ||
+                    normalizedFoodName.contains(normalizedQuery);
+              }).toList();
+
+              return CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    floating: true,
+                    snap: true,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    title: Text(AppLocalizations.of(context)!.localSpecialty),
+                    centerTitle: true,
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+                      child: TextField(
+                        onChanged: (value) {
                           setState(() {
                             _searchQuery = value;
                           });
                         },
                         decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.searchOcopProduct,
-                          prefixIcon: const Icon(Icons.search),
+                          hintText: AppLocalizations.of(context)!.search,
+                          prefixIcon: Icon(Icons.search,
+                              color: theme.colorScheme.onSurface),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(60),
                             borderSide: BorderSide.none,
@@ -111,71 +91,85 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
                           filled: true,
                           fillColor: kSearchBackgroundColor,
                         ),
-                      );
-                    },
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: options.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final option = options.elementAt(index);
-                                return InkWell(
-                                  onTap: () {
-                                    onSelected(option);
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0, vertical: 12.0),
-                                    child: Text(
-                                      option,
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  )),
+                      ),
+                    ),
+                  ),
+                  _buildBody(provider.state, filteredLocals, provider),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody(LocalSpecialtyState state,
+      List<LocalSpecialties> filteredLocals, LocalSpecialtyProvider provider) {
+    switch (state) {
+      case LocalSpecialtyState.loading:
+      case LocalSpecialtyState.initial:
+        return const SliverToBoxAdapter(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: CircularProgressIndicator(),
             ),
-        _isLoading
-            ? const SliverToBoxAdapter(
+          ),
+        );
+      case LocalSpecialtyState.error:
+        return SliverToBoxAdapter(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    provider.errorMessage,
+                    textAlign: TextAlign.center,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => provider.fetchLocalSpecialties(),
+                    child: const Text("Thử lại"),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      case LocalSpecialtyState.loaded:
+        return filteredLocals.isEmpty
+            ? SliverToBoxAdapter(
                 child: Center(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
-                    child: CircularProgressIndicator(),
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Text(
+                        AppLocalizations.of(context)!.noLocalSpecialtyFound),
                   ),
                 ),
               )
             : SliverPadding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16.0),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 1, childAspectRatio: 1.5),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1 / 1.4,
+                  ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       return LocalSpecialtyItem(
-                          localSpecialty: _filteredLocals[index]);
+                          localSpecialty: filteredLocals[index]);
                     },
-                    childCount: _filteredLocals.length,
+                    childCount: filteredLocals.length,
                   ),
                 ),
-              ),
-      ])),
-    );
+              );
+    }
   }
 }

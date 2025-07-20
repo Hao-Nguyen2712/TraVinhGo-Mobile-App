@@ -81,17 +81,15 @@ class CategoryButtons extends StatelessWidget {
                     label: Text(
                       localizedName,
                       style: TextStyle(
-                        fontWeight:
-                            isSelected ? FontWeight.w800 : FontWeight.w500,
+                        fontWeight: FontWeight.w700,
                         color: isSelected
-                            ? theme.colorScheme.onPrimary
+                            ? Colors.white
                             : theme.colorScheme.onSurface,
                         fontSize: 14,
                       ),
                     ),
-                    backgroundColor: isSelected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.surface,
+                    backgroundColor:
+                        isSelected ? Colors.green : theme.colorScheme.surface,
                     selected: isSelected,
                     showCheckmark: false,
                     avatar: Image.asset(

@@ -51,8 +51,8 @@ class DestinationMapProvider {
       if (_allDestinations.isEmpty) {
         developer.log('No destinations loaded. Fetching destinations...',
             name: 'DestinationMapProvider');
-        await destinationProvider.fetchAllDestinations();
-        _allDestinations = destinationProvider.destinations;
+        await destinationProvider.fetchAllDestinationsForMap();
+        _allDestinations = destinationProvider.allDestinationsForMap;
         dataWasFetched = true;
       }
 
@@ -110,9 +110,9 @@ class DestinationMapProvider {
           'Raw coordinates for ${destination.name}: ${destination.location.coordinates}',
           name: 'DestinationMapProvider');
 
-      // Extract coordinates - API provides [latitude, longitude]
-      final double latitude = destination.location.coordinates![0];
-      final double longitude = destination.location.coordinates![1];
+      // Extract coordinates - API provides [longitude, latitude], we need to swap them.
+      final double latitude = destination.location.coordinates![1];
+      final double longitude = destination.location.coordinates![0];
 
       // Check for invalid coordinate values
       if (longitude < -180 ||

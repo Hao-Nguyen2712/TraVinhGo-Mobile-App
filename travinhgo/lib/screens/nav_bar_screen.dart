@@ -23,27 +23,27 @@ class _BottomNavBarState extends State<BottomNavBar> {
       const MapScreen(),
       // Events screen - Auth required
       AuthRequiredScreen(
+        message: AppLocalizations.of(context)!.loginToUseFeature,
         child: Scaffold(
             body: Center(
                 child: Text(AppLocalizations.of(context)!.eventsComingSoon))),
-        message: AppLocalizations.of(context)!.loginToUseFeature,
       ),
       // Home screen - Available to all users
       const HomeScreen(),
       // Favorites screen - Auth required
       AuthRequiredScreen(
+        message: AppLocalizations.of(context)!.loginToUseFeature,
         child: Scaffold(
             body: Center(
                 child:
                     Text(AppLocalizations.of(context)!.favoritesComingSoon))),
-        message: AppLocalizations.of(context)!.loginToUseFeature,
       ),
       // Profile screen - Auth required
       AuthRequiredScreen(
+        message: AppLocalizations.of(context)!.loginToUseFeature,
         child: Scaffold(
             body: Center(
                 child: Text(AppLocalizations.of(context)!.profileComingSoon))),
-        message: AppLocalizations.of(context)!.loginToUseFeature,
       ),
     ];
   }
@@ -77,7 +77,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
               child: Image.asset(
                 'assets/images/navigations/home.png',
                 color: currentIndex == 2
-                    ? Theme.of(context).colorScheme.onPrimary
+                    ? Colors.white
                     : Theme.of(context).colorScheme.onSecondaryContainer,
                 scale: 20,
               ),
@@ -229,7 +229,7 @@ class _ShellNavigatorState extends State<ShellNavigator> {
             child: Image.asset(
               'assets/images/navigations/home.png',
               color: currentIndex == 2
-                  ? Theme.of(context).colorScheme.onPrimary
+                  ? Colors.white
                   : Theme.of(context).colorScheme.onSecondaryContainer,
               scale: 20,
             ),

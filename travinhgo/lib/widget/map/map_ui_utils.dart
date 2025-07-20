@@ -112,7 +112,7 @@ class LocationPreview extends StatelessWidget {
             controller.mapScene.loadSceneForMapScheme(mapScheme, (error) async {
               if (error == null) {
                 final mapImage = await MapImage.withFilePathAndWidthAndHeight(
-                    'assets/images/markers/marker.png', 50, 50);
+                    'assets/images/markers/marker.png', 70, 70);
                 controller.camera.lookAtPoint(location);
                 controller.mapScene.addMapMarker(MapMarker(location, mapImage));
               }
