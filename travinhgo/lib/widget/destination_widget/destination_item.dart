@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 import 'package:travinhgo/widget/success_dialog.dart';
 import 'package:travinhgo/providers/destination_type_provider.dart';
@@ -49,7 +50,7 @@ class DestinationItem extends StatelessWidget {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(15.sp),
                 color: isDarkMode
                     ? colorScheme.surfaceVariant
                     : colorScheme.surface,
@@ -62,116 +63,125 @@ class DestinationItem extends StatelessWidget {
                   )
                 ]),
             child: Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: EdgeInsets.all(2.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Stack(
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 175,
-                          height: 190,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                              image: DecorationImage(
-                                  image: NetworkImage(destination.images[0]),
-                                  fit: BoxFit.cover)),
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 12,
-                        child: GestureDetector(
-                          onTap: () {
-                            final isCurrentlyFavorite =
-                                favoriteProvider.isExist(destination.id);
-                            favoriteProvider
-                                .toggleDestinationFavorite(destination);
-                            _showFavoriteDialog(context, !isCurrentlyFavorite);
-                          },
-                          child: Icon(
-                            favoriteProvider.isExist(destination.id)
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: colorScheme.error,
-                            size: 22,
+                  Container(
+                    width: double.infinity,
+                    height: 18.h,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40.w,
+                            height: 20.h,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15.sp),
+                                image: DecorationImage(
+                                    image: NetworkImage(destination.images[0]),
+                                    fit: BoxFit.cover)),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 4,
-                  ),
-                  Text(
-                    StringHelper.toTitleCase(destination.name),
-                    maxLines: 2,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : colorScheme.primary,
-                        fontSize: 16,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  const SizedBox(
-                    height: 2,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        destination.avarageRating.toStringAsFixed(1),
-                        style: TextStyle(
-                            fontSize: 15,
-                            color: isDarkMode ? Colors.white70 : null),
-                      ),
-                      const SizedBox(width: 5),
-                      ...List.generate(5, (index) {
-                        double rating = destination.avarageRating;
-                        if (index < rating.floor()) {
-                          return Icon(Icons.star,
-                              color: colorScheme.secondary, size: 15);
-                        } else if (index < rating && rating - index >= 0.5) {
-                          return Icon(Icons.star_half,
-                              color: colorScheme.secondary, size: 15);
-                        } else {
-                          return Icon(Icons.star_border,
-                              color: colorScheme.secondary, size: 15);
-                        }
-                      }),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 2,
-                  ),
-                  Row(
-                    children: [
-                      Image.network(
-                        destinationTypeProvider
-                                .getDestinationtypeById(
-                                    destination.destinationTypeId)
-                                .marker
-                                ?.image ??
-                            '',
-                        width: 25,
-                        height: 25,
-                      ),
-                      const SizedBox(
-                        width: 6,
-                      ),
-                      Expanded(
-                        child: Text(
-                          destination.address.toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: true,
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: isDarkMode ? Colors.white70 : null),
+                        Positioned(
+                          top: 1.h,
+                          right: 2.w,
+                          child: GestureDetector(
+                            onTap: () {
+                              final isCurrentlyFavorite =
+                                  favoriteProvider.isExist(destination.id);
+                              favoriteProvider
+                                  .toggleDestinationFavorite(destination);
+                              _showFavoriteDialog(
+                                  context, !isCurrentlyFavorite);
+                            },
+                            child: Icon(
+                              favoriteProvider.isExist(destination.id)
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: colorScheme.error,
+                              size: 16.sp,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  )
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 0.5.h,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          StringHelper.toTitleCase(destination.name),
+                          maxLines: 2,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : colorScheme.primary,
+                              fontSize: 16.sp,
+                              overflow: TextOverflow.ellipsis),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              destination.avarageRating.toStringAsFixed(1),
+                              style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: isDarkMode ? Colors.white70 : null),
+                            ),
+                            SizedBox(width: 1.w),
+                            ...List.generate(5, (index) {
+                              double rating = destination.avarageRating;
+                              if (index < rating.floor()) {
+                                return Icon(Icons.star,
+                                    color: colorScheme.secondary, size: 14.sp);
+                              } else if (index < rating &&
+                                  rating - index >= 0.5) {
+                                return Icon(Icons.star_half,
+                                    color: colorScheme.secondary, size: 14.sp);
+                              } else {
+                                return Icon(Icons.star_border,
+                                    color: colorScheme.secondary, size: 14.sp);
+                              }
+                            }),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Image.network(
+                              destinationTypeProvider
+                                      .getDestinationtypeById(
+                                          destination.destinationTypeId)
+                                      .marker
+                                      ?.image ??
+                                  '',
+                              width: 6.w,
+                              height: 6.w,
+                            ),
+                            SizedBox(
+                              width: 1.5.w,
+                            ),
+                            Expanded(
+                              child: Text(
+                                destination.address.toString(),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: true,
+                                style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: isDarkMode ? Colors.white70 : null),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

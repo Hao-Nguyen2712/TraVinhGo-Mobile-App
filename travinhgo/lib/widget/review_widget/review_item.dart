@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../Models/review/reply_user_information.dart';
 import '../../Models/review/review.dart';
@@ -56,10 +57,10 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 2.h),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12.sp),
         boxShadow: [
           BoxShadow(
             color: theme.shadowColor.withOpacity(0.1),
@@ -70,7 +71,7 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(4.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -82,13 +83,13 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                 Stack(
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: 12.w,
+                      height: 12.w,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: colorScheme.primary.withOpacity(0.3),
-                          width: 2,
+                          width: 0.5.w,
                         ),
                         image: DecorationImage(
                           image: (review.avatar != null &&
@@ -106,21 +107,22 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                     ),
                     // Online indicator (optional)
                     Positioned(
-                      bottom: 2,
-                      right: 2,
+                      bottom: 0.2.h,
+                      right: 0.5.w,
                       child: Container(
-                        width: 14,
-                        height: 14,
+                        width: 3.w,
+                        height: 3.w,
                         decoration: BoxDecoration(
                           color: Colors.green,
                           shape: BoxShape.circle,
-                          border: Border.all(color: theme.cardColor, width: 2),
+                          border:
+                              Border.all(color: theme.cardColor, width: 0.5.w),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 3.w),
                 // Review content
                 Expanded(
                   child: Column(
@@ -139,7 +141,7 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
+                                SizedBox(height: 0.3.h),
                                 Text(
                                   timeAgo(review.createdAt.toLocal()),
                                   style: theme.textTheme.bodySmall,
@@ -149,10 +151,10 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           ),
                           // Enhanced rating badge
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 3.w, vertical: 0.8.h),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(15.sp),
                               gradient: LinearGradient(
                                 colors: [
                                   colorScheme.primary,
@@ -175,27 +177,27 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                   style: TextStyle(
                                     color: colorScheme.onPrimary,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 13,
+                                    fontSize: 10.sp,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: 1.w),
                                 Icon(Icons.star,
-                                    size: 14, color: colorScheme.onPrimary),
+                                    size: 11.sp, color: colorScheme.onPrimary),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 1.5.h),
 
                       // Review comment with better typography
                       if (review.comment != null)
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(3.w),
                           decoration: BoxDecoration(
                             color: colorScheme.surfaceVariant.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(10.sp),
                             border: Border.all(color: theme.dividerColor),
                           ),
                           child: Text(
@@ -207,13 +209,13 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                           ),
                         ),
 
-                      const SizedBox(height: 12),
+                      SizedBox(height: 1.5.h),
 
                       // Enhanced images display
                       if (review.images != null && review.images!.isNotEmpty)
                         Container(
-                          height: 80,
-                          margin: const EdgeInsets.only(bottom: 12),
+                          height: 10.h,
+                          margin: EdgeInsets.only(bottom: 1.5.h),
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: review.images!.length,
@@ -227,16 +229,17 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                       duration: const Duration(seconds: 1),
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius:
+                                            BorderRadius.circular(10.sp),
                                       ),
                                     ),
                                   );
                                 },
                                 child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  width: 80,
+                                  margin: EdgeInsets.only(right: 2.w),
+                                  width: 20.w,
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(10.sp),
                                     image: DecorationImage(
                                       image:
                                           NetworkImage(review.images![index]),

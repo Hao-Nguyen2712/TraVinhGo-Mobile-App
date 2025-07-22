@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 import '../../providers/ocop_product_provider.dart';
-
-import '../../utils/constants.dart';
 import '../../widget/ocop_product_widget/ocop_product_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -54,6 +53,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
     final filteredProducts = _filteredOcopProducts(ocopProducts);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Scaffold(
       body: SafeArea(
@@ -72,7 +72,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
               child: Autocomplete<String>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
                   if (textEditingValue.text.isEmpty)
@@ -115,8 +115,8 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                       elevation: 4,
                       borderRadius: BorderRadius.circular(12),
                       child: Container(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        constraints: const BoxConstraints(maxHeight: 200),
+                        width: 90.w,
+                        constraints: BoxConstraints(maxHeight: 25.h),
                         decoration: BoxDecoration(
                           color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
@@ -167,13 +167,13 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
           )
         else
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  childAspectRatio: 0.64),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isTablet ? 3 : 2,
+                  crossAxisSpacing: 5.w,
+                  mainAxisSpacing: 2.h,
+                  childAspectRatio: isTablet ? 0.75 : 0.64),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   return OcopProductItem(ocopProduct: filteredProducts[index]);

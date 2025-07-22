@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 class EventFestivalContentTab extends StatelessWidget {
   final String? description;
@@ -11,32 +12,32 @@ class EventFestivalContentTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 18,
+          SizedBox(
+            height: 2.h,
           ),
-          const Row(
+          Row(
             children: [
               Icon(Icons.library_books_outlined,
-                  color: Color(0xFF8F83F3), size: 24),
-              SizedBox(width: 8),
+                  color: const Color(0xFF8F83F3), size: 18.sp),
+              SizedBox(width: 2.w),
               Text(
                 "Mô tả sự kiện",
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 2.h),
           Text(
             description ?? 'Chưa có mô tả cho sự kiện này.',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 12.sp,
               color: Colors.grey.shade700,
               height: 1.5,
             ),

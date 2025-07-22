@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 class DataFieldRow extends StatelessWidget {
   final String title;
@@ -19,11 +20,11 @@ class DataFieldRow extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
+              style: TextStyle(fontSize: 15.sp, color: colorScheme.onSurface),
             ),
             const Spacer(),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 225),
+              constraints: BoxConstraints(maxWidth: 60.w),
               child: GestureDetector(
                 onTap: () {
                   if (value != null && value!.isNotEmpty) {
@@ -39,7 +40,7 @@ class DataFieldRow extends StatelessWidget {
                 child: Text(
                   value ?? 'N/A',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15.sp,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : colorScheme.onSurfaceVariant,

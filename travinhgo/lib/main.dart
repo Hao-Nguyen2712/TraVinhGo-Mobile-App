@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/providers/card_provider.dart';
 import 'package:travinhgo/providers/favorite_provider.dart';
@@ -170,57 +171,62 @@ class _MyAppState extends State<MyApp> {
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) => MultiProvider(
-        providers: [
-          Provider(create: (_) => InteractionProvider()),
-          Provider(create: (_) => InteractionLogProvider()),
-          ChangeNotifierProvider.value(value: _authProvider),
-          ChangeNotifierProvider(create: (_) => CardProvider()),
-          ChangeNotifierProvider(create: (_) => SettingProvider()),
-          ChangeNotifierProvider(create: (_) => MarkerProvider()),
-          ChangeNotifierProxyProvider<SettingProvider, MapProvider>(
-            create: (_) => MapProvider(),
-            update: (_, settings, previous) {
-              final mapProvider = previous ?? MapProvider();
-              final platformBrightness = MediaQuery.of(_).platformBrightness;
-              mapProvider.updateMapTheme(
-                  settings.themeMode, platformBrightness);
-              return mapProvider;
-            },
-          ),
-          ChangeNotifierProvider(create: (_) => DestinationProvider()),
-          ChangeNotifierProvider(create: (_) => DestinationTypeProvider()),
-          ChangeNotifierProvider(create: (_) => TagProvider()),
-          ChangeNotifierProvider(create: (_) => OcopTypeProvider()),
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-          ChangeNotifierProvider(create: (_) => NotificationProvider()),
-          ChangeNotifierProvider(create: (_) => FavoriteProvider()),
-          ChangeNotifierProvider(create: (_) => OcopProductProvider()),
-          ChangeNotifierProvider(create: (_) => LocalSpecialtyProvider()),
-        ],
-        child: Consumer<SettingProvider>(
-          builder: (context, settingProvider, child) {
-            return MaterialApp.router(
-              title: "TraVinhGo",
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode: settingProvider.themeMode,
-              routerConfig: _appRouter.router,
-              restorationScopeId: 'app_scope',
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [
-                Locale('en', ''), // English, no country code
-                Locale('vi', ''), // Vietnamese, no country code
-              ],
-              locale: settingProvider.locale,
-            );
-          },
-        ),
+  Widget build(BuildContext context) => Sizer(
+        builder: (context, orientation, deviceType) {
+          return MultiProvider(
+            providers: [
+              Provider(create: (_) => InteractionProvider()),
+              Provider(create: (_) => InteractionLogProvider()),
+              ChangeNotifierProvider.value(value: _authProvider),
+              ChangeNotifierProvider(create: (_) => CardProvider()),
+              ChangeNotifierProvider(create: (_) => SettingProvider()),
+              ChangeNotifierProvider(create: (_) => MarkerProvider()),
+              ChangeNotifierProxyProvider<SettingProvider, MapProvider>(
+                create: (_) => MapProvider(),
+                update: (_, settings, previous) {
+                  final mapProvider = previous ?? MapProvider();
+                  final platformBrightness =
+                      MediaQuery.of(context).platformBrightness;
+                  mapProvider.updateMapTheme(
+                      settings.themeMode, platformBrightness);
+                  return mapProvider;
+                },
+              ),
+              ChangeNotifierProvider(create: (_) => DestinationProvider()),
+              ChangeNotifierProvider(create: (_) => DestinationTypeProvider()),
+              ChangeNotifierProvider(create: (_) => TagProvider()),
+              ChangeNotifierProvider(create: (_) => OcopTypeProvider()),
+              ChangeNotifierProvider(create: (_) => UserProvider()),
+              ChangeNotifierProvider(create: (_) => NotificationProvider()),
+              ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+              ChangeNotifierProvider(create: (_) => OcopProductProvider()),
+              ChangeNotifierProvider(create: (_) => LocalSpecialtyProvider()),
+            ],
+            child: Consumer<SettingProvider>(
+              builder: (context, settingProvider, child) {
+                return MaterialApp.router(
+                  title: "TraVinhGo",
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.lightTheme,
+                  darkTheme: AppTheme.darkTheme,
+                  themeMode: settingProvider.themeMode,
+                  routerConfig: _appRouter.router,
+                  restorationScopeId: 'app_scope',
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: const [
+                    Locale('en', ''), // English, no country code
+                    Locale('vi', ''), // Vietnamese, no country code
+                  ],
+                  locale: settingProvider.locale,
+                );
+              },
+            ),
+          );
+        },
       );
 }

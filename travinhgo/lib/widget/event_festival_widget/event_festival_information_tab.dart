@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:travinhgo/models/event_festival/event_and_festival.dart';
 import 'package:travinhgo/utils/string_helper.dart';
@@ -14,53 +15,59 @@ class EventFestivalInformationTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 15.0),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 18,
+          SizedBox(
+            height: 2.h,
           ),
-          const Row(
+          Row(
             children: [
               Icon(Icons.calendar_month_outlined,
-                  color: Color(0xFF8F83F3), size: 30),
-              SizedBox(width: 18),
+                  color: const Color(0xFF8F83F3), size: 22.sp),
+              SizedBox(width: 3.w),
               Text(
                 "Chi tiết sự kiện",
                 style: TextStyle(
-                  fontSize: 25,
+                  fontSize: 17.sp,
                   fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 6.h),
           _buildInfoRow(
-            icon: Icons.location_on_outlined,
+            icon: Icons.home_filled,
             iconColor: const Color(0xFFF57A82),
             title: "Địa điểm",
-            value:
-                "${eventAndFestival.location.name}\n${eventAndFestival.location.address}",
+            value: "${eventAndFestival.location.name}",
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 2.5.h),
           _buildInfoRow(
-            icon: Icons.calendar_today_outlined,
+            icon: Icons.location_on_rounded,
+            iconColor: const Color(0xFFF57A82),
+            title: "Địa chỉ",
+            value: "${eventAndFestival.location.address}",
+          ),
+          SizedBox(height: 2.5.h),
+          _buildInfoRow(
+            icon: Icons.calendar_today_rounded,
             iconColor: const Color(0xFF8F83F3),
             title: "Ngày bắt đầu",
             value:
                 StringHelper.formatDate(eventAndFestival.startDate.toString()),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 2.5.h),
           _buildInfoRow(
-            icon: Icons.timer_outlined,
+            icon: Icons.timer_rounded,
             iconColor: const Color(0xFFF57A82),
             title: "Ngày kết thúc",
             value: StringHelper.formatDate(eventAndFestival.endDate.toString()),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 2.5.h),
           _buildInfoRow(
-            icon: Icons.category_outlined,
+            icon: Icons.category_rounded,
             iconColor: const Color(0xFF4B9EFC),
             title: "Loại sự kiện",
             value: eventAndFestival.category,
@@ -79,20 +86,22 @@ class EventFestivalInformationTab extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: iconColor, size: 30),
-        const SizedBox(width: 16),
+        Icon(icon, color: iconColor, size: 22.sp),
+        SizedBox(width: 4.w),
         Text(
           title,
           style: TextStyle(
-              fontSize: 16, color: Colors.black, fontWeight: FontWeight.w700),
+              fontSize: 14.sp,
+              color: Colors.black,
+              fontWeight: FontWeight.w700),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 6.w),
         Expanded(
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: 14.sp,
               fontWeight: FontWeight.w700,
               color: Colors.black,
             ),

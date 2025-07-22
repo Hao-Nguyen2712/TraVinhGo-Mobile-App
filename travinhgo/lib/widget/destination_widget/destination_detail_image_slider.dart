@@ -6,7 +6,8 @@ class DestinationDetailImageSlider extends StatelessWidget {
   final Function(int) onChange;
   final List<String> imageList;
 
-  const DestinationDetailImageSlider({super.key, required this.onChange, required this.imageList});
+  const DestinationDetailImageSlider(
+      {super.key, required this.onChange, required this.imageList});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,8 @@ class DestinationDetailImageSlider extends StatelessWidget {
                   imageUrl: imageList[index],
                   fit: BoxFit.cover,
                   fadeInDuration: const Duration(milliseconds: 300),
-                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                  placeholder: (context, url) =>
+                      const Center(child: CircularProgressIndicator()),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),

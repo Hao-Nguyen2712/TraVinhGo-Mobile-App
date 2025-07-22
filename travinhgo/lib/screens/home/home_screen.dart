@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/sampledata/samplelist.dart';
 import 'package:travinhgo/widget/category_grid.dart';
 import 'package:travinhgo/widget/category_item.dart';
@@ -70,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
           : Brightness.dark, // light status bar icons
     ));
     final authProvider = Provider.of<AuthProvider>(context);
-    final screenHeight = MediaQuery.of(context).size.height;
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
     final colorScheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -102,111 +102,100 @@ class _HomeScreenState extends State<HomeScreen> {
                   bottom: true, // Keep bottom safe area
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        // Ensure the content has enough space to scroll
-                        minHeight: screenHeight -
-                            statusBarHeight -
-                            MediaQuery.of(context).padding.bottom -
-                            80, // Account for header
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 30.0),
-                        child: Column(
-                          children: [
-                            // Welcome message
-                            const SizedBox(height: 35),
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 4.h),
+                      child: Column(
+                        children: [
+                          // Welcome message
+                          SizedBox(height: 4.h),
 
-                            // Image slider
-                            ImageSlider(imageList: imageListHome),
-                            // Categories grid - now using the CategoryGrid widget
-                            const CategoryGrid(),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 9.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        AppLocalizations.of(context)!
-                                            .activities,
-                                        style: TextStyle(
-                                            color: isDarkMode
-                                                ? Colors.white
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold),
-                                      ),
+                          // Image slider
+                          ImageSlider(imageList: imageListHome),
+                          // Categories grid - now using the CategoryGrid widget
+                          const CategoryGrid(),
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 3.w),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(left: 2.w),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      AppLocalizations.of(context)!.activities,
+                                      style: TextStyle(
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                          fontSize: 19.sp,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: ImageSliderEvent(
-                                      topEvents: _topEvents,
+                                ),
+                                Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 1.5.h),
+                                  child: ImageSliderEvent(
+                                    topEvents: _topEvents,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 2.w),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      AppLocalizations.of(context)!
+                                          .touristAttraction,
+                                      style: TextStyle(
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                          fontSize: 19.sp,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 9.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        AppLocalizations.of(context)!
-                                            .touristAttraction,
-                                        style: TextStyle(
-                                            color: isDarkMode
-                                                ? Colors.white
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold),
-                                      ),
+                                ),
+                                Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 1.5.h),
+                                  child: ImageSliderDestination(
+                                    favoriteDestinations: _favoriteDestinations,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 2.w),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      AppLocalizations.of(context)!
+                                          .featuredOcopProducts,
+                                      style: TextStyle(
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                          fontSize: 19.sp,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: ImageSliderDestination(
-                                      favoriteDestinations:
-                                          _favoriteDestinations,
-                                    ),
+                                ),
+                                Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 1.5.h),
+                                  child: ImageSliderOcop(
+                                    ocopProducts: _ocopProducts,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 9.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        AppLocalizations.of(context)!
-                                            .featuredOcopProducts,
-                                        style: TextStyle(
-                                            color: isDarkMode
-                                                ? Colors.white
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: ImageSliderOcop(
-                                      ocopProducts: _ocopProducts,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:sizer/sizer.dart';
 import 'package:provider/provider.dart';
 import '../../Models/tip/tip.dart';
 import '../../providers/tag_provider.dart';
@@ -108,7 +109,7 @@ class _TipScreenState extends State<TipScreen> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
                   child: TextField(
                     controller: _searchController,
                     onChanged: (value) {
@@ -127,7 +128,7 @@ class _TipScreenState extends State<TipScreen> {
                             )
                           : null,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(60),
+                        borderRadius: BorderRadius.circular(30.sp),
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
@@ -142,55 +143,55 @@ class _TipScreenState extends State<TipScreen> {
                           child: CircularProgressIndicator(),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(2.w),
                           itemCount: _filteredTips.length,
                           itemBuilder: (context, index) {
                             final tip = _filteredTips[index];
                             final tag = tagProvider.getTagById(tip.tagId);
                             return Card(
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 2.w, vertical: 1.h),
                               elevation: 2,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(12.sp),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: EdgeInsets.all(4.w),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       StringHelper.toTitleCase(tip.title),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 18,
+                                        fontSize: 17.sp,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 1.h),
                                     Row(
                                       children: [
                                         ClipRRect(
                                           borderRadius:
-                                              BorderRadius.circular(4),
+                                              BorderRadius.circular(4.sp),
                                           child: Image.network(
                                             tag.image,
-                                            width: 20,
-                                            height: 20,
+                                            width: 5.w,
+                                            height: 5.w,
                                             fit: BoxFit.cover,
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
+                                        SizedBox(width: 2.w),
                                         Text(
                                           tag.name,
                                           style: TextStyle(
-                                            fontSize: 14,
+                                            fontSize: 13.sp,
                                             color: theme
                                                 .colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: 1.5.h),
                                     Html(
                                       data: tip.content,
                                       style: {
@@ -198,13 +199,13 @@ class _TipScreenState extends State<TipScreen> {
                                           maxLines:
                                               _expandedList[index] ? 1000 : 3,
                                           textOverflow: TextOverflow.ellipsis,
-                                          fontSize: FontSize(15),
+                                          fontSize: FontSize(15.sp),
                                           color: theme
                                               .colorScheme.onSurfaceVariant,
                                         ),
                                       },
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 1.h),
                                     Align(
                                       alignment: Alignment.centerLeft,
                                       child: TextButton.icon(
@@ -221,7 +222,8 @@ class _TipScreenState extends State<TipScreen> {
                                               : AppLocalizations.of(context)!
                                                   .seeMore,
                                           style: TextStyle(
-                                              color: theme.colorScheme.primary),
+                                              color: theme.colorScheme.primary,
+                                              fontSize: 14.sp),
                                         ),
                                         label: Icon(
                                           _expandedList[index]

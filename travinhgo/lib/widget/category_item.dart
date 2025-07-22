@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/screens/introduction/introduction_page.dart';
 
 import '../screens/notification/message_screen.dart';
@@ -44,11 +45,11 @@ class CategoryItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 70,
-            height: 70,
+            width: 18.w,
+            height: 18.w,
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(15.sp),
             ),
             child: Padding(
               padding: const EdgeInsets.all(0.0),
@@ -58,13 +59,13 @@ class CategoryItem extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: 1.h),
           SizedBox(
-            width: 70,
+            width: 18.w,
             child: Text(
               title,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../Models/ocop/ocop_product.dart';
 import '../../../widget/home_widget/ocop/slider_ocop_card.dart';
@@ -10,13 +11,13 @@ class ImageSliderOcop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 245,
+      height: 30.h,
       child: GridView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: ocopProducts.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 1,
-          mainAxisSpacing: 8,
+          mainAxisSpacing: 2.w,
           childAspectRatio: 1.2,
         ),
         itemBuilder: (context, index) {

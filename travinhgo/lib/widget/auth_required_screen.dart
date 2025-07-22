@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'package:travinhgo/widget/login_button_widget.dart';
 import 'package:travinhgo/utils/constants.dart';
@@ -28,13 +29,13 @@ class AuthRequiredScreen extends StatelessWidget {
             body: SafeArea(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: EdgeInsets.all(6.w),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Lock icon
                       Container(
-                        padding: const EdgeInsets.all(20),
+                        padding: EdgeInsets.all(5.w),
                         decoration: BoxDecoration(
                           color: Theme.of(context)
                               .colorScheme
@@ -44,38 +45,38 @@ class AuthRequiredScreen extends StatelessWidget {
                         ),
                         child: Icon(
                           Icons.lock_outline,
-                          size: 60,
+                          size: 18.w,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 3.h),
 
                       // Title
-                      const Text(
+                      Text(
                         'Authentication Required',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 1.5.h),
 
                       // Message
                       Text(
                         message,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14.sp,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 4.h),
 
                       // Login button
                       SizedBox(
-                        width: 220,
-                        height: 50,
+                        width: 55.w,
+                        height: 6.h,
                         child: ElevatedButton(
                           onPressed: () {
                             // Get current route to return to after login
@@ -92,20 +93,20 @@ class AuthRequiredScreen extends StatelessWidget {
                             foregroundColor:
                                 Theme.of(context).colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                              borderRadius: BorderRadius.circular(30.sp),
                             ),
                             elevation: 2,
                           ),
-                          child: const Text(
+                          child: Text(
                             'Login',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 2.h),
 
                       // Back to home button
                       TextButton(
@@ -116,7 +117,7 @@ class AuthRequiredScreen extends StatelessWidget {
                           'Back to Home',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
-                            fontSize: 16,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ),

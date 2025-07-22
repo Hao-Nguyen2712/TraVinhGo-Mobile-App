@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../utils/string_helper.dart';
 
@@ -25,10 +26,10 @@ class SliderEventCard extends StatelessWidget {
         );
       },
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        margin: EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.h),
         elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(15.sp),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -36,32 +37,33 @@ class SliderEventCard extends StatelessWidget {
             // Image
             // Image with Favorite Icon
             ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15.sp),
+                topRight: Radius.circular(15.sp),
               ),
               child: Stack(
                 children: [
                   Image.network(
                     imageUrl,
-                    height: 120,
+                    height: 15.h,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
                 ],
               ),
             ),
+            SizedBox(height: 1.h),
             // Name + Icon
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+              padding: EdgeInsets.symmetric(vertical: 1.h, horizontal: 1.w),
               child: Row(
                 children: [
-                  const SizedBox(width: 8),
+                  SizedBox(width: 2.w),
                   Expanded(
                     child: Text(
                       StringHelper.toTitleCase(title),
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

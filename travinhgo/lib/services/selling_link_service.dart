@@ -43,7 +43,8 @@ class SellingLinkService {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data'];
-        List<SellingLink> sellingLinks = data.map((item) => SellingLink.fromJson(item)).toList();
+        List<SellingLink> sellingLinks =
+            data.map((item) => SellingLink.fromJson(item)).toList();
         return sellingLinks;
       }
       return [];
