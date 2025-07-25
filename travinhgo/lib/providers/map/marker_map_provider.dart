@@ -13,8 +13,8 @@ class MarkerMapProvider {
   final BaseMapProvider baseMapProvider;
 
   // Marker size constants
-  static const double markerMinSize = 80.0;
-  static const double markerMaxSize = 200.0;
+  static const double markerMinSize = 40.0;
+  static const double markerMaxSize = 100.0;
   static const double minZoomLevel = 5.0;
   static const double maxZoomLevel = 20.0;
 
@@ -118,13 +118,13 @@ class MarkerMapProvider {
           // Use a more visible location marker
           assetPath = 'assets/images/navigations/destination_point.png';
           // Override size for location marker to make it more visible
-          size = 48;
+          size = 34;
           break;
         case MARKER_TYPE_CUSTOM:
           // Use a distinctive marker for custom taps
           assetPath = 'assets/images/markers/marker.png';
           // Make custom markers slightly larger
-          size = 52;
+          size = 40;
           break;
         case MARKER_TYPE_DESTINATION:
         case MARKER_TYPE_CATEGORY:
@@ -146,7 +146,7 @@ class MarkerMapProvider {
 
       // Fallback to a default size if the specified size fails
       try {
-        return MapImage.withFilePathAndWidthAndHeight(assetPath, 80, 80);
+        return MapImage.withFilePathAndWidthAndHeight(assetPath, 40, 40);
       } catch (finalError) {
         developer.log('CRITICAL: Even default marker failed: $finalError',
             name: 'MarkerMapProvider');
@@ -265,9 +265,9 @@ class MarkerMapProvider {
 
       // Set text properties - increased size per user request
       double textSizeInPixels =
-          40; // Increased from 16 to 24 for better visibility
+          28; // Increased from 16 to 24 for better visibility
       double textOutlineSizeInPixels =
-          6; // Increased outline for better contrast
+          4; // Increased outline for better contrast
 
       // Define text placement options
       List<MapMarkerTextStylePlacement> placements = [];

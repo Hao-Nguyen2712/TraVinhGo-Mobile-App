@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/providers/favorite_provider.dart';
 import 'favorite_tab/favorite_all_tab.dart';
 import 'favorite_tab/favorite_destination_tab.dart';
@@ -52,18 +53,17 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               automaticallyImplyLeading: false,
               title: Text(
                 AppLocalizations.of(context)!.favoriteTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 20,
+                  fontSize: 16.sp,
                 ),
               ),
               centerTitle: true,
             ),
             SliverToBoxAdapter(
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding: EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 2.w),
                 color: colorScheme.primary,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -98,18 +98,18 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          margin: const EdgeInsets.symmetric(horizontal: 4.0),
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          margin: EdgeInsets.symmetric(horizontal: 1.w),
+          padding: EdgeInsets.symmetric(vertical: 1.5.h),
           decoration: BoxDecoration(
             color: isSelected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12.sp),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
                       color: primaryColor.withOpacity(0.3),
                       spreadRadius: 1,
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : [],
@@ -122,23 +122,23 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 style: TextStyle(
                   color: isSelected ? primaryColor : Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 14.sp,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 1.h),
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
                   color: isSelected ? primaryColor : Colors.red,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   count.toString(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                 ),
               ),

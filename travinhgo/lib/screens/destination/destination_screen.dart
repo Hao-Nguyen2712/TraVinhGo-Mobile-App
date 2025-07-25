@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../models/destination/destination.dart';
 import '../../providers/destination_provider.dart';
@@ -83,6 +84,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Scaffold(
       body: SafeArea(
@@ -113,7 +115,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: EdgeInsets.all(4.w),
                       child: Column(
                         children: [
                           TextField(
@@ -126,7 +128,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                               prefixIcon: Icon(Icons.search,
                                   color: theme.colorScheme.onSurfaceVariant),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(60),
+                                borderRadius: BorderRadius.circular(30.sp),
                                 borderSide: BorderSide.none,
                               ),
                               filled: true,
@@ -140,9 +142,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
                   ),
                   SliverToBoxAdapter(
                     child: Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      height: 40,
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                      height: 5.h,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: provider.destinationTypes.length + 1,
@@ -166,29 +168,28 @@ class _DestinationScreenState extends State<DestinationScreen> {
                           );
                         },
                         separatorBuilder: (context, index) =>
-                            const SizedBox(width: 10),
+                            SizedBox(width: 2.5.w),
                       ),
                     ),
                   ),
                   if (provider.isLoading && provider.destinations.isEmpty)
-                    const SliverToBoxAdapter(
+                    SliverToBoxAdapter(
                       child: Center(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
+                          padding: EdgeInsets.symmetric(vertical: 4.h),
                           child: CircularProgressIndicator(),
                         ),
                       ),
                     )
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(4.w),
                       sliver: SliverGrid(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20,
-                          childAspectRatio: 0.58,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isTablet ? 3 : 2,
+                          crossAxisSpacing: 4.w,
+                          mainAxisSpacing: 4.w,
+                          childAspectRatio: isTablet ? 0.7 : 0.58,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -204,9 +205,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
                       ),
                     ),
                   if (provider.isLoadingMore)
-                    const SliverToBoxAdapter(
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: EdgeInsets.all(4.w),
                         child: Center(child: CircularProgressIndicator()),
                       ),
                     ),
@@ -236,15 +237,15 @@ class _DestinationScreenState extends State<DestinationScreen> {
           color: isSelected
               ? theme.colorScheme.primary
               : theme.colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(15.sp),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
         child: Row(
           children: [
             if (icon != null)
               Icon(
                 icon,
-                size: 20,
+                size: 15.sp,
                 color: isSelected
                     ? theme.colorScheme.onPrimary
                     : theme.colorScheme.onSurface,
@@ -252,16 +253,17 @@ class _DestinationScreenState extends State<DestinationScreen> {
             if (imageUrl != null)
               Image.network(
                 imageUrl,
-                width: 20,
-                height: 20,
+                width: 15.sp,
+                height: 15.sp,
               ),
-            const SizedBox(width: 5),
+            SizedBox(width: 1.w),
             Text(
               label,
               style: TextStyle(
                 color: isSelected
                     ? theme.colorScheme.onPrimary
                     : theme.colorScheme.onSurface,
+                fontSize: 14.sp,
               ),
             ),
           ],

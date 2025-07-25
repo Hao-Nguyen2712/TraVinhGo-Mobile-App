@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sizer/sizer.dart';
 import 'package:provider/provider.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
 import 'dart:math' as math;
@@ -342,15 +343,15 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                   children: [
                     // Custom loading animation
                     SizedBox(
-                      width: 60,
-                      height: 60,
+                      width: 15.w,
+                      height: 15.w,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
                           // Outer rotating circle
                           SizedBox(
-                            width: 60,
-                            height: 60,
+                            width: 15.w,
+                            height: 15.w,
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 colorScheme.primary.withAlpha(179),
@@ -360,8 +361,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                           ),
                           // Inner rotating circle (opposite direction)
                           SizedBox(
-                            width: 40,
-                            height: 40,
+                            width: 10.w,
+                            height: 10.w,
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 colorScheme.primary,
@@ -371,8 +372,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                           ),
                           // Center dot
                           Container(
-                            width: 15,
-                            height: 15,
+                            width: 4.w,
+                            height: 4.w,
                             decoration: BoxDecoration(
                               color: colorScheme.primary,
                               shape: BoxShape.circle,
@@ -381,23 +382,23 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 3.h),
                     // Loading text
                     Text(
                       AppLocalizations.of(context)!.authenticating,
                       style: GoogleFonts.montserrat(
-                        fontSize: 18,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: colorScheme.primary,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 1.h),
                     // Subtext
                     Text(
                       AppLocalizations.of(context)!.verifyingCredentials,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.montserrat(
-                        fontSize: 14,
+                        fontSize: 11.sp,
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -566,7 +567,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                       ? _navigateBack
                                       : null,
                                   child: Container(
-                                    padding: const EdgeInsets.all(8),
+                                    padding: EdgeInsets.all(2.w),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: _isBackNavigationAvailable
@@ -580,7 +581,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                           ? colorScheme.onSurfaceVariant
                                           : colorScheme.onSurfaceVariant
                                               .withOpacity(0.5),
-                                      size: 18,
+                                      size: 14.sp,
                                     ),
                                   ),
                                 ),
@@ -591,14 +592,13 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     builder: (context, constraints) {
                                   // Calculate logo size based on available height
                                   final availableHeight =
-                                      constraints.maxHeight -
-                                          40; // Account for padding
+                                      constraints.maxHeight - 4.h;
                                   final logoSize = math.min(
-                                      isKeyboardVisible ? 80.0 : 150.0,
+                                      isKeyboardVisible ? 20.w : 35.w,
                                       availableHeight);
 
                                   return Padding(
-                                    padding: const EdgeInsets.only(top: 10),
+                                    padding: EdgeInsets.only(top: 1.h),
                                     child: Image.asset(
                                       'assets/images/auth/logo.png',
                                       height: logoSize,
@@ -608,7 +608,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                       errorBuilder: (ctx, obj, stack) => Icon(
                                         Icons.landscape,
                                         color: colorScheme.onPrimary,
-                                        size: 70,
+                                        size: 18.w,
                                       ),
                                     ),
                                   );
@@ -619,7 +619,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10), // Reduced spacing after header
+                    SizedBox(height: 1.h), // Reduced spacing after header
                     // Scrollable content area that adjusts for keyboard
                     Expanded(
                       child: GestureDetector(
@@ -628,7 +628,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                         child: SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
+                              horizontal: 2.w, vertical: 1.h),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -636,39 +636,38 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                               Text(
                                 AppLocalizations.of(context)!.signIn,
                                 style: GoogleFonts.montserrat(
-                                  fontSize: 28,
+                                  fontSize: 22.sp,
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.onSurface,
                                   letterSpacing: 0.5,
                                 ),
                               ),
-                              const SizedBox(height: 14),
+                              SizedBox(height: 1.5.h),
                               // Subtitle
                               Text(
                                 AppLocalizations.of(context)!.signInToContinue,
                                 style: GoogleFonts.montserrat(
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                   color: colorScheme.onSurfaceVariant,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: 3.h),
 
                               // Phone number field
                               Padding(
-                                padding: const EdgeInsets.all(5),
+                                padding: EdgeInsets.all(1.w),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding:
-                                          const EdgeInsets.only(left: 15.0),
+                                      padding: EdgeInsets.only(left: 4.w),
                                       child: RichText(
                                         text: TextSpan(
                                           text: AppLocalizations.of(context)!
                                               .phoneNumber,
                                           style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.w500,
                                             color: colorScheme.onSurface,
                                           ),
@@ -684,12 +683,13 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 1.h),
                                     Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                         color: colorScheme.surfaceVariant,
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius:
+                                            BorderRadius.circular(8.sp),
                                         border: _phoneError != null
                                             ? Border.all(
                                                 color: colorScheme.error,
@@ -712,16 +712,15 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                               AppLocalizations.of(context)!
                                                   .yourPhoneNumber,
                                           border: InputBorder.none,
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 16,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 5.w,
+                                            vertical: 2.h,
                                           ),
                                           suffixIcon: _phoneController
                                                   .text.isNotEmpty
                                               ? IconButton(
-                                                  icon: const Icon(Icons.clear,
-                                                      size: 18),
+                                                  icon: Icon(Icons.clear,
+                                                      size: 14.sp),
                                                   onPressed: () {
                                                     setState(() {
                                                       _phoneController.clear();
@@ -740,41 +739,41 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                               // Error message for phone number
                               if (_phoneError != null)
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 20.0),
+                                  padding: EdgeInsets.only(left: 5.w),
                                   child: Align(
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       _phoneError!,
                                       style: TextStyle(
                                         color: colorScheme.error,
-                                        fontSize: 12,
+                                        fontSize: 10.sp,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
                                   ),
                                 ),
-                              const SizedBox(height: 30),
+                              SizedBox(height: 3.h),
 
                               // Continue button
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
+                                padding: EdgeInsets.symmetric(horizontal: 5.w),
                                 child: SizedBox(
                                   width: double.infinity,
-                                  height: 52,
+                                  height: 6.h,
                                   child: ElevatedButton(
                                     onPressed: _handlePhoneSignIn,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: colorScheme.primary,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(26),
+                                        borderRadius:
+                                            BorderRadius.circular(20.sp),
                                       ),
                                     ),
                                     child: Text(
                                       AppLocalizations.of(context)!
                                           .continueButton,
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 16.sp,
                                         fontWeight: FontWeight.w600,
                                         color: colorScheme.onPrimary,
                                       ),
@@ -783,12 +782,11 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                 ),
                               ),
 
-                              const SizedBox(height: 30),
+                              SizedBox(height: 3.h),
 
                               // Always show "Or continue with" section
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
+                                padding: EdgeInsets.symmetric(horizontal: 5.w),
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -799,14 +797,14 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0),
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 4.w),
                                       child: Text(
                                         AppLocalizations.of(context)!
                                             .orContinueWith,
                                         style: TextStyle(
                                           color: colorScheme.onSurfaceVariant,
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -821,17 +819,17 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(height: 2.5.h),
 
                               // Google sign-in button - always visible
                               InkWell(
                                 onTap: _handleGoogleSignIn,
                                 child: Container(
-                                  width: 220,
-                                  height: 50,
+                                  width: 55.w,
+                                  height: 6.h,
                                   decoration: BoxDecoration(
                                     color: colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(25),
+                                    borderRadius: BorderRadius.circular(20.sp),
                                     boxShadow: [
                                       BoxShadow(
                                         color:
@@ -852,15 +850,15 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                     children: [
                                       Image.asset(
                                         'assets/images/auth/search.png',
-                                        height: 20,
-                                        width: 20,
+                                        height: 5.w,
+                                        width: 5.w,
                                       ),
-                                      const SizedBox(width: 12),
+                                      SizedBox(width: 3.w),
                                       Text(
                                         AppLocalizations.of(context)!.google,
                                         style: GoogleFonts.montserrat(
                                           color: colorScheme.onSurface,
-                                          fontSize: 14,
+                                          fontSize: 16.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -874,7 +872,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                 height: keyboardHeight > 0
                                     ? keyboardHeight
                                     : MediaQuery.of(context).padding.bottom +
-                                        20,
+                                        2.h,
                               ),
                             ],
                           ),
@@ -889,10 +887,10 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                     color: colorScheme.scrim,
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.all(24),
+                        padding: EdgeInsets.all(6.w),
                         decoration: BoxDecoration(
                           color: colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12.sp),
                           boxShadow: [
                             BoxShadow(
                               color: colorScheme.shadow.withOpacity(0.1),
@@ -906,15 +904,15 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                           children: [
                             // Custom loading animation
                             SizedBox(
-                              width: 60,
-                              height: 60,
+                              width: 15.w,
+                              height: 15.w,
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
                                   // Outer rotating circle
                                   SizedBox(
-                                    width: 60,
-                                    height: 60,
+                                    width: 15.w,
+                                    height: 15.w,
                                     child: CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                         colorScheme.primary.withAlpha(179),
@@ -924,8 +922,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   ),
                                   // Inner rotating circle (opposite direction)
                                   SizedBox(
-                                    width: 40,
-                                    height: 40,
+                                    width: 10.w,
+                                    height: 10.w,
                                     child: CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                         colorScheme.primary,
@@ -935,8 +933,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   ),
                                   // Center dot
                                   Container(
-                                    width: 15,
-                                    height: 15,
+                                    width: 4.w,
+                                    height: 4.w,
                                     decoration: BoxDecoration(
                                       color: colorScheme.primary,
                                       shape: BoxShape.circle,
@@ -945,24 +943,24 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 3.h),
                             // Loading text
                             Text(
                               AppLocalizations.of(context)!.authenticating,
                               style: GoogleFonts.montserrat(
-                                fontSize: 18,
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
                                 color: colorScheme.primary,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 1.h),
                             // Subtext
                             Text(
                               AppLocalizations.of(context)!
                                   .verifyingCredentials,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.montserrat(
-                                fontSize: 14,
+                                fontSize: 11.sp,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),

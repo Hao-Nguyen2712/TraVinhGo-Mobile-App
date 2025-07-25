@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/widget/ocop_product_widget/rating_star_widget.dart';
 
@@ -28,126 +29,125 @@ class OcopProductItem extends StatelessWidget {
           pathParameters: {'id': ocopProduct.id},
         );
       },
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Theme.of(context).colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                    offset: Offset(0, 4),
-                  )
-                ]),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.sp),
+            color: Theme.of(context).colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 2,
+                offset: Offset(0, 4),
+              )
+            ]),
+        child: Padding(
+          padding: EdgeInsets.all(2.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
                 children: [
-                  Stack(
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 175,
-                          height: 190,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                              image: DecorationImage(
-                                  image:
-                                      NetworkImage(ocopProduct.productImage[0]),
-                                  fit: BoxFit.cover)),
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 12,
-                        child: GestureDetector(
-                          onTap: () {
-                            favoriteProvider.toggleOcopFavorite(ocopProduct);
-                          },
-                          child: Icon(
-                            favoriteProvider.isExist(ocopProduct.id)
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: Theme.of(context).colorScheme.error,
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 18.h,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15.sp),
+                          image: DecorationImage(
+                              image: NetworkImage(ocopProduct.productImage[0]),
+                              fit: BoxFit.cover)),
+                    ),
                   ),
-                  const SizedBox(
-                    height: 2,
-                  ),
-                  Text(
-                    StringHelper.toTitleCase(ocopProduct.productName),
-                    maxLines: 2,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : Theme.of(context).colorScheme.primary,
-                        fontSize: 16,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  const SizedBox(
-                    height: 2,
-                  ),
-                  RatingStarWidget(ocopProduct.ocopPoint),
-                  const SizedBox(
-                    height: 2,
-                  ),
-                  Row(
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: StringHelper.formatCurrency(
-                                  ocopProduct.productPrice),
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Theme.of(context).colorScheme.error),
-                            ),
-                            TextSpan(
-                              text: ' vnd',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
-                          ],
-                        ),
+                  Positioned(
+                    top: 1.h,
+                    right: 3.w,
+                    child: GestureDetector(
+                      onTap: () {
+                        favoriteProvider.toggleOcopFavorite(ocopProduct);
+                      },
+                      child: Icon(
+                        favoriteProvider.isExist(ocopProduct.id)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 20.sp,
                       ),
-                      const Spacer(),
-                      Text(
-                        "Buy at",
-                        style: TextStyle(
-                            fontSize: 14,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Theme.of(context).colorScheme.primary),
-                      ),
-                      const SizedBox(width: 4),
-                      Image.asset(
-                        "assets/images/navigations/external-link.png",
-                        scale: 0.7,
-                        fit: BoxFit.contain,
-                      ),
-                    ],
-                  )
+                    ),
+                  ),
                 ],
               ),
-            ),
-          )
-        ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 1.h),
+                    Text(
+                      StringHelper.toTitleCase(ocopProduct.productName),
+                      maxLines: 2,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.primary,
+                          fontSize: 15.sp,
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                    const Spacer(),
+                    RatingStarWidget(ocopProduct.ocopPoint),
+                    SizedBox(height: 0.5.h),
+                    Builder(builder: (context) {
+                      final price =
+                          double.tryParse(ocopProduct.productPrice ?? '');
+                      return Row(
+                        children: [
+                          if (price != null && price > 0)
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: StringHelper.formatCurrency(
+                                        ocopProduct.productPrice!),
+                                    style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .error),
+                                  ),
+                                  TextSpan(
+                                    text: ' vnd',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            Text(
+                              "Chưa cập nhật giá",
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontStyle: FontStyle.italic,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                          const Spacer(),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

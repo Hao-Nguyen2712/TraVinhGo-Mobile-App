@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 class ImageSlider extends StatefulWidget {
   final List<String> imageList;
@@ -75,7 +76,7 @@ class _ImageSliderState extends State<ImageSlider> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 180, // Reduced height from 220 to 180
+          height: 22.h,
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.imageList.length,
@@ -87,17 +88,14 @@ class _ImageSliderState extends State<ImageSlider> {
             itemBuilder: (context, index) {
               return AnimatedPadding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: _currentPage == index
-                      ? 0
-                      : 5.0, // Reduced from 10.0 to 5.0
+                  horizontal: 2.w,
+                  vertical: _currentPage == index ? 0 : 1.h,
                 ),
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(20), // Reduced from 25 to 20
+                    borderRadius: BorderRadius.circular(15.sp),
                     boxShadow: [
                       BoxShadow(
                         color: Theme.of(context)
@@ -110,8 +108,7 @@ class _ImageSliderState extends State<ImageSlider> {
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(20), // Reduced from 25 to 20
+                    borderRadius: BorderRadius.circular(15.sp),
                     child: Image.asset(
                       "assets/images/sample/${widget.imageList[index]}",
                       fit: BoxFit.cover,
@@ -122,7 +119,7 @@ class _ImageSliderState extends State<ImageSlider> {
             },
           ),
         ),
-        const SizedBox(height: 10), // Reduced from 15 to 10
+        SizedBox(height: 1.h),
         // Page indicators
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -131,16 +128,14 @@ class _ImageSliderState extends State<ImageSlider> {
               onTap: () => _goToPage(index),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(
-                    horizontal: 3), // Reduced from 4 to 3
-                height: 6, // Reduced from 8 to 6
-                width:
-                    _currentPage == index ? 18 : 6, // Reduced from 24/8 to 18/6
+                margin: EdgeInsets.symmetric(horizontal: 1.w),
+                height: 1.h,
+                width: _currentPage == index ? 5.w : 2.w,
                 decoration: BoxDecoration(
                   color: _currentPage == index
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(6), // Reduced from 8 to 6
+                  borderRadius: BorderRadius.circular(1.h),
                 ),
               ),
             );

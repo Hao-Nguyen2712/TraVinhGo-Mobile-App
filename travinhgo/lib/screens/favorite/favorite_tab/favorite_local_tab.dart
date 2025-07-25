@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
 
 import '../../../providers/favorite_provider.dart';
@@ -19,11 +20,14 @@ class FavoriteLocalTab extends StatelessWidget {
     return GridView.builder(
       physics: const BouncingScrollPhysics(),
       shrinkWrap: true,
-      padding: const EdgeInsets.all(8.0), // padding ở đây
+      padding: EdgeInsets.all(2.w),
       itemCount: locals.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 1,
-        childAspectRatio: 1.5,
+        childAspectRatio:
+            MediaQuery.of(context).orientation == Orientation.landscape
+                ? 3
+                : 1.5,
       ),
       itemBuilder: (context, index) {
         return LocalSpecialtyItem(

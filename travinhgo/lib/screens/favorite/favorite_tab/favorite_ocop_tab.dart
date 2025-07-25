@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
 
 import '../../../providers/favorite_provider.dart';
@@ -19,13 +20,16 @@ class FavoriteOcopTab extends StatelessWidget {
     return GridView.builder(
       physics: const BouncingScrollPhysics(),
       shrinkWrap: true,
-      padding: const EdgeInsets.all(8.0), // padding ở đây
+      padding: EdgeInsets.all(2.w),
       itemCount: ocops.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-        childAspectRatio: 0.58,
+        crossAxisSpacing: 4.w,
+        mainAxisSpacing: 4.w,
+        childAspectRatio:
+            MediaQuery.of(context).orientation == Orientation.landscape
+                ? 0.9
+                : 0.58,
       ),
       itemBuilder: (context, index) {
         return OcopProductItem(

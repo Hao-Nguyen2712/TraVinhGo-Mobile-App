@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:travinhgo/providers/favorite_provider.dart';
 
@@ -31,7 +32,7 @@ class LocalSpecialtyItem extends StatelessWidget {
         elevation: 4,
         color: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12.sp),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -40,9 +41,9 @@ class LocalSpecialtyItem extends StatelessWidget {
             Expanded(
               flex: 3,
               child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12.sp),
+                  topRight: Radius.circular(12.sp),
                 ),
                 child: Stack(
                   fit: StackFit.expand,
@@ -52,8 +53,8 @@ class LocalSpecialtyItem extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                     Positioned(
-                      top: 8,
-                      right: 8,
+                      top: 1.h,
+                      right: 2.w,
                       child: GestureDetector(
                         onTap: () {
                           favoriteProvider
@@ -64,7 +65,7 @@ class LocalSpecialtyItem extends StatelessWidget {
                               ? Icons.favorite
                               : Icons.favorite_border,
                           color: Theme.of(context).colorScheme.error,
-                          size: 22,
+                          size: 16.sp,
                         ),
                       ),
                     ),
@@ -76,33 +77,33 @@ class LocalSpecialtyItem extends StatelessWidget {
             Flexible(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: EdgeInsets.all(3.w),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CircleAvatar(
-                      radius: 16,
+                      radius: 12.sp,
                       backgroundColor:
                           Theme.of(context).colorScheme.secondaryContainer,
                       child: Icon(
                         Icons.ramen_dining,
                         color:
                             Theme.of(context).colorScheme.onSecondaryContainer,
-                        size: 18,
+                        size: 15.sp,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 2.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           SizedBox(
-                            height: 40, // Fixed height for the title
+                            height: 5.h, // Fixed height for the title
                             child: Text(
                               StringHelper.toTitleCase(localSpecialty.foodName),
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -110,25 +111,6 @@ class LocalSpecialtyItem extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (localSpecialty.description != null &&
-                              localSpecialty.description!.isNotEmpty)
-                            Expanded(
-                              child: Html(
-                                data: localSpecialty.description!,
-                                style: {
-                                  "body": Style(
-                                    fontSize: FontSize(12),
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                    maxLines: 2,
-                                    textOverflow: TextOverflow.ellipsis,
-                                    margin: Margins.zero,
-                                    padding: HtmlPaddings.zero,
-                                    textAlign: TextAlign.left,
-                                  ),
-                                },
-                              ),
-                            ),
                         ],
                       ),
                     ),

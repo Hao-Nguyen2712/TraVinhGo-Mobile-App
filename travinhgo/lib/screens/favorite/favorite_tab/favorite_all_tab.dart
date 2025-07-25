@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
 
 import '../../../providers/favorite_provider.dart';
@@ -30,13 +31,14 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
       return const EmptyFavoritesPlaceholder();
     }
 
-    const int destinationPerRow = 2;
+    final destinationPerRow =
+        MediaQuery.of(context).orientation == Orientation.landscape ? 3 : 2;
     const int ocopPerRow = 2;
     const int localPerRow = 1;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(4.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -113,11 +115,12 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: EdgeInsets.only(top: 2.h),
           child: Text(
             title,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              fontSize: 16.sp,
             ),
           ),
         ),
@@ -129,8 +132,8 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               : (itemCount > crossAxisCount ? crossAxisCount : itemCount),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
+            crossAxisSpacing: 4.w,
+            mainAxisSpacing: 4.w,
             childAspectRatio: childAspectRatio,
           ),
           itemBuilder: itemBuilder,
@@ -142,11 +145,12 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               onPressed: onToggleShowAll,
               child: Text(
                 showAll ? l10n.less : l10n.more,
-                style: TextStyle(color: theme.colorScheme.primary),
+                style: TextStyle(
+                    color: theme.colorScheme.primary, fontSize: 12.sp),
               ),
             ),
           ),
-        const SizedBox(height: 16),
+        SizedBox(height: 2.h),
       ],
     );
   }

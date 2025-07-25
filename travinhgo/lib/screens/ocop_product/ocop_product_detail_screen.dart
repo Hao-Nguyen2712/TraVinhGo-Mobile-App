@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -147,7 +148,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               setState(() {
                                 currentImage = index;
                               });
-                              // Preload ảnh liền kề để tránh load chậm khi vuốt nhanh
                               if (index + 1 <
                                   ocopProductDetail.productImage.length) {
                                 precacheImage(
@@ -165,25 +165,24 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             imageList: ocopProductDetail.productImage,
                           ),
                           Positioned(
-                            top: 12,
-                            left: 8,
-                            right: 8,
+                            top: 2.h,
+                            left: 2.w,
+                            right: 2.w,
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: EdgeInsets.symmetric(horizontal: 2.w),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
-                                      width: 40,
-                                      height: 40,
+                                      width: 10.w,
+                                      height: 10.w,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: Colors.black.withOpacity(0.3),
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(4.0),
+                                        padding: EdgeInsets.all(1.w),
                                         child: Center(
                                           child: IconButton(
                                               onPressed: () {
@@ -198,16 +197,16 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         ),
                                       )),
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: 10.w,
+                                    height: 10.w,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: Colors.black.withOpacity(0.3),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(2.0),
+                                      padding: EdgeInsets.all(0.5.w),
                                       child: IconButton(
-                                          iconSize: 18,
+                                          iconSize: 18.sp,
                                           onPressed: () {},
                                           icon: Image.asset(
                                               'assets/images/navigations/share.png')),
@@ -218,9 +217,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                           ),
                           Positioned(
-                            top: 230,
-                            left: 8,
-                            right: 8,
+                            top: 30.h,
+                            left: 2.w,
+                            right: 2.w,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
@@ -228,9 +227,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                   (index) => AnimatedContainer(
                                         duration:
                                             const Duration(microseconds: 300),
-                                        width: 20,
-                                        height: 8,
-                                        margin: EdgeInsets.only(right: 3),
+                                        width: 5.w,
+                                        height: 1.h,
+                                        margin: EdgeInsets.only(right: 1.w),
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(10),
@@ -247,8 +246,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                           ),
                           Positioned(
-                            top: 210,
-                            right: 16,
+                            top: 28.h,
+                            right: 4.w,
                             child: GestureDetector(
                               onTap: () {
                                 favoriteProvider
@@ -259,17 +258,17 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                     ? Icons.favorite
                                     : Icons.favorite_border,
                                 color: Theme.of(context).colorScheme.error,
-                                size: 40,
+                                size: 24.sp,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(
-                        height: 8,
+                      SizedBox(
+                        height: 1.h,
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        padding: EdgeInsets.symmetric(horizontal: 4.w),
                         child: Column(
                           children: [
                             Row(
@@ -278,21 +277,21 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                   tagProvider
                                       .getTagById(ocopProductDetail.tagId)
                                       .image,
-                                  width: 36,
-                                  height: 36,
+                                  width: 9.w,
+                                  height: 9.w,
                                 ),
-                                const SizedBox(
-                                  width: 10,
+                                SizedBox(
+                                  width: 2.w,
                                 ),
                                 Text(
                                   AppLocalizations.of(context)!.localSpecialty,
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 12.sp),
                                 ),
                                 const Spacer(),
                               ],
                             ),
-                            const SizedBox(
-                              height: 8,
+                            SizedBox(
+                              height: 1.h,
                             ),
                             Align(
                                 alignment: Alignment.centerLeft,
@@ -302,12 +301,13 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                   style: theme.textTheme.headlineSmall
                                       ?.copyWith(
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 18.sp,
                                           color: isDarkMode
                                               ? Colors.white
                                               : colorScheme.primary),
                                 )),
-                            const SizedBox(
-                              height: 8,
+                            SizedBox(
+                              height: 1.h,
                             ),
                             if (ocopProductDetail.productDescription != null)
                               DescriptionFm(
@@ -316,23 +316,23 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 isExpanded: _isExpanded,
                                 onToggle: _toggleExpanded,
                               ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 2.h),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!
                                       .placeOfProduction,
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 14.sp),
                                 ),
                                 const Spacer(),
                                 SizedBox(
-                                  width: 190,
+                                  width: 50.w,
                                   child: Text(
                                     StringHelper.toUpperCase(
                                         ocopProductDetail.company.name),
                                     style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 14.sp,
                                         color: colorScheme.primary),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
@@ -340,12 +340,12 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 )
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 2.h),
                             Row(
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!.referencePrice,
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 14.sp),
                                 ),
                                 const Spacer(),
                                 Text.rich(
@@ -355,7 +355,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         text: StringHelper.formatCurrency(
                                             ocopProductDetail.productPrice),
                                         style: TextStyle(
-                                            fontSize: 18,
+                                            fontSize: 14.sp,
                                             color: colorScheme.onBackground,
                                             fontWeight: FontWeight.w800),
                                       ),
@@ -363,7 +363,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         text: AppLocalizations.of(context)!
                                             .currencyVnd,
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 15.sp,
                                           color: colorScheme.onBackground,
                                         ),
                                       ),
@@ -372,35 +372,35 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 2.h),
                             Row(
                               children: [
                                 Text(
                                   'Ocop Point',
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 15.sp),
                                 ),
                                 const Spacer(),
                                 RatingStarWidget(ocopProductDetail.ocopPoint)
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 2.h),
                             DataFieldRow(
                               title: 'Ocop type',
                               value: ocopProductDetail.ocopType!.ocopTypeName,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 2.h),
                             DataFieldRow(
                               title: AppLocalizations.of(context)!.yearRelease,
                               value:
                                   ocopProductDetail.ocopYearRelease.toString(),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 2.h),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
                                   'Selling links',
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 15.sp),
                                 ),
                                 const Spacer(),
                                 SellingLinkList(sellingLinks: _sellingLinks),

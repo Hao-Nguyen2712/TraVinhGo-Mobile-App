@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
 import 'package:here_sdk/core.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 import 'package:travinhgo/providers/tag_provider.dart';
@@ -359,24 +360,23 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           ),
                         ),
                         Positioned(
-                          top: 12,
-                          left: 8,
-                          right: 8,
+                          top: 1.5.h,
+                          left: 2.w,
+                          right: 2.w,
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: EdgeInsets.symmetric(horizontal: 2.w),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: 12.w,
+                                    height: 12.w,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: Colors.grey.withOpacity(0.5),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(4.0),
+                                      padding: EdgeInsets.all(1.w),
                                       child: Center(
                                         child: IconButton(
                                             onPressed: () {
@@ -387,16 +387,16 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                       ),
                                     )),
                                 Container(
-                                  width: 40,
-                                  height: 40,
+                                  width: 12.w,
+                                  height: 12.w,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.grey.withOpacity(0.5),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(2.0),
+                                    padding: EdgeInsets.all(0.5.w),
                                     child: IconButton(
-                                        iconSize: 18,
+                                        iconSize: 16.sp,
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },
@@ -409,9 +409,9 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           ),
                         ),
                         Positioned(
-                          top: 230,
-                          left: 8,
-                          right: 8,
+                          top: 28.h,
+                          left: 2.w,
+                          right: 2.w,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(
@@ -419,11 +419,12 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 (index) => AnimatedContainer(
                                       duration:
                                           const Duration(microseconds: 300),
-                                      width: 20,
-                                      height: 8,
-                                      margin: EdgeInsets.only(right: 3),
+                                      width: 5.w,
+                                      height: 1.h,
+                                      margin: EdgeInsets.only(right: 0.8.w),
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius:
+                                            BorderRadius.circular(8.sp),
                                         color: currentImage == index
                                             ? Colors.white
                                             : Colors.grey,
@@ -432,8 +433,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           ),
                         ),
                         Positioned(
-                          top: 210,
-                          right: 16,
+                          top: 26.h,
+                          right: 4.w,
                           child: GestureDetector(
                             onTap: () {
                               favoriteProvider
@@ -444,17 +445,17 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                   ? Icons.favorite
                                   : Icons.favorite_border,
                               color: Colors.red,
-                              size: 40,
+                              size: 28.sp,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(
-                      height: 8,
+                    SizedBox(
+                      height: 1.h,
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
                       child: Column(
                         children: [
                           Row(
@@ -463,51 +464,51 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 tagProvider
                                     .getTagById(destinationDetail.tagId)
                                     .image,
-                                width: 36,
-                                height: 36,
+                                width: 11.w,
+                                height: 11.w,
                               ),
-                              const SizedBox(
-                                width: 10,
+                              SizedBox(
+                                width: 2.5.w,
                               ),
                               Text(
                                 AppLocalizations.of(context)!.destination,
-                                style: const TextStyle(fontSize: 16),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
                               const Spacer(),
                               const Icon(
                                 Icons.favorite_sharp,
                                 color: Colors.red,
                               ),
-                              const SizedBox(
-                                width: 10,
+                              SizedBox(
+                                width: 2.5.w,
                               ),
-                              const Text(
+                              Text(
                                 "82",
-                                style: TextStyle(fontSize: 16),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
-                              const SizedBox(
-                                width: 6,
+                              SizedBox(
+                                width: 1.5.w,
                               ),
                               Text(
                                 AppLocalizations.of(context)!.favorite,
-                                style: const TextStyle(fontSize: 16),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
                             ],
                           ),
-                          const SizedBox(
-                            height: 8,
+                          SizedBox(
+                            height: 1.h,
                           ),
                           Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 destinationDetail.name,
                                 style: TextStyle(
-                                    fontSize: 25,
+                                    fontSize: 22.sp,
                                     fontWeight: FontWeight.bold,
                                     color: kprimaryColor),
                               )),
-                          const SizedBox(
-                            height: 8,
+                          SizedBox(
+                            height: 1.h,
                           ),
                           if (desc.isNotEmpty || history.isNotEmpty)
                             DescriptionFm(
@@ -520,46 +521,47 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           Divider(
                             color: Colors.grey.withOpacity(0.1),
                             thickness: 0.4,
-                            height: 10,
+                            height: 1.5.h,
                           ),
                           Row(
                             children: [
                               Text(
                                 AppLocalizations.of(context)!.openingHours,
-                                style: const TextStyle(fontSize: 16),
+                                style: TextStyle(fontSize: 15.sp),
                               ),
                               const Spacer(),
                               Text(
                                 AppLocalizations.of(context)!.opening,
-                                style: const TextStyle(
-                                    fontSize: 16, color: kprimaryColor),
+                                style: TextStyle(
+                                    fontSize: 15.sp, color: kprimaryColor),
                               ),
-                              const SizedBox(
-                                width: 6,
+                              SizedBox(
+                                width: 1.5.w,
                               ),
                               if (destinationDetail.openingHours != null)
                                 Text(
                                   '${destinationDetail.openingHours?.openTime.toString() ?? AppLocalizations.of(context)!.notAvailable} - ${destinationDetail.openingHours?.closeTime.toString() ?? AppLocalizations.of(context)!.notAvailable}',
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 15.sp),
                                 )
                               else
                                 Text(
                                   AppLocalizations.of(context)!.notAvailable,
-                                  style: const TextStyle(
-                                      fontSize: 16, color: Colors.grey),
+                                  style: TextStyle(
+                                      fontSize: 15.sp, color: Colors.grey),
                                 ),
                             ],
                           ),
-                          Divider(
-                            color: Colors.grey.withOpacity(0.1),
-                            thickness: 0.4,
-                            height: 10,
+                          SizedBox(
+                            height: 1.h,
                           ),
                           DataFieldRow(
                             title: AppLocalizations.of(context)!.ticket,
                             value: StringHelper.normalizeName(
                                     destinationDetail.ticket) ??
                                 AppLocalizations.of(context)!.notAvailable,
+                          ),
+                          SizedBox(
+                            height: 1.h,
                           ),
                           DataFieldRow(
                             title: AppLocalizations.of(context)!.type,
@@ -569,24 +571,30 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                         destinationDetail.destinationTypeId)
                                     .name),
                           ),
+                          SizedBox(
+                            height: 1.h,
+                          ),
                           DataFieldRow(
                             title: AppLocalizations.of(context)!.address,
                             value: destinationDetail.address,
+                          ),
+                          SizedBox(
+                            height: 2.h,
                           ),
                           Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 AppLocalizations.of(context)!.location,
-                                style: const TextStyle(
-                                    fontSize: 24, color: kprimaryColor),
+                                style: TextStyle(
+                                    fontSize: 18.sp, color: kprimaryColor),
                               )),
                           Divider(
                             color: Colors.grey.withOpacity(0.1),
                             thickness: 0.4,
-                            height: 10,
+                            height: 1.5.h,
                           ),
                           SizedBox(
-                            height: 200,
+                            height: 25.h,
                             child: MapPreview(
                               location: GeoCoordinates(
                                 destinationDetail.location.coordinates![1],
@@ -606,43 +614,43 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               },
                             ),
                           ),
-                          const SizedBox(
-                            height: 10,
+                          SizedBox(
+                            height: 1.2.h,
                           ),
-                          const SizedBox(
-                            height: 10,
+                          SizedBox(
+                            height: 1.2.h,
                           ),
                           Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 AppLocalizations.of(context)!.rating(
                                     destinationDetail.avarageRating.toString()),
-                                style: const TextStyle(
-                                    fontSize: 24, color: kprimaryColor),
+                                style: TextStyle(
+                                    fontSize: 20.sp, color: kprimaryColor),
                               )),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: EdgeInsets.all(2.w),
                             child: Column(
                               children: ratingData.map((data) {
                                 return Padding(
                                   padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                      EdgeInsets.symmetric(vertical: 0.5.h),
                                   child: Row(
                                     children: [
                                       Text('${data['stars']}'),
-                                      const SizedBox(width: 4),
+                                      SizedBox(width: 1.w),
                                       Icon(Icons.star,
-                                          color: Colors.amber, size: 16),
-                                      const SizedBox(width: 8),
+                                          color: Colors.amber, size: 14.sp),
+                                      SizedBox(width: 2.w),
                                       Expanded(
                                         child: Stack(
                                           children: [
                                             Container(
-                                              height: 10,
+                                              height: 1.5.h,
                                               decoration: BoxDecoration(
                                                 color: Colors.grey.shade300,
                                                 borderRadius:
-                                                    BorderRadius.circular(5),
+                                                    BorderRadius.circular(5.sp),
                                               ),
                                             ),
                                             FractionallySizedBox(
@@ -651,20 +659,21 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                                           .toDouble() /
                                                       100,
                                               child: Container(
-                                                height: 10,
+                                                height: 1.5.h,
                                                 decoration: BoxDecoration(
                                                   color: Colors.amber,
                                                   borderRadius:
-                                                      BorderRadius.circular(5),
+                                                      BorderRadius.circular(
+                                                          5.sp),
                                                 ),
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: 2.w),
                                       SizedBox(
-                                        width: 60,
+                                        width: 15.w,
                                         child: Text(
                                           '${(data['percent'] ?? 0).toStringAsFixed(1)}%',
                                           textAlign: TextAlign.right,
@@ -676,8 +685,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               }).toList(),
                             ),
                           ),
-                          const SizedBox(
-                            height: 10,
+                          SizedBox(
+                            height: 1.2.h,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -685,7 +694,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               Text(
                                 'Reviews',
                                 style: TextStyle(
-                                    fontSize: 24, color: kprimaryColor),
+                                    fontSize: 20.sp, color: kprimaryColor),
                               ),
                               TextButton(
                                 onPressed: () async {
@@ -714,8 +723,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(
-                            height: 10,
+                          SizedBox(
+                            height: 1.2.h,
                           ),
                           // Column(
                           //   children: reviews.take(5).map((review) {
@@ -728,12 +737,12 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           reviews.isEmpty
                               ? Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 32.0),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 4.h),
                                     child: Text(
                                       'There are no reviews yet.',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14.sp,
                                         color: Colors.grey[600],
                                       ),
                                       textAlign: TextAlign.center,
@@ -743,8 +752,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               : Column(
                                   children: reviews.take(5).map((review) {
                                     return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 1.2.h),
                                       child: ReviewItem(review: review),
                                     );
                                   }).toList(),

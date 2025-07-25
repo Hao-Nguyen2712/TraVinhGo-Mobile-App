@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/widget/category_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -20,14 +21,14 @@ class CategoryGrid extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: GridView.count(
         crossAxisCount: 4,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         childAspectRatio: 0.8,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 5,
+        mainAxisSpacing: 1.h,
+        crossAxisSpacing: 2.w,
         children: [
           CategoryItem(
             iconName: "Introduction",
