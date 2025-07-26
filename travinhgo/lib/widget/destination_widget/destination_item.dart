@@ -16,8 +16,9 @@ import '../../utils/string_helper.dart';
 
 class DestinationItem extends StatelessWidget {
   final Destination destination;
+  final bool isAllowFavorite;
 
-  const DestinationItem({super.key, required this.destination});
+  const DestinationItem({super.key, required this.destination, required this.isAllowFavorite});
 
   void _showFavoriteDialog(BuildContext context, bool isFavorite) {
     final message = isFavorite
@@ -83,7 +84,7 @@ class DestinationItem extends StatelessWidget {
                                     fit: BoxFit.cover)),
                           ),
                         ),
-                        Positioned(
+                        if (isAllowFavorite) Positioned(
                           top: 1.h,
                           right: 2.w,
                           child: GestureDetector(

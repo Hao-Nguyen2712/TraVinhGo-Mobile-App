@@ -13,6 +13,7 @@ import '../../Models/selling_link/selling_link.dart';
 import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
 import '../../providers/tag_provider.dart';
+import '../../services/auth_service.dart';
 import '../../services/selling_link_service.dart';
 import '../../utils/constants.dart';
 import '../../Models/interaction/item_type.dart';
@@ -40,6 +41,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   bool _isLoading = true;
   bool _isExpanded = false;
   late List<SellingLink> _sellingLinks;
+
+  late bool isAuthen;
 
   Timer? _interactionTimer;
 
@@ -88,8 +91,10 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
 
   Future<void> fetchOcopSellingLink(String id) async {
     final data = await SellingLinkService().getSellingLinkByOcopId(id);
+    var sessionId =  await AuthService().getSessionId();
     setState(() {
       _sellingLinks = data;
+      isAuthen = sessionId != null;
     });
   }
 
@@ -217,7 +222,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                           ),
                           Positioned(
-                            top: 30.h,
+                            top: 23.h,
                             left: 2.w,
                             right: 2.w,
                             child: Row(
@@ -245,8 +250,8 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                       )),
                             ),
                           ),
-                          Positioned(
-                            top: 28.h,
+                          if (isAuthen) Positioned(
+                            top: 19.h,
                             right: 4.w,
                             child: GestureDetector(
                               onTap: () {
@@ -284,7 +289,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                   width: 2.w,
                                 ),
                                 Text(
-                                  AppLocalizations.of(context)!.localSpecialty,
+                                  AppLocalizations.of(context)!.ocopProduct,
                                   style: TextStyle(fontSize: 12.sp),
                                 ),
                                 const Spacer(),
@@ -385,7 +390,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                             SizedBox(height: 2.h),
                             DataFieldRow(
-                              title: 'Ocop type',
+                              title: AppLocalizations.of(context)!.ocopType,
                               value: ocopProductDetail.ocopType!.ocopTypeName,
                             ),
                             SizedBox(height: 2.h),

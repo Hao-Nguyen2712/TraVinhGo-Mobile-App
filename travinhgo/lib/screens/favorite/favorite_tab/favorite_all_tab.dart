@@ -50,7 +50,7 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               itemCount: destinations.length,
               items: destinations,
               itemBuilder: (context, index) =>
-                  DestinationItem(destination: destinations[index]),
+                  DestinationItem(destination: destinations[index], isAllowFavorite: true,),
               crossAxisCount: destinationPerRow,
               childAspectRatio: 0.58,
               showAll: showAllDestinations,
@@ -67,7 +67,7 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               itemCount: ocops.length,
               items: ocops,
               itemBuilder: (context, index) =>
-                  OcopProductItem(ocopProduct: ocops[index]),
+                  OcopProductItem(ocopProduct: ocops[index], isAllowFavorite: true,),
               crossAxisCount: ocopPerRow,
               childAspectRatio: 0.58,
               showAll: showAllOcop,
@@ -84,7 +84,7 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               itemCount: locals.length,
               items: locals,
               itemBuilder: (context, index) =>
-                  LocalSpecialtyItem(localSpecialty: locals[index]),
+                  LocalSpecialtyItem(localSpecialty: locals[index], isAllowFavorite: true,),
               crossAxisCount: localPerRow,
               childAspectRatio: 1.5,
               showAll: showAllLocals,

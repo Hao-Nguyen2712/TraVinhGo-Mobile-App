@@ -38,18 +38,43 @@ class DescriptionFm extends StatelessWidget {
               isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 300),
         ),
+        // Center(
+        //   child: TextButton(
+        //     onPressed: onToggle,
+        //     child: Text(
+        //       isExpanded ? 'Less' : 'More',
+        //       style: TextStyle(
+        //           color: Theme.of(context).brightness == Brightness.dark
+        //               ? Colors.white
+        //               : Theme.of(context).colorScheme.primary),
+        //     ),
+        //   ),
+        // ),
         Center(
           child: TextButton(
             onPressed: onToggle,
+            style: TextButton.styleFrom(
+              side: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primary,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            ),
             child: Text(
               isExpanded ? 'Less' : 'More',
               style: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.primary),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
-        ),
+        )
       ],
     );
   }

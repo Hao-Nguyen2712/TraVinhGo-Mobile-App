@@ -4,12 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
 import '../../providers/tag_provider.dart';
+import '../../services/auth_service.dart';
 import '../../services/local_specialtie_service.dart';
 import '../../utils/constants.dart';
 import '../../Models/interaction/item_type.dart';
@@ -33,6 +35,8 @@ class _LocalSpecialtyDetailScreenState
   late LocalSpecialties localSpecialtyDetail;
   bool _isLoading = true;
   bool _isExpanded = false;
+
+  late bool isAuthen;
 
   late String desc;
 
@@ -70,7 +74,7 @@ class _LocalSpecialtyDetailScreenState
 
   Future<void> fetchocalSpecialty(String id) async {
     final data = await LocalSpecialtieService().getLocalSpecialtieById(id);
-
+    var sessionId =  await AuthService().getSessionId();
     if (data == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -92,6 +96,7 @@ class _LocalSpecialtyDetailScreenState
 
     if (mounted) {
       setState(() {
+        isAuthen = sessionId != null;
         localSpecialtyDetail = data;
         desc = (localSpecialtyDetail.description ?? '').trim();
         _isLoading = false;
@@ -193,9 +198,9 @@ class _LocalSpecialtyDetailScreenState
                             ),
                           ),
                           Positioned(
-                            top: 230,
-                            left: 8,
-                            right: 8,
+                            top: 23.h,
+                            left: 2.w,
+                            right: 2.w,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
@@ -221,9 +226,9 @@ class _LocalSpecialtyDetailScreenState
                                       )),
                             ),
                           ),
-                          Positioned(
-                            top: 210,
-                            right: 16,
+                          if (isAuthen) Positioned(
+                            top: 19.h,
+                            right: 4.w,
                             child: GestureDetector(
                               onTap: () {
                                 favoriteProvider.toggleLocalSpecialtiesFavorite(
