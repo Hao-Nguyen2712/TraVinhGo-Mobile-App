@@ -11,8 +11,9 @@ import '../../providers/interaction_provider.dart';
 
 class LocalSpecialtyItem extends StatelessWidget {
   final LocalSpecialties localSpecialty;
+  final bool isAllowFavorite;
 
-  const LocalSpecialtyItem({super.key, required this.localSpecialty});
+  const LocalSpecialtyItem({super.key, required this.localSpecialty, required this.isAllowFavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class LocalSpecialtyItem extends StatelessWidget {
                       localSpecialty.images.first,
                       fit: BoxFit.cover,
                     ),
-                    Positioned(
+                    if (isAllowFavorite) Positioned(
                       top: 1.h,
                       right: 2.w,
                       child: GestureDetector(

@@ -20,6 +20,7 @@ import '../../providers/destination_type_provider.dart';
 import '../../Models/interaction/item_type.dart';
 import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
+import '../../services/auth_service.dart';
 import '../../services/review_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
@@ -49,6 +50,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   late String desc;
   late String history;
+  
+  late bool isAuthen;
 
   late List<String> allImageDestination;
 
@@ -141,6 +144,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   Future<void> fetchReviews(String id) async {
     final reviewList = await ReviewService().getReviewsByDestinationId(id);
+    var sessionId =  await AuthService().getSessionId();
     debugPrint('is allow: ${reviewList?.hasReviewed ?? false}');
 
     if (reviewList == null) return;
@@ -150,6 +154,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     if (mounted) {
       setState(() {
         reviews = reviewList.reviews;
+        isAuthen = sessionId != null;
         ratingData = [
           {'stars': 5, 'percent': _ratingSummary!.oneStarPercent},
           {'stars': 4, 'percent': _ratingSummary!.twoStarPercent},
@@ -409,7 +414,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                           ),
                         ),
                         Positioned(
-                          top: 28.h,
+                          top: 23.h,
                           left: 2.w,
                           right: 2.w,
                           child: Row(
@@ -426,14 +431,19 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                         borderRadius:
                                             BorderRadius.circular(8.sp),
                                         color: currentImage == index
-                                            ? Colors.white
-                                            : Colors.grey,
+                                            ? Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.3),
                                       ),
                                     )),
                           ),
                         ),
-                        Positioned(
-                          top: 26.h,
+                        if (isAuthen) Positioned(
+                          top: 19.h,
                           right: 4.w,
                           child: GestureDetector(
                             onTap: () {

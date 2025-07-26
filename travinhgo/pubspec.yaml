@@ -106,6 +106,7 @@ flutter:
       - assets/images/navigations/
       - assets/images/auth/
       - assets/images/sample/
+      - assets/images/introduction/
       - assets/images/markers/
       - assets/images/profile/
       - assets/images/map/

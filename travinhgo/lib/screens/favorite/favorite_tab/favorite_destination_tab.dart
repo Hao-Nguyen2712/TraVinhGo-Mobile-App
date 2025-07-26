@@ -30,6 +30,7 @@ class FavoriteDestinationTab extends StatelessWidget {
       itemBuilder: (context, index) {
         return DestinationItem(
           destination: destinations[index],
+          isAllowFavorite: true,
         );
       },
     );

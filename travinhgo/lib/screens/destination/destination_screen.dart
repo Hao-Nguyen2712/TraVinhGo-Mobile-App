@@ -6,6 +6,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../models/destination/destination.dart';
 import '../../providers/destination_provider.dart';
+import '../../services/auth_service.dart';
 import '../../widget/destination_widget/destination_item.dart';
 
 class DestinationScreen extends StatefulWidget {
@@ -22,11 +23,13 @@ class _DestinationScreenState extends State<DestinationScreen> {
   String _searchQuery = '';
   String? _selectedDestinationTypeId;
   Timer? _debounce;
+  late bool isAuthen;
 
   @override
   void initState() {
     super.initState();
     _focusNode.requestFocus();
+    isAuthentication();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<DestinationProvider>(context, listen: false);
       provider.fetchDestinations(isRefresh: true);
@@ -54,6 +57,11 @@ class _DestinationScreenState extends State<DestinationScreen> {
         provider.hasMore) {
       provider.fetchDestinations();
     }
+  }
+  
+  Future<void> isAuthentication() async {
+    var sessionId =  await AuthService().getSessionId();
+    isAuthen = sessionId != null;
   }
 
   void _onSearchChanged(String query) {
@@ -198,6 +206,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                             }
                             return DestinationItem(
                               destination: provider.destinations[index],
+                              isAllowFavorite: isAuthen,
                             );
                           },
                           childCount: provider.destinations.length,

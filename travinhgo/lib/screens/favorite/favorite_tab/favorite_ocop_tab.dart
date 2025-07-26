@@ -34,6 +34,7 @@ class FavoriteOcopTab extends StatelessWidget {
       itemBuilder: (context, index) {
         return OcopProductItem(
           ocopProduct: ocops[index],
+          isAllowFavorite: true,
         );
       },
     );

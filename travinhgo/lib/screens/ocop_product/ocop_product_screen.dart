@@ -6,6 +6,7 @@ import 'package:travinhgo/services/ocop_product_service.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import '../../providers/ocop_product_provider.dart';
+import '../../services/auth_service.dart';
 import '../../widget/ocop_product_widget/ocop_product_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -19,10 +20,12 @@ class OcopProductScreen extends StatefulWidget {
 class _OcopProductScreenState extends State<OcopProductScreen> {
   List<String> _ocopProductNames = [];
   String _searchQuery = '';
+  late bool isAuthen;
 
   @override
   void initState() {
     super.initState();
+    isAuthentication();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<OcopProductProvider>(context, listen: false)
           .fetchOcopProducts();
@@ -34,6 +37,11 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
     super.didChangeDependencies();
     final ocopProducts = Provider.of<OcopProductProvider>(context).ocopProducts;
     _ocopProductNames = ocopProducts.map((e) => e.productName).toList();
+  }
+
+  Future<void> isAuthentication() async {
+    var sessionId =  await AuthService().getSessionId();
+    isAuthen = sessionId != null;
   }
 
   List<OcopProduct> _filteredOcopProducts(List<OcopProduct> products) {
@@ -176,7 +184,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                   childAspectRatio: isTablet ? 0.75 : 0.64),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  return OcopProductItem(ocopProduct: filteredProducts[index]);
+                  return OcopProductItem(ocopProduct: filteredProducts[index], isAllowFavorite: isAuthen,);
                 },
                 childCount: filteredProducts.length,
               ),

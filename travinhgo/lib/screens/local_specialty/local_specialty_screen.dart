@@ -5,6 +5,7 @@ import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:travinhgo/providers/local_specialty_provider.dart';
 import 'package:travinhgo/widget/local_specialty_widget/local_specialty_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../services/auth_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/string_helper.dart';
 
@@ -17,15 +18,22 @@ class LocalSpecialtyScreen extends StatefulWidget {
 
 class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
   String _searchQuery = '';
+  late bool isAuthen;
 
   @override
   void initState() {
     super.initState();
+    isAuthentication();
     // Fetch initial data using the provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<LocalSpecialtyProvider>(context, listen: false)
           .fetchLocalSpecialties();
     });
+  }
+
+  Future<void> isAuthentication() async {
+    var sessionId =  await AuthService().getSessionId();
+    isAuthen = sessionId != null;
   }
 
   @override
@@ -164,7 +172,7 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       return LocalSpecialtyItem(
-                          localSpecialty: filteredLocals[index]);
+                          localSpecialty: filteredLocals[index], isAllowFavorite: isAuthen,);
                     },
                     childCount: filteredLocals.length,
                   ),

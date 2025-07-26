@@ -13,8 +13,9 @@ import '../../utils/string_helper.dart';
 
 class OcopProductItem extends StatelessWidget {
   final OcopProduct ocopProduct;
+  final bool isAllowFavorite;
 
-  const OcopProductItem({super.key, required this.ocopProduct});
+  const OcopProductItem({super.key, required this.ocopProduct, required this.isAllowFavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,7 @@ class OcopProductItem extends StatelessWidget {
                               fit: BoxFit.cover)),
                     ),
                   ),
-                  Positioned(
+                  if (isAllowFavorite) Positioned(
                     top: 1.h,
                     right: 3.w,
                     child: GestureDetector(

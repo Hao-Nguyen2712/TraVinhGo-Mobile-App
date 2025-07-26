@@ -32,6 +32,7 @@ class FavoriteLocalTab extends StatelessWidget {
       itemBuilder: (context, index) {
         return LocalSpecialtyItem(
           localSpecialty: locals[index],
+          isAllowFavorite: true,
         );
       },
     );
