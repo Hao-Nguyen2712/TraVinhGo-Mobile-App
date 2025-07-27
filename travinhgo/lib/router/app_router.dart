@@ -23,7 +23,8 @@ import '../screens/ocop_product/ocop_product_detail_screen.dart';
 import '../screens/map/map_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../widget/auth_required_screen.dart';
-import '../main.dart'; // Import to access the global navigatorKey and hasShownSplashScreen
+import '../main.dart';
+import '../widget/image_viewer_screen.dart'; // Import to access the global navigatorKey and hasShownSplashScreen
 
 // Specialized observer to monitor navigation during Google Sign-In
 class GoogleSignInNavigationObserver extends NavigatorObserver {
@@ -218,6 +219,17 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return OcopProductDetailScreen(
             id: id,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/image-viewer/:imageUrl',
+        name: 'ImageViewer',
+        builder: (context, state) {
+          final imageUrl = state.pathParameters['imageUrl']!;
+          final decodedUrl = Uri.decodeComponent(imageUrl);
+          return ImageViewerScreen(
+            imageUrl: decodedUrl,
           );
         },
       ),
