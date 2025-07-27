@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class EventFestivalImageSliderTab extends StatelessWidget {
   final Function(int) onChange;
@@ -21,15 +22,22 @@ class EventFestivalImageSliderTab extends StatelessWidget {
           childAspectRatio: 1.0,
         ),
         itemBuilder: (context, index) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: CachedNetworkImage(
-              imageUrl: imageList[index],
-              fit: BoxFit.cover,
-              fadeInDuration: const Duration(milliseconds: 300),
-              placeholder: (context, url) =>
-                  const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+          return GestureDetector(
+            onTap: () {
+              final imageUrl = imageList[index];
+              final encodedUrl = Uri.encodeComponent(imageUrl);
+              context.push('/image-viewer/$encodedUrl');
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                imageUrl: imageList[index],
+                fit: BoxFit.cover,
+                fadeInDuration: const Duration(milliseconds: 300),
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
             ),
           );
         },

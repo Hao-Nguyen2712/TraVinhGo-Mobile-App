@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../image_viewer_screen.dart';
 
 class DestinationDetailImageSlider extends StatelessWidget {
   final Function(int) onChange;
@@ -23,15 +26,22 @@ class DestinationDetailImageSlider extends StatelessWidget {
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 1.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(9),
-                child: CachedNetworkImage(
-                  imageUrl: imageList[index],
-                  fit: BoxFit.cover,
-                  fadeInDuration: const Duration(milliseconds: 300),
-                  placeholder: (context, url) =>
-                      const Center(child: CircularProgressIndicator()),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+              child: GestureDetector(
+                onTap: () {
+                  final imageUrl = imageList[index];
+                  final encodedUrl = Uri.encodeComponent(imageUrl);
+                  context.push('/image-viewer/$encodedUrl');
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(9),
+                  child: CachedNetworkImage(
+                    imageUrl: imageList[index],
+                    fit: BoxFit.cover,
+                    fadeInDuration: const Duration(milliseconds: 300),
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                  ),
                 ),
               ),
             );
