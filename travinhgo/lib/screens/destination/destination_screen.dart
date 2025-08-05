@@ -23,7 +23,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
   String _searchQuery = '';
   String? _selectedDestinationTypeId;
   Timer? _debounce;
-  late bool isAuthen;
+  bool isAuthen = false;
 
   @override
   void initState() {
@@ -58,10 +58,14 @@ class _DestinationScreenState extends State<DestinationScreen> {
       provider.fetchDestinations();
     }
   }
-  
+
   Future<void> isAuthentication() async {
-    var sessionId =  await AuthService().getSessionId();
-    isAuthen = sessionId != null;
+    var sessionId = await AuthService().getSessionId();
+    if (mounted) {
+      setState(() {
+        isAuthen = sessionId != null;
+      });
+    }
   }
 
   void _onSearchChanged(String query) {

@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travinhgo/models/event_festival/event_and_festival.dart';
+import 'package:travinhgo/providers/favorite_provider.dart';
 import 'package:travinhgo/services/event_festival_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -68,13 +70,20 @@ class _EventFesftivalDetailScreenState
       setState(() {
         eventAndFestival = data;
         screensTab = [
-          EventFestivalInformationTab(
-            eventAndFestival: eventAndFestival,
+          SingleChildScrollView(
+            child: EventFestivalInformationTab(
+              eventAndFestival: eventAndFestival,
+            ),
           ),
-          EventFestivalContentTab(description: eventAndFestival.description),
-          EventFestivalImageSliderTab(
-            onChange: (index) {},
-            imageList: eventAndFestival.images,
+          SingleChildScrollView(
+            child: EventFestivalContentTab(
+                description: eventAndFestival.description),
+          ),
+          SingleChildScrollView(
+            child: EventFestivalImageSliderTab(
+              onChange: (index) {},
+              imageList: eventAndFestival.images,
+            ),
           ),
         ];
         _isLoading = false;
@@ -114,17 +123,30 @@ class _EventFesftivalDetailScreenState
                         ),
                       ),
                       actions: [
-                        Container(
-                          margin: EdgeInsets.all(2.w),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.favorite_border,
-                                color: Colors.white),
-                            onPressed: () {},
-                          ),
+                        Consumer<FavoriteProvider>(
+                          builder: (context, favoriteProvider, child) {
+                            final isFavorite =
+                                favoriteProvider.isExist(eventAndFestival.id);
+                            return Container(
+                              margin: EdgeInsets.all(2.w),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  isFavorite
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: isFavorite ? Colors.red : Colors.white,
+                                ),
+                                onPressed: () {
+                                  favoriteProvider.toggleEventFestivalFavorite(
+                                      eventAndFestival);
+                                },
+                              ),
+                            );
+                          },
                         ),
                         Container(
                           margin: EdgeInsets.all(2.w),
@@ -232,7 +254,25 @@ class _EventFesftivalDetailScreenState
             Expanded(
               flex: 1,
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  final location = eventAndFestival.location.location;
+                  if (location.coordinates != null &&
+                      location.coordinates!.length == 2) {
+                    final lat = location.coordinates![1];
+                    final lng = location.coordinates![0];
+                    context.goNamed('map_shell', extra: {
+                      'latitude': lat,
+                      'longitude': lng,
+                      'name': eventAndFestival.nameEvent
+                    });
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(AppLocalizations.of(context)!
+                              .locationNotAvailable)),
+                    );
+                  }
+                },
                 icon: const Icon(Icons.directions),
                 label: Text(
                   "Chỉ đường",

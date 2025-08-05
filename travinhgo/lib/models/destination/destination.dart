@@ -1,20 +1,43 @@
-class Destination {
+import 'package:hive/hive.dart';
+import 'package:travinhgo/models/location.dart';
+
+part 'destination.g.dart';
+
+@HiveType(typeId: 0)
+class Destination extends HiveObject {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
+  @HiveField(2)
   double avarageRating;
+  @HiveField(3)
   final String? description;
+  @HiveField(4)
   final String? address;
+  @HiveField(5)
   final Location location;
+  @HiveField(6)
   final List<String> images;
+  @HiveField(7)
   final HistoryStory? historyStory;
+  @HiveField(8)
   final DateTime? updateAt;
+  @HiveField(9)
   final String destinationTypeId;
+  @HiveField(10)
   final OpeningHours? openingHours;
+  @HiveField(11)
   final String? capacity;
+  @HiveField(12)
   final Contact? contact;
+  @HiveField(13)
   final String tagId;
+  @HiveField(14)
   final String? ticket;
+  @HiveField(15)
   int? favoriteCount;
+  @HiveField(16)
   final bool status;
 
   Destination(
@@ -65,23 +88,11 @@ class Destination {
   }
 }
 
-class Location {
-  final String? type;
-  final List<double>? coordinates;
-
-  Location({this.type, this.coordinates});
-
-  factory Location.fromJson(Map<String, dynamic> json) {
-    return Location(
-      type: json['type'],
-      coordinates:
-          List<double>.from(json['coordinates'].map((e) => e.toDouble())),
-    );
-  }
-}
-
+@HiveType(typeId: 2)
 class HistoryStory {
+  @HiveField(0)
   final String? content;
+  @HiveField(1)
   final List<String>? images;
 
   HistoryStory({this.content, this.images});
@@ -94,8 +105,11 @@ class HistoryStory {
   }
 }
 
+@HiveType(typeId: 3)
 class OpeningHours {
+  @HiveField(0)
   final String? openTime;
+  @HiveField(1)
   final String? closeTime;
 
   OpeningHours({this.openTime, this.closeTime});
@@ -108,9 +122,13 @@ class OpeningHours {
   }
 }
 
+@HiveType(typeId: 4)
 class Contact {
+  @HiveField(0)
   final String? phone;
+  @HiveField(1)
   final String? email;
+  @HiveField(2)
   final String? website;
 
   Contact({this.phone, this.email, this.website});

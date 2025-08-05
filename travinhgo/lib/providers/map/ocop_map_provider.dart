@@ -57,16 +57,17 @@ class OcopMapProvider {
       for (final product in ocopProducts) {
         // For each product, we need to check all selling locations
         for (final sellLocation in product.sellocations) {
-          if (sellLocation.location.coordinates == null ||
-              sellLocation.location.coordinates!.length < 2) {
+          if (sellLocation.location == null ||
+              sellLocation.location!.coordinates == null ||
+              sellLocation.location!.coordinates!.length < 2) {
             continue; // Skip if no valid coordinates
           }
 
           // Extract latitude and longitude from the coordinates
           final double longitude = sellLocation
-              .location.coordinates![0]; // GeoJSON format has longitude first
+              .location!.coordinates![0]; // GeoJSON format has longitude first
           final double latitude =
-              sellLocation.location.coordinates![1]; // Latitude second
+              sellLocation.location!.coordinates![1]; // Latitude second
 
           // Create coordinates from product location
           final coordinates = GeoCoordinates(latitude, longitude);

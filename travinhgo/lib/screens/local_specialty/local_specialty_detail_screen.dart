@@ -17,6 +17,7 @@ import '../../utils/constants.dart';
 import '../../Models/interaction/item_type.dart';
 import '../../widget/description_fm.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
+import '../../widget/local_specialty_widget/local_specialty_location_card.dart';
 
 class LocalSpecialtyDetailScreen extends StatefulWidget {
   final String id;
@@ -74,7 +75,7 @@ class _LocalSpecialtyDetailScreenState
 
   Future<void> fetchocalSpecialty(String id) async {
     final data = await LocalSpecialtieService().getLocalSpecialtieById(id);
-    var sessionId =  await AuthService().getSessionId();
+    var sessionId = await AuthService().getSessionId();
     if (data == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -226,24 +227,26 @@ class _LocalSpecialtyDetailScreenState
                                       )),
                             ),
                           ),
-                          if (isAuthen) Positioned(
-                            top: 19.h,
-                            right: 4.w,
-                            child: GestureDetector(
-                              onTap: () {
-                                favoriteProvider.toggleLocalSpecialtiesFavorite(
-                                    localSpecialtyDetail);
-                              },
-                              child: Icon(
-                                favoriteProvider
-                                        .isExist(localSpecialtyDetail.id)
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: Theme.of(context).colorScheme.error,
-                                size: 40,
+                          if (isAuthen)
+                            Positioned(
+                              top: 19.h,
+                              right: 4.w,
+                              child: GestureDetector(
+                                onTap: () {
+                                  favoriteProvider
+                                      .toggleLocalSpecialtiesFavorite(
+                                          localSpecialtyDetail);
+                                },
+                                child: Icon(
+                                  favoriteProvider
+                                          .isExist(localSpecialtyDetail.id)
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: Theme.of(context).colorScheme.error,
+                                  size: 40,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(
@@ -253,25 +256,6 @@ class _LocalSpecialtyDetailScreenState
                         padding: const EdgeInsets.symmetric(horizontal: 15),
                         child: Column(
                           children: [
-                            Row(
-                              children: [
-                                Image.network(
-                                  tagProvider
-                                      .getTagById(localSpecialtyDetail.tagId)
-                                      .image,
-                                  width: 36,
-                                  height: 36,
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)!.localSpecialty,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const Spacer(),
-                              ],
-                            ),
                             const SizedBox(
                               height: 8,
                             ),
@@ -289,7 +273,7 @@ class _LocalSpecialtyDetailScreenState
                                               .primary),
                                 )),
                             const SizedBox(
-                              height: 8,
+                              height: 10,
                             ),
                             if (localSpecialtyDetail.description != null)
                               DescriptionFm(
@@ -297,6 +281,9 @@ class _LocalSpecialtyDetailScreenState
                                 isExpanded: _isExpanded,
                                 onToggle: _toggleExpanded,
                               ),
+                            const SizedBox(
+                              height: 10,
+                            ),
                             Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
@@ -308,6 +295,29 @@ class _LocalSpecialtyDetailScreenState
                                           .colorScheme
                                           .primary),
                                 )),
+                            const SizedBox(height: 16),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: localSpecialtyDetail.locations.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 18,
+                                mainAxisSpacing: 18,
+                                childAspectRatio: 0.7,
+                              ),
+                              itemBuilder: (context, index) {
+                                final location =
+                                    localSpecialtyDetail.locations[index];
+                                return LocalSpecialtyLocationCard(
+                                  location: location,
+                                  tagImage: tagProvider
+                                      .getTagById(localSpecialtyDetail.tagId)
+                                      .image,
+                                );
+                              },
+                            ),
                           ],
                         ),
                       )

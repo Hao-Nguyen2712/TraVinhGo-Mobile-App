@@ -26,7 +26,7 @@ class ImageSliderOcop extends StatelessWidget {
             id: ocop.id,
             title: ocop.productName,
             imageUrl: ocop.productImage[0],
-            companyName: ocop.company.name,
+            companyName: ocop.company?.name ?? 'N/A',
           );
         },
       ),

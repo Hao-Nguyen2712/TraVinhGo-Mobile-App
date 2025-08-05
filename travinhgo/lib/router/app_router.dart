@@ -199,8 +199,11 @@ class AppRouter {
         name: 'LocalSpecialtyDetail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return LocalSpecialtyDetailScreen(
-            id: id,
+          return AuthRequiredScreen(
+            message: 'Please login to use this feature',
+            child: LocalSpecialtyDetailScreen(
+              id: id,
+            ),
           );
         },
       ),
@@ -217,8 +220,11 @@ class AppRouter {
         name: 'OcopProductDetail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return OcopProductDetailScreen(
-            id: id,
+          return AuthRequiredScreen(
+            message: 'Please login to use this feature',
+            child: OcopProductDetailScreen(
+              id: id,
+            ),
           );
         },
       ),
@@ -248,7 +254,10 @@ class AppRouter {
         name: 'EventFestivalDetail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return EventFesftivalDetailScreen(id: id);
+          return AuthRequiredScreen(
+            message: 'Please login to use this feature',
+            child: EventFesftivalDetailScreen(id: id),
+          );
         },
       ),
 

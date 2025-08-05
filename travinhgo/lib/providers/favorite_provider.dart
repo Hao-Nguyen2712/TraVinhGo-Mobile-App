@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:travinhgo/Models/favorite/favorite.dart';
 
 import 'package:travinhgo/models/destination/destination.dart';
+import 'package:travinhgo/models/event_festival/event_and_festival.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
+import 'package:travinhgo/services/event_festival_service.dart';
 import '../services/destination_service.dart';
 import '../services/favorite_service.dart';
 import '../services/local_specialtie_service.dart';
@@ -15,6 +17,7 @@ class FavoriteProvider extends ChangeNotifier {
   final List<Destination> _destinationList = [];
   final List<LocalSpecialties> _localSpecialteList = [];
   final List<OcopProduct> _ocopProductList = [];
+  final List<EventAndFestival> _eventFestivalList = [];
 
   List<Favorite> get favorites => _favorites;
 
@@ -23,6 +26,8 @@ class FavoriteProvider extends ChangeNotifier {
   List<LocalSpecialties> get localSpecialteList => _localSpecialteList;
 
   List<OcopProduct> get ocopProductList => _ocopProductList;
+
+  List<EventAndFestival> get eventFestivalList => _eventFestivalList;
 
   Future<void> fetchFavorites() async {
     try {
@@ -33,6 +38,7 @@ class FavoriteProvider extends ChangeNotifier {
       List<String> destinationIds = [];
       List<String> ocopIds = [];
       List<String> localIds = [];
+      List<String> eventFestivalIds = [];
 
       for (var item in _favorites) {
         switch (item.itemType) {
@@ -44,6 +50,9 @@ class FavoriteProvider extends ChangeNotifier {
             break;
           case 'LocalSpecialties':
             localIds.add(item.itemId);
+            break;
+          case 'EventAndFestival':
+            eventFestivalIds.add(item.itemId);
             break;
         }
       }
@@ -61,11 +70,16 @@ class FavoriteProvider extends ChangeNotifier {
           ? LocalSpecialtieService().getLocalSpecialtiesByIds(localIds)
           : Future.value(<LocalSpecialties>[]);
 
-      // Chờ 3 future hoàn tất song song
+      final eventFestivalFuture = eventFestivalIds.isNotEmpty
+          ? EventFestivalService().getEventFestivalsByIds(eventFestivalIds)
+          : Future.value(<EventAndFestival>[]);
+
+      // Chờ 4 future hoàn tất song song
       final results = await Future.wait([
         destinationFuture,
         ocopFuture,
         localFuture,
+        eventFestivalFuture,
       ]);
 
       // Gán kết quả vào danh sách tương ứng
@@ -81,11 +95,14 @@ class FavoriteProvider extends ChangeNotifier {
         ..clear()
         ..addAll(results[2] as List<LocalSpecialties>);
 
+      _eventFestivalList
+        ..clear()
+        ..addAll(results[3] as List<EventAndFestival>);
+
       debugPrint('-------------------------------------------');
       for (var destination in _destinationList) {
         debugPrint('name: ${destination.name}, ID: ${destination.id}');
       }
-
 
       notifyListeners();
     } catch (e) {
@@ -136,6 +153,22 @@ class FavoriteProvider extends ChangeNotifier {
       final fav = Favorite(itemId: item.id, itemType: "LocalSpecialties");
       _favorites.add(fav);
       _localSpecialteList.add(item);
+      await FavoriteService().addFavoriteList(fav);
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleEventFestivalFavorite(EventAndFestival item) async {
+    final index = _favorites.indexWhere(
+        (f) => f.itemId == item.id && f.itemType == "EventAndFestival");
+    if (index != -1) {
+      _favorites.removeAt(index);
+      _eventFestivalList.remove(item);
+      await FavoriteService().removeFavoriteList(item.id);
+    } else {
+      final fav = Favorite(itemId: item.id, itemType: "EventAndFestival");
+      _favorites.add(fav);
+      _eventFestivalList.add(item);
       await FavoriteService().addFavoriteList(fav);
     }
     notifyListeners();

@@ -96,4 +96,14 @@ class StringHelper {
     }
     return str;
   }
+
+  static String stripHtml(String? htmlString) {
+    if (htmlString == null) return '';
+    // Thay thế <br> và <p> bằng ký tự xuống dòng, sau đó loại bỏ các thẻ HTML khác
+    return htmlString
+        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+        .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n')
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .trim();
+  }
 }

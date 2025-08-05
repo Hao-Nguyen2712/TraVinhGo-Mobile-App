@@ -2,31 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:travinhgo/services/local_specialtie_service.dart';
 
-enum LocalSpecialtyState { initial, loading, loaded, error }
-
 class LocalSpecialtyProvider with ChangeNotifier {
   final LocalSpecialtieService _localSpecialtieService =
       LocalSpecialtieService();
 
-  LocalSpecialtyState _state = LocalSpecialtyState.initial;
   List<LocalSpecialties> _localSpecialties = [];
-  String _errorMessage = '';
+  String? _errorMessage;
+  bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _pageNumber = 1;
+  final int _pageSize = 10;
+  String? _searchQuery;
 
-  LocalSpecialtyState get state => _state;
   List<LocalSpecialties> get localSpecialties => _localSpecialties;
-  String get errorMessage => _errorMessage;
+  String? get errorMessage => _errorMessage;
+  bool get isLoading => _isLoading;
+  bool get isLoadingMore => _isLoadingMore;
+  bool get hasMore => _hasMore;
 
-  Future<void> fetchLocalSpecialties() async {
-    _state = LocalSpecialtyState.loading;
+  void applySearchQuery(String? query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  Future<void> fetchLocalSpecialties({bool isRefresh = false}) async {
+    if (isRefresh) {
+      _pageNumber = 1;
+      _localSpecialties = [];
+      _hasMore = true;
+      _isLoading = true;
+    } else {
+      if (_isLoadingMore || !_hasMore) return;
+      _isLoadingMore = true;
+    }
     notifyListeners();
 
     try {
-      _localSpecialties = await _localSpecialtieService.getLocalSpecialtie();
-      _state = LocalSpecialtyState.loaded;
+      final newItems = await _localSpecialtieService.getLocalSpecialtiesPaging(
+        pageNumber: _pageNumber,
+        pageSize: _pageSize,
+        searchQuery: _searchQuery,
+      );
+
+      if (newItems.length < _pageSize) {
+        _hasMore = false;
+      }
+
+      _localSpecialties.addAll(newItems);
+      _pageNumber++;
+      _errorMessage = null;
     } catch (e) {
       _errorMessage = 'Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.';
-      _state = LocalSpecialtyState.error;
+    } finally {
+      _isLoading = false;
+      _isLoadingMore = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 }

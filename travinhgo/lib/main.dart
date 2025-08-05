@@ -28,11 +28,17 @@ import 'package:travinhgo/providers/local_specialty_provider.dart';
 import 'package:travinhgo/providers/ocop_product_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:travinhgo/providers/event_festival_provider.dart';
 
 // Import HERE SDK directly in main.dart
 import 'package:here_sdk/core.dart';
 import 'package:here_sdk/core.engine.dart';
 import 'package:here_sdk/core.errors.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:travinhgo/models/destination/destination.dart';
+import 'package:travinhgo/models/event_festival/event_and_festival.dart';
+import 'package:travinhgo/models/ocop/ocop_product.dart';
+import 'package:travinhgo/models/location.dart';
 import 'firebase_options.dart';
 
 // Global navigator key for accessing navigation from anywhere
@@ -54,6 +60,23 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive for caching
+  await Hive.initFlutter();
+  Hive.registerAdapter(DestinationAdapter());
+  Hive.registerAdapter(LocationAdapter());
+  Hive.registerAdapter(HistoryStoryAdapter());
+  Hive.registerAdapter(OpeningHoursAdapter());
+  Hive.registerAdapter(ContactAdapter());
+  Hive.registerAdapter(OcopProductAdapter());
+  Hive.registerAdapter(CompanyAdapter());
+  Hive.registerAdapter(SellLocationAdapter());
+  Hive.registerAdapter(OcopTypeDTOAdapter());
+  Hive.registerAdapter(EventAndFestivalAdapter());
+  Hive.registerAdapter(EventLocationAdapter());
+  await Hive.openBox<Destination>('destinations');
+  await Hive.openBox<OcopProduct>('ocopProducts');
+  await Hive.openBox<EventAndFestival>('eventFestivals');
 
   // Initialize environment configuration
   await EnvConfig.initialize();
@@ -201,6 +224,7 @@ class _MyAppState extends State<MyApp> {
               ChangeNotifierProvider(create: (_) => FavoriteProvider()),
               ChangeNotifierProvider(create: (_) => OcopProductProvider()),
               ChangeNotifierProvider(create: (_) => LocalSpecialtyProvider()),
+              ChangeNotifierProvider(create: (_) => EventFestivalProvider()),
             ],
             child: Consumer<SettingProvider>(
               builder: (context, settingProvider, child) {

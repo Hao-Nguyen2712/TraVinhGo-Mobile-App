@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:travinhgo/screens/accomodation/accomodation_screen.dart';
 import 'package:travinhgo/screens/introduction/introduction_page.dart';
+import 'package:travinhgo/screens/utilities/utilities_screen.dart';
 
 import '../screens/notification/message_screen.dart';
 import '../screens/destination/destination_screen.dart';
@@ -13,34 +15,57 @@ class CategoryItem extends StatelessWidget {
   final String iconName;
   final Color color;
   final String title;
-  final int index;
 
   const CategoryItem({
     super.key,
     required this.iconName,
     this.color = Colors.transparent,
     required this.title,
-    required this.index,
   });
+
+  void _navigateToScreen(BuildContext context) {
+    Widget? screen;
+    switch (iconName) {
+      case "Introduction":
+        screen = const IntroductionPage();
+        break;
+      case "Destination":
+        screen = const DestinationScreen();
+        break;
+      case "Specialities":
+        screen = const LocalSpecialtyScreen();
+        break;
+      case "EventAndFestival":
+        screen = const EventFestivalScreen();
+        break;
+      case "Ocop":
+        screen = const OcopProductScreen();
+        break;
+      case "Message":
+        screen = const MessageScreen();
+        break;
+      case "Tips":
+        screen = const TipScreen();
+        break;
+      case "Stay":
+        screen = const AccomodationScreen();
+        break;
+      case "Utilities":
+        screen = const UtilitiesScreen();
+        break;
+    }
+    if (screen != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => screen!),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> screen = const [
-      IntroductionPage(),
-      DestinationScreen(),
-      LocalSpecialtyScreen(),
-      EventFestivalScreen(),
-      OcopProductScreen(),
-      MessageScreen(),
-      TipScreen()
-    ];
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => screen[index]),
-        );
-      },
+      onTap: () => _navigateToScreen(context),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

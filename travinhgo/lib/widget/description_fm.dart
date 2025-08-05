@@ -38,18 +38,7 @@ class DescriptionFm extends StatelessWidget {
               isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 300),
         ),
-        // Center(
-        //   child: TextButton(
-        //     onPressed: onToggle,
-        //     child: Text(
-        //       isExpanded ? 'Less' : 'More',
-        //       style: TextStyle(
-        //           color: Theme.of(context).brightness == Brightness.dark
-        //               ? Colors.white
-        //               : Theme.of(context).colorScheme.primary),
-        //     ),
-        //   ),
-        // ),
+        const SizedBox(height: 10),
         Center(
           child: TextButton(
             onPressed: onToggle,
