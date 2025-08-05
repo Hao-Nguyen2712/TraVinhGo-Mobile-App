@@ -1,18 +1,35 @@
-import '../destination/destination.dart';
+import 'package:hive/hive.dart';
+import 'package:travinhgo/models/location.dart';
 
-class OcopProduct {
+part 'ocop_product.g.dart';
+
+@HiveType(typeId: 10)
+class OcopProduct extends HiveObject {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String productName;
+  @HiveField(2)
   final String? productDescription;
+  @HiveField(3)
   final List<String> productImage;
+  @HiveField(4)
   final String? productPrice;
+  @HiveField(5)
   final String ocopTypeId;
+  @HiveField(6)
   final List<SellLocation> sellocations;
+  @HiveField(7)
   final String companyId;
+  @HiveField(8)
   final int ocopPoint;
+  @HiveField(9)
   final int ocopYearRelease;
+  @HiveField(10)
   final String tagId;
-  final Company company;
+  @HiveField(11)
+  final Company? company;
+  @HiveField(12)
   final OcopTypeDTO? ocopType;
 
   OcopProduct(
@@ -27,7 +44,7 @@ class OcopProduct {
       required this.ocopPoint,
       required this.ocopYearRelease,
       required this.tagId,
-      required this.company,
+      this.company,
       this.ocopType});
 
   factory OcopProduct.fromJson(Map<String, dynamic> json) {
@@ -38,7 +55,7 @@ class OcopProduct {
       productImage: json['productImage'] != null
           ? List<String>.from(json['productImage'])
           : [],
-      productPrice: json['productPrice'],
+      productPrice: json['productPrice']?.toString(),
       ocopTypeId: json['ocopTypeId'],
       sellocations: json['sellocations'] != null
           ? List<SellLocation>.from(
@@ -48,15 +65,20 @@ class OcopProduct {
       ocopPoint: json['ocopPoint'],
       ocopYearRelease: json['ocopYearRelease'],
       tagId: json['tagId'],
-      company: Company.fromJson(json['company']),
-      ocopType:
-          json['ocopType'] != null ? OcopTypeDTO.fromJson(json['ocopType']) : null,
+      company:
+          json['company'] != null ? Company.fromJson(json['company']) : null,
+      ocopType: json['ocopType'] != null
+          ? OcopTypeDTO.fromJson(json['ocopType'])
+          : null,
     );
   }
 }
 
-class Company {
+@HiveType(typeId: 11)
+class Company extends HiveObject {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
 
   Company({required this.id, required this.name});
@@ -69,10 +91,14 @@ class Company {
   }
 }
 
-class SellLocation {
+@HiveType(typeId: 12)
+class SellLocation extends HiveObject {
+  @HiveField(0)
   final String? locationName;
+  @HiveField(1)
   final String? locationAddress;
-  final Location location;
+  @HiveField(2)
+  final Location? location;
 
   SellLocation(
       {required this.locationName,
@@ -83,13 +109,17 @@ class SellLocation {
     return SellLocation(
       locationName: json['locationName'],
       locationAddress: json['locationAddress'],
-      location: Location.fromJson(json['location']),
+      location:
+          json['location'] != null ? Location.fromJson(json['location']) : null,
     );
   }
 }
 
-class OcopTypeDTO {
+@HiveType(typeId: 13)
+class OcopTypeDTO extends HiveObject {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String ocopTypeName;
 
   OcopTypeDTO({required this.id, required this.ocopTypeName});

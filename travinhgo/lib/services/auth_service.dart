@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:travinhgo/main.dart';
 import 'package:travinhgo/screens/auth/login_screen.dart';
 
 import '../utils/env_config.dart';
@@ -18,6 +19,7 @@ class AuthService {
   static final AuthService _instance = AuthService._internal();
   String? _otpToken;
   String? _lastError;
+  bool _isRefreshing = false;
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
@@ -52,17 +54,32 @@ class AuthService {
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (DioException error, ErrorInterceptorHandler handler) async {
-          debugPrint(
-              "AUTH_SERVICE: Dio error interceptor triggered: ${error.type}");
+          if (error.response?.statusCode == 401) {
+            if (await refreshToken()) {
+              // Retry the original request
+              try {
+                final response = await dio.request(
+                  error.requestOptions.path,
+                  options: Options(
+                    method: error.requestOptions.method,
+                    headers: error.requestOptions.headers,
+                  ),
+                  data: error.requestOptions.data,
+                  queryParameters: error.requestOptions.queryParameters,
+                );
+                return handler.resolve(response);
+              } on DioException catch (e) {
+                return handler.next(e);
+              }
+            } else {
+              await logout();
+              showSessionExpiredDialog();
+              debugPrint('AUTH_SERVICE: Session expired: 401 Unauthorized');
+            }
+          }
 
           // Set last error message based on error type
           _setErrorFromDioException(error);
-
-          if (error.response?.statusCode == 401) {
-            // Clear tokens on 401 (Unauthorized) response
-            await logout();
-            debugPrint('AUTH_SERVICE: Session expired: 401 Unauthorized');
-          }
           return handler.next(error);
         },
       ),
@@ -502,6 +519,49 @@ class AuthService {
     await _secureStorage.delete(key: 'token'); // Also remove any OTP token
   }
 
+  Future<bool> refreshToken() async {
+    if (_isRefreshing) {
+      return false;
+    }
+    _isRefreshing = true;
+
+    try {
+      final refreshToken = await getRefreshToken();
+      if (refreshToken == null) {
+        _isRefreshing = false;
+        return false;
+      }
+
+      final response = await dio.post(
+        '${_baseUrl}refresh-token',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'refreshToken': ' $refreshToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final newSessionId = response.data['sessionId'];
+        final newRefreshToken = response.data['refreshToken'];
+
+        if (newSessionId != null && newRefreshToken != null) {
+          await _secureStorage.write(key: 'session_id', value: newSessionId);
+          await _secureStorage.write(
+              key: 'refresh_token', value: newRefreshToken);
+          _isRefreshing = false;
+          return true;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error refreshing token: $e');
+    }
+
+    _isRefreshing = false;
+    return false;
+  }
+
   Future<String?> getSessionId() async {
     return await _secureStorage.read(key: 'session_id');
   }
@@ -554,7 +614,11 @@ class AuthService {
   }
 
   // Show session expired dialog
-  Future<void> showSessionExpiredDialog(BuildContext context) async {
+  Future<void> showSessionExpiredDialog() async {
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      return;
+    }
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -580,7 +644,7 @@ class AuthService {
   Future<bool> checkSession(BuildContext context) async {
     final isValid = await isLoggedIn();
     if (!isValid) {
-      await showSessionExpiredDialog(context);
+      await showSessionExpiredDialog();
       return false;
     }
     return true;

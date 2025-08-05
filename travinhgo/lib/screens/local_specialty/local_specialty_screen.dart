@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:travinhgo/providers/local_specialty_provider.dart';
 import 'package:travinhgo/widget/local_specialty_widget/local_specialty_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
-import '../../utils/constants.dart';
-import '../../utils/string_helper.dart';
 
 class LocalSpecialtyScreen extends StatefulWidget {
   const LocalSpecialtyScreen({super.key});
@@ -17,167 +17,241 @@ class LocalSpecialtyScreen extends StatefulWidget {
 }
 
 class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
-  String _searchQuery = '';
-  late bool isAuthen;
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  bool isAuthen = false;
 
   @override
   void initState() {
     super.initState();
+    _focusNode.requestFocus();
     isAuthentication();
-    // Fetch initial data using the provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<LocalSpecialtyProvider>(context, listen: false)
-          .fetchLocalSpecialties();
+      final provider =
+          Provider.of<LocalSpecialtyProvider>(context, listen: false);
+      provider.fetchLocalSpecialties(isRefresh: true);
     });
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final provider =
+        Provider.of<LocalSpecialtyProvider>(context, listen: false);
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !provider.isLoadingMore &&
+        provider.hasMore) {
+      provider.fetchLocalSpecialties();
+    }
   }
 
   Future<void> isAuthentication() async {
-    var sessionId =  await AuthService().getSessionId();
-    isAuthen = sessionId != null;
+    var sessionId = await AuthService().getSessionId();
+    if (mounted) {
+      setState(() {
+        isAuthen = sessionId != null;
+      });
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+
+      final provider =
+          Provider.of<LocalSpecialtyProvider>(context, listen: false);
+      provider.applySearchQuery(query);
+      provider.fetchLocalSpecialties(isRefresh: true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+    final statusBarHeight = MediaQuery.of(context).viewPadding.top;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: theme.colorScheme.primary,
-        statusBarIconBrightness:
-            isDarkMode ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDarkMode ? Brightness.dark : Brightness.light,
-      ),
-      child: Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        body: SafeArea(
-          top: false, // We handle the top padding with the AppBar
-          child: Consumer<LocalSpecialtyProvider>(
-            builder: (context, provider, child) {
-              final filteredLocals = provider.localSpecialties.where((local) {
-                final normalizedQuery =
-                    StringHelper.removeDiacritics(_searchQuery.toLowerCase());
-                final normalizedFoodName =
-                    StringHelper.removeDiacritics(local.foodName.toLowerCase());
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: theme.brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+    ));
 
-                return _searchQuery.isEmpty ||
-                    normalizedFoodName.contains(normalizedQuery);
-              }).toList();
-
-              return CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    floating: true,
-                    snap: true,
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
-                    title: Text(AppLocalizations.of(context)!.localSpecialty),
-                    centerTitle: true,
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      extendBodyBehindAppBar: true,
+      body: Container(
+        color: colorScheme.primary,
+        child: Column(
+          children: [
+            SizedBox(height: statusBarHeight),
+            _buildHeader(context),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-                      child: TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.search,
-                          prefixIcon: Icon(Icons.search,
-                              color: theme.colorScheme.onSurface),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(60),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: kSearchBackgroundColor,
+                ),
+                child: SafeArea(
+                  top: false,
+                  bottom: true,
+                  child: Consumer<LocalSpecialtyProvider>(
+                    builder: (context, provider, child) {
+                      return RefreshIndicator(
+                        onRefresh: () =>
+                            provider.fetchLocalSpecialties(isRefresh: true),
+                        child: CustomScrollView(
+                          controller: _scrollController,
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: _buildSearchBar(context),
+                            ),
+                            if (provider.isLoading &&
+                                provider.localSpecialties.isEmpty)
+                              const SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 32),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              )
+                            else if (provider.errorMessage != null)
+                              SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 32),
+                                    child: Text(AppLocalizations.of(context)!
+                                        .errorPrefix(provider.errorMessage!)),
+                                  ),
+                                ),
+                              )
+                            else if (provider.localSpecialties.isEmpty)
+                              SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 32),
+                                    child: Text(AppLocalizations.of(context)!
+                                        .noLocalSpecialtyFound),
+                                  ),
+                                ),
+                              )
+                            else
+                              SliverPadding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 4.w, vertical: 2.h),
+                                sliver: SliverGrid(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: isTablet ? 3 : 2,
+                                          crossAxisSpacing: 5.w,
+                                          mainAxisSpacing: 2.h,
+                                          childAspectRatio:
+                                              isTablet ? 0.7 : 0.6),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      return LocalSpecialtyItem(
+                                        localSpecialty:
+                                            provider.localSpecialties[index],
+                                        isAllowFavorite: isAuthen,
+                                      );
+                                    },
+                                    childCount:
+                                        provider.localSpecialties.length,
+                                  ),
+                                ),
+                              ),
+                            if (provider.isLoadingMore)
+                              const SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
-                  _buildBody(provider.state, filteredLocals, provider),
-                ],
-              );
-            },
-          ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildBody(LocalSpecialtyState state,
-      List<LocalSpecialties> filteredLocals, LocalSpecialtyProvider provider) {
-    switch (state) {
-      case LocalSpecialtyState.loading:
-      case LocalSpecialtyState.initial:
-        return const SliverToBoxAdapter(
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
-              child: CircularProgressIndicator(),
-            ),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back,
+                color: Theme.of(context).colorScheme.onPrimary),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-        );
-      case LocalSpecialtyState.error:
-        return SliverToBoxAdapter(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    provider.errorMessage,
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => provider.fetchLocalSpecialties(),
-                    child: const Text("Thử lại"),
-                  )
-                ],
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.localSpecialty,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
-        );
-      case LocalSpecialtyState.loaded:
-        return filteredLocals.isEmpty
-            ? SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 32),
-                    child: Text(
-                        AppLocalizations.of(context)!.noLocalSpecialtyFound),
-                  ),
-                ),
-              )
-            : SliverPadding(
-                padding: const EdgeInsets.all(16.0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1 / 1.4,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      return LocalSpecialtyItem(
-                          localSpecialty: filteredLocals[index], isAllowFavorite: isAuthen,);
-                    },
-                    childCount: filteredLocals.length,
-                  ),
-                ),
-              );
-    }
+          const SizedBox(width: 48), // To balance the IconButton
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      child: TextField(
+        controller: _searchController,
+        focusNode: _focusNode,
+        onChanged: _onSearchChanged,
+        decoration: InputDecoration(
+          hintText: AppLocalizations.of(context)!.search,
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(60),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: colorScheme.surfaceVariant.withOpacity(0.7),
+        ),
+      ),
+    );
   }
 }

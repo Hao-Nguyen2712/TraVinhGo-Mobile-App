@@ -110,4 +110,46 @@ class LocalSpecialtieService {
       rethrow;
     }
   }
+
+  Future<List<LocalSpecialties>> getLocalSpecialtiesPaging({
+    int pageNumber = 1,
+    int pageSize = 10,
+    String? searchQuery,
+  }) async {
+    try {
+      var endPoint = '${_baseUrl}LocalSpecialities-Paging';
+
+      final Map<String, dynamic> queryParameters = {
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
+      };
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParameters.addAll({'searchQuery': searchQuery});
+      }
+
+      final response = await dio.get(
+        endPoint,
+        queryParameters: queryParameters,
+        options: Options(headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic>? data = response.data['data']['data'];
+        if (data == null) {
+          return [];
+        }
+        List<LocalSpecialties> localSpecialties =
+            data.map((item) => LocalSpecialties.fromJson(item)).toList();
+        return localSpecialties;
+      } else {
+        throw Exception(
+            'Failed to load paged local specialties. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error during get paged local specialties: $e');
+      rethrow;
+    }
+  }
 }

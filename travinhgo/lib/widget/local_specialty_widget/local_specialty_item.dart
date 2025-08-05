@@ -13,7 +13,8 @@ class LocalSpecialtyItem extends StatelessWidget {
   final LocalSpecialties localSpecialty;
   final bool isAllowFavorite;
 
-  const LocalSpecialtyItem({super.key, required this.localSpecialty, required this.isAllowFavorite});
+  const LocalSpecialtyItem(
+      {super.key, required this.localSpecialty, required this.isAllowFavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -53,68 +54,82 @@ class LocalSpecialtyItem extends StatelessWidget {
                       localSpecialty.images.first,
                       fit: BoxFit.cover,
                     ),
-                    if (isAllowFavorite) Positioned(
-                      top: 1.h,
-                      right: 2.w,
-                      child: GestureDetector(
-                        onTap: () {
-                          favoriteProvider
-                              .toggleLocalSpecialtiesFavorite(localSpecialty);
-                        },
-                        child: Icon(
-                          favoriteProvider.isExist(localSpecialty.id)
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: Theme.of(context).colorScheme.error,
-                          size: 16.sp,
+                    if (isAllowFavorite)
+                      Positioned(
+                        top: 1.h,
+                        right: 2.w,
+                        child: GestureDetector(
+                          onTap: () {
+                            favoriteProvider
+                                .toggleLocalSpecialtiesFavorite(localSpecialty);
+                          },
+                          child: Icon(
+                            favoriteProvider.isExist(localSpecialty.id)
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: Theme.of(context).colorScheme.error,
+                            size: 16.sp,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
             ),
             // Name + Icon
             Flexible(
-              flex: 2,
+              flex: 3,
               child: Padding(
                 padding: EdgeInsets.all(3.w),
-                child: Row(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 12.sp,
-                      backgroundColor:
-                          Theme.of(context).colorScheme.secondaryContainer,
-                      child: Icon(
-                        Icons.ramen_dining,
-                        color:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
-                        size: 15.sp,
-                      ),
-                    ),
-                    SizedBox(width: 2.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 5.h, // Fixed height for the title
-                            child: Text(
-                              StringHelper.toTitleCase(localSpecialty.foodName),
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 13.sp,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondaryContainer,
+                          child: Icon(
+                            Icons.ramen_dining,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer,
+                            size: 16.sp,
                           ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(width: 2.w),
+                        Expanded(
+                          child: Text(
+                            StringHelper.toTitleCase(localSpecialty.foodName),
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
+                    SizedBox(height: 1.5.h),
+                    if (localSpecialty.description != null &&
+                        localSpecialty.description!.isNotEmpty)
+                      Expanded(
+                        child: Text(
+                          StringHelper.stripHtml(localSpecialty.description),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                   ],
                 ),
               ),

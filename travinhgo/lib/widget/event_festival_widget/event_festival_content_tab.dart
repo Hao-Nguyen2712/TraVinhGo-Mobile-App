@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:sizer/sizer.dart';
 
 class EventFestivalContentTab extends StatelessWidget {
@@ -34,13 +35,15 @@ class EventFestivalContentTab extends StatelessWidget {
             ],
           ),
           SizedBox(height: 2.h),
-          Text(
-            description ?? 'Chưa có mô tả cho sự kiện này.',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.grey.shade700,
-              height: 1.5,
-            ),
+          Html(
+            data: description ?? 'Chưa có mô tả cho sự kiện này.',
+            style: {
+              "body": Style(
+                fontSize: FontSize(14.sp),
+                color: Colors.grey.shade700,
+                lineHeight: const LineHeight(1.5),
+              ),
+            },
           ),
         ],
       ),

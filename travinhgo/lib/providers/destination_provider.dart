@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import 'package:travinhgo/models/destination/destination.dart';
 import 'package:travinhgo/models/destination_types/destination_type.dart';
 import 'package:travinhgo/models/marker/marker.dart';
@@ -13,6 +14,8 @@ class DestinationProvider with ChangeNotifier {
   final DestinationTypeService _destinationTypeService =
       DestinationTypeService();
   final MarkerService _markerService = MarkerService();
+
+  final String _cacheBoxName = 'destinations';
 
   // --- State Variables ---
   List<Destination> _allDestinations = []; // Master list for paginated items
@@ -81,16 +84,23 @@ class DestinationProvider with ChangeNotifier {
   Future<void> fetchDestinations({
     bool isRefresh = false,
   }) async {
-    // Prevent concurrent calls
     if (_isLoading || (_isLoadingMore && !isRefresh)) return;
 
     if (isRefresh) {
       _currentPage = 1;
       _hasMore = true;
-      _allDestinations = [];
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
+
+      // 1. Load from cache first
+      final cachedDestinations = _loadFromCache();
+      if (cachedDestinations.isNotEmpty) {
+        _allDestinations = cachedDestinations;
+        // Temporarily turn off loading to show cached data immediately
+        _isLoading = false;
+        notifyListeners();
+      }
     } else {
       _isLoadingMore = true;
       notifyListeners();
@@ -104,6 +114,7 @@ class DestinationProvider with ChangeNotifier {
     }
 
     try {
+      // 2. Always call API to get the latest data
       final newDestinations = await _destinationService.getDestination(
         pageIndex: _currentPage,
         pageSize: _pageSize,
@@ -111,12 +122,23 @@ class DestinationProvider with ChangeNotifier {
         typeId: _currentTypeId,
       );
 
+      if (isRefresh) {
+        _allDestinations =
+            []; // Clear old data (from cache) to replace with new data from network
+        await _clearCache(); // Clear old cache
+      }
+
       if (newDestinations.isEmpty || newDestinations.length < _pageSize) {
         _hasMore = false;
       }
 
       _allDestinations.addAll(newDestinations);
       _currentPage++;
+
+      // 3. Save new data to cache (only save the first page on refresh)
+      if (isRefresh && newDestinations.isNotEmpty) {
+        await _saveToCache(newDestinations);
+      }
 
       developer.log(
           'Fetched page $_currentPage. Has more: $_hasMore. Total items: ${_allDestinations.length}',
@@ -189,5 +211,25 @@ class DestinationProvider with ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  // --- Cache Helper Methods ---
+  Future<void> _saveToCache(List<Destination> destinations) async {
+    final box = Hive.box<Destination>(_cacheBoxName);
+    // Use a map with id as key to avoid duplicates
+    final Map<String, Destination> destinationMap = {
+      for (var d in destinations) d.id: d
+    };
+    await box.putAll(destinationMap);
+  }
+
+  List<Destination> _loadFromCache() {
+    final box = Hive.box<Destination>(_cacheBoxName);
+    return box.values.toList();
+  }
+
+  Future<void> _clearCache() async {
+    final box = Hive.box<Destination>(_cacheBoxName);
+    await box.clear();
   }
 }

@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../Models/selling_link/selling_link.dart';
 import '../../providers/favorite_provider.dart';
@@ -21,8 +22,8 @@ import '../../utils/string_helper.dart';
 import '../../widget/data_field_row.dart';
 import '../../widget/description_fm.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
+import '../../widget/ocop_product_widget/ocop_location_card.dart';
 import '../../widget/ocop_product_widget/rating_star_widget.dart';
-import '../../widget/selling_link_widget/selling_link_list.dart';
 
 class OcopProductDetailScreen extends StatefulWidget {
   final String id;
@@ -91,11 +92,13 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
 
   Future<void> fetchOcopSellingLink(String id) async {
     final data = await SellingLinkService().getSellingLinkByOcopId(id);
-    var sessionId =  await AuthService().getSessionId();
-    setState(() {
-      _sellingLinks = data;
-      isAuthen = sessionId != null;
-    });
+    var sessionId = await AuthService().getSessionId();
+    if (mounted) {
+      setState(() {
+        _sellingLinks = data;
+        isAuthen = sessionId != null;
+      });
+    }
   }
 
   Future<void> fetchOcopProduct(String id) async {
@@ -126,6 +129,24 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
     }
   }
 
+  void _launchLink(BuildContext context, String url) async {
+    String urlToLaunch = url;
+    if (!urlToLaunch.startsWith(RegExp(r'https?://'))) {
+      urlToLaunch = 'https://$urlToLaunch';
+    }
+
+    final uri = Uri.parse(urlToLaunch);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể mở đường dẫn: $urlToLaunch')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
@@ -133,6 +154,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDarkMode = theme.brightness == Brightness.dark;
+    final labelStyle = TextStyle(fontSize: 15.sp, color: colorScheme.onSurface);
     void _toggleExpanded() {
       setState(() {
         _isExpanded = !_isExpanded;
@@ -250,23 +272,24 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                       )),
                             ),
                           ),
-                          if (isAuthen) Positioned(
-                            top: 19.h,
-                            right: 4.w,
-                            child: GestureDetector(
-                              onTap: () {
-                                favoriteProvider
-                                    .toggleOcopFavorite(ocopProductDetail);
-                              },
-                              child: Icon(
-                                favoriteProvider.isExist(ocopProductDetail.id)
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: Theme.of(context).colorScheme.error,
-                                size: 24.sp,
+                          if (isAuthen)
+                            Positioned(
+                              top: 19.h,
+                              right: 4.w,
+                              child: GestureDetector(
+                                onTap: () {
+                                  favoriteProvider
+                                      .toggleOcopFavorite(ocopProductDetail);
+                                },
+                                child: Icon(
+                                  favoriteProvider.isExist(ocopProductDetail.id)
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: Theme.of(context).colorScheme.error,
+                                  size: 24.sp,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       SizedBox(
@@ -276,25 +299,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                         padding: EdgeInsets.symmetric(horizontal: 4.w),
                         child: Column(
                           children: [
-                            Row(
-                              children: [
-                                Image.network(
-                                  tagProvider
-                                      .getTagById(ocopProductDetail.tagId)
-                                      .image,
-                                  width: 9.w,
-                                  height: 9.w,
-                                ),
-                                SizedBox(
-                                  width: 2.w,
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)!.ocopProduct,
-                                  style: TextStyle(fontSize: 12.sp),
-                                ),
-                                const Spacer(),
-                              ],
-                            ),
                             SizedBox(
                               height: 1.h,
                             ),
@@ -322,22 +326,34 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                 onToggle: _toggleExpanded,
                               ),
                             SizedBox(height: 2.h),
+                            Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  AppLocalizations.of(context)!.information,
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
+                                )),
+                            SizedBox(height: 2.h),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!
                                       .placeOfProduction,
-                                  style: TextStyle(fontSize: 14.sp),
+                                  style: labelStyle,
                                 ),
                                 const Spacer(),
                                 SizedBox(
                                   width: 50.w,
                                   child: Text(
                                     StringHelper.toUpperCase(
-                                        ocopProductDetail.company.name),
+                                        ocopProductDetail.company?.name ?? ''),
+                                    textAlign: TextAlign.right,
                                     style: TextStyle(
-                                        fontSize: 14.sp,
+                                        fontSize: 15.sp,
                                         color: colorScheme.primary),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
@@ -350,7 +366,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!.referencePrice,
-                                  style: TextStyle(fontSize: 14.sp),
+                                  style: labelStyle,
                                 ),
                                 const Spacer(),
                                 Text.rich(
@@ -360,7 +376,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         text: StringHelper.formatCurrency(
                                             ocopProductDetail.productPrice),
                                         style: TextStyle(
-                                            fontSize: 14.sp,
+                                            fontSize: 15.sp,
                                             color: colorScheme.onBackground,
                                             fontWeight: FontWeight.w800),
                                       ),
@@ -382,7 +398,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               children: [
                                 Text(
                                   'Ocop Point',
-                                  style: TextStyle(fontSize: 15.sp),
+                                  style: labelStyle,
                                 ),
                                 const Spacer(),
                                 RatingStarWidget(ocopProductDetail.ocopPoint)
@@ -390,7 +406,7 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                             ),
                             SizedBox(height: 2.h),
                             DataFieldRow(
-                              title: AppLocalizations.of(context)!.ocopType,
+                              title: AppLocalizations.of(context)!.type,
                               value: ocopProductDetail.ocopType!.ocopTypeName,
                             ),
                             SizedBox(height: 2.h),
@@ -405,12 +421,92 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               children: [
                                 Text(
                                   'Selling links',
-                                  style: TextStyle(fontSize: 15.sp),
+                                  style: labelStyle,
                                 ),
-                                const Spacer(),
-                                SellingLinkList(sellingLinks: _sellingLinks),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _sellingLinks.isEmpty
+                                      ? Text(
+                                          AppLocalizations.of(context)!
+                                              .notUpdate,
+                                          textAlign: TextAlign.right,
+                                          style: TextStyle(
+                                              fontSize: 15.sp,
+                                              fontStyle: FontStyle.italic,
+                                              color: Colors.grey),
+                                        )
+                                      : DropdownButtonFormField<SellingLink>(
+                                          decoration: InputDecoration(
+                                            isDense: true,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 8),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          hint: const Text('Chọn liên kết'),
+                                          isExpanded: true,
+                                          items: _sellingLinks
+                                              .map((link) =>
+                                                  DropdownMenuItem<SellingLink>(
+                                                    value: link,
+                                                    child: Text(link.title,
+                                                        overflow: TextOverflow
+                                                            .ellipsis),
+                                                  ))
+                                              .toList(),
+                                          onChanged: (link) {
+                                            if (link != null) {
+                                              _launchLink(context, link.link);
+                                            }
+                                          },
+                                        ),
+                                ),
                               ],
                             ),
+                            SizedBox(height: 4.h),
+                            if (ocopProductDetail.sellocations != null &&
+                                ocopProductDetail.sellocations.isNotEmpty) ...[
+                              Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    AppLocalizations.of(context)!
+                                        .availableStore,
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
+                                  )),
+                              const SizedBox(height: 16),
+                              GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount:
+                                    ocopProductDetail.sellocations.length,
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 18,
+                                  mainAxisSpacing: 18,
+                                  mainAxisExtent: 30.h,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final sellLocation =
+                                      ocopProductDetail.sellocations[index];
+                                  return OcopLocationCard(
+                                    location: sellLocation,
+                                    tagImage: tagProvider
+                                        .getTagById(ocopProductDetail.tagId)
+                                        .image,
+                                  );
+                                },
+                              ),
+                              SizedBox(height: 2.h),
+                            ],
                           ],
                         ),
                       )

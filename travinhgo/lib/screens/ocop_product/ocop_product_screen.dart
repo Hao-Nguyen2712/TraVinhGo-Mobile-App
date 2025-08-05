@@ -1,14 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:travinhgo/models/ocop/ocop_product.dart';
-import 'package:travinhgo/services/ocop_product_service.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../models/ocop/ocop_product.dart';
 import '../../providers/ocop_product_provider.dart';
 import '../../services/auth_service.dart';
 import '../../widget/ocop_product_widget/ocop_product_item.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OcopProductScreen extends StatefulWidget {
   const OcopProductScreen({super.key});
@@ -18,179 +18,228 @@ class OcopProductScreen extends StatefulWidget {
 }
 
 class _OcopProductScreenState extends State<OcopProductScreen> {
-  List<String> _ocopProductNames = [];
-  String _searchQuery = '';
-  late bool isAuthen;
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  bool isAuthen = false;
 
   @override
   void initState() {
     super.initState();
+    _focusNode.requestFocus();
     isAuthentication();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OcopProductProvider>(context, listen: false)
-          .fetchOcopProducts();
+      final provider = Provider.of<OcopProductProvider>(context, listen: false);
+      provider.loadInitialOcopProducts();
+    });
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final provider = Provider.of<OcopProductProvider>(context, listen: false);
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !provider.isLoadingMore &&
+        provider.hasMore) {
+      provider.fetchOcopProducts();
+    }
+  }
+
+  Future<void> isAuthentication() async {
+    var sessionId = await AuthService().getSessionId();
+    if (mounted) {
+      setState(() {
+        isAuthen = sessionId != null;
+      });
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+
+      final provider = Provider.of<OcopProductProvider>(context, listen: false);
+      provider.applySearchQuery(query);
+      provider.fetchOcopProducts(isRefresh: true);
     });
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final ocopProducts = Provider.of<OcopProductProvider>(context).ocopProducts;
-    _ocopProductNames = ocopProducts.map((e) => e.productName).toList();
-  }
-
-  Future<void> isAuthentication() async {
-    var sessionId =  await AuthService().getSessionId();
-    isAuthen = sessionId != null;
-  }
-
-  List<OcopProduct> _filteredOcopProducts(List<OcopProduct> products) {
-    return products.where((event) {
-      final matchesSearch = _searchQuery.isEmpty ||
-          event.productName.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesSearch;
-    }).toList();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final ocopProvider = Provider.of<OcopProductProvider>(context);
-    final ocopProducts = ocopProvider.ocopProducts;
-    final isLoading = ocopProvider.isLoading;
-    final error = ocopProvider.errorMessage;
-    final filteredProducts = _filteredOcopProducts(ocopProducts);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isTablet = MediaQuery.of(context).size.width >= 600;
+    final statusBarHeight = MediaQuery.of(context).viewPadding.top;
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: theme.brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+    ));
 
     return Scaffold(
-      body: SafeArea(
-          child: CustomScrollView(slivers: [
-        SliverAppBar(
-          floating: true,
-          snap: true,
-          title: Text(AppLocalizations.of(context)!.ocopProduct),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-              child: Autocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  if (textEditingValue.text.isEmpty)
-                    return const Iterable<String>.empty();
-                  return _ocopProductNames.where((name) => name
-                      .toLowerCase()
-                      .contains(textEditingValue.text.toLowerCase()));
-                },
-                onSelected: (String selection) {
-                  setState(() {
-                    _searchQuery = selection;
-                  });
-                },
-                fieldViewBuilder:
-                    (context, controller, focusNode, onFieldSubmitted) {
-                  return TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    onSubmitted: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!.searchOcopProduct,
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(60),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: colorScheme.surfaceVariant,
-                    ),
-                  );
-                },
-                optionsViewBuilder: (context, onSelected, options) {
-                  return Align(
-                    alignment: Alignment.topLeft,
-                    child: Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 90.w,
-                        constraints: BoxConstraints(maxHeight: 25.h),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final option = options.elementAt(index);
-                            return InkWell(
-                              onTap: () {
-                                onSelected(option);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0, vertical: 12.0),
-                                child: Text(
-                                  option,
-                                  style: theme.textTheme.bodyLarge,
+      backgroundColor: colorScheme.surface,
+      extendBodyBehindAppBar: true,
+      body: Container(
+        color: colorScheme.primary,
+        child: Column(
+          children: [
+            SizedBox(height: statusBarHeight),
+            _buildHeader(context),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  bottom: true,
+                  child: Consumer<OcopProductProvider>(
+                    builder: (context, ocopProvider, child) {
+                      return RefreshIndicator(
+                        onRefresh: () =>
+                            ocopProvider.fetchOcopProducts(isRefresh: true),
+                        child: CustomScrollView(
+                          controller: _scrollController,
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: _buildSearchBar(context),
+                            ),
+                            if (ocopProvider.isLoading &&
+                                ocopProvider.ocopProducts.isEmpty)
+                              const SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 32),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              )
+                            else if (ocopProvider.errorMessage != null)
+                              SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 32),
+                                    child: Text(AppLocalizations.of(context)!
+                                        .errorPrefix(
+                                            ocopProvider.errorMessage!)),
+                                  ),
+                                ),
+                              )
+                            else
+                              SliverPadding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 4.w, vertical: 2.h),
+                                sliver: SliverGrid(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: isTablet ? 3 : 2,
+                                          crossAxisSpacing: 5.w,
+                                          mainAxisSpacing: 2.h,
+                                          childAspectRatio:
+                                              isTablet ? 0.75 : 0.64),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      return OcopProductItem(
+                                        ocopProduct:
+                                            ocopProvider.ocopProducts[index],
+                                        isAllowFavorite: isAuthen,
+                                      );
+                                    },
+                                    childCount:
+                                        ocopProvider.ocopProducts.length,
+                                  ),
                                 ),
                               ),
-                            );
-                          },
+                            if (ocopProvider.isLoadingMore)
+                              const SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                    ),
-                  );
-                },
-              )),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        if (isLoading)
-          const SliverToBoxAdapter(
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          )
-        else if (error != null)
-          SliverToBoxAdapter(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                child: Text(AppLocalizations.of(context)!.errorPrefix(error)),
-              ),
-            ),
-          )
-        else
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: isTablet ? 3 : 2,
-                  crossAxisSpacing: 5.w,
-                  mainAxisSpacing: 2.h,
-                  childAspectRatio: isTablet ? 0.75 : 0.64),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return OcopProductItem(ocopProduct: filteredProducts[index], isAllowFavorite: isAuthen,);
-                },
-                childCount: filteredProducts.length,
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back,
+                color: Theme.of(context).colorScheme.onPrimary),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.ocopProduct,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
-      ])),
+          const SizedBox(width: 48), // To balance the IconButton
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      child: TextField(
+        controller: _searchController,
+        focusNode: _focusNode,
+        onChanged: _onSearchChanged,
+        decoration: InputDecoration(
+          hintText: AppLocalizations.of(context)!.searchOcopProduct,
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(60),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: colorScheme.surfaceVariant.withOpacity(0.7),
+        ),
+      ),
     );
   }
 }

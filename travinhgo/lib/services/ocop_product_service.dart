@@ -29,20 +29,33 @@ class OcopProductService {
 
   final Dio dio = Dio();
 
-  Future<List<OcopProduct>> getOcopProduct() async {
+  Future<List<OcopProduct>> getOcopProduct({
+    int pageIndex = 1,
+    int pageSize = 10,
+    String? searchQuery,
+    String? sortOrder,
+  }) async {
     try {
-      var endPoint = '${_baseUrl}GetActiveOcopProduct';
+      var endPoint = '${_baseUrl}GetOcopProductPaging';
+      final params = {
+        'PageIndex': pageIndex.toString(),
+        'PageSize': pageSize.toString(),
+        if (searchQuery != null && searchQuery.isNotEmpty)
+          'Search': searchQuery,
+        if (sortOrder != null) 'Sort': sortOrder,
+      };
 
       final response = await dio.get(endPoint,
+          queryParameters: params,
           options: Options(headers: {
-            'Content-Type': 'application/json charset=UTF-8',
+            'Content-Type': 'application/json; charset=UTF-8',
           }));
 
       debugPrint(
           'ocop_api_response: status=${response.statusCode}, data=${response.data}');
 
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data'];
+        List<dynamic> data = response.data['data']['data'];
         List<OcopProduct> ocopProducts =
             data.map((item) => OcopProduct.fromJson(item)).toList();
         return ocopProducts;
