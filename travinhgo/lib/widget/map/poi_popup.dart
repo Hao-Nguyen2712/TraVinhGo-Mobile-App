@@ -33,7 +33,10 @@ class PoiPopup extends StatelessWidget {
         '${mapProvider.lastPoiCoordinates!.latitude.toStringAsFixed(5)}, ${mapProvider.lastPoiCoordinates!.longitude.toStringAsFixed(5)}';
 
     final bool isOcop = metadata?.getString("is_ocop_product") == "true";
+    final bool isLocalSpecialty =
+        metadata?.getString("is_local_specialty") == "true";
     final String? ocopProductId = metadata?.getString("product_id");
+    final String? specialtyId = metadata?.getString("specialty_id");
     final colorScheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -143,9 +146,12 @@ class PoiPopup extends StatelessWidget {
                               if (isOcop && ocopProductId != null) {
                                 GoRouter.of(context).push(
                                     '/ocop-product-detail/$ocopProductId');
-                                mapProvider.closePoiPopup();
+                              } else if (isLocalSpecialty &&
+                                  specialtyId != null) {
+                                GoRouter.of(context).push(
+                                    '/local-specialty-detail/$specialtyId');
                               }
-                              // Handle other detail navigations if needed
+                              mapProvider.closePoiPopup();
                             },
                           ),
                         ),

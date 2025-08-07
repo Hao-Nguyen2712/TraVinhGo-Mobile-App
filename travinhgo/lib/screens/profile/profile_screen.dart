@@ -27,8 +27,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadUserProfile();
   }
 
-  Future<void> _loadUserProfile() async {
+  Future<void> _loadUserProfile({bool forceRefresh = false}) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // If data is already available and we are not forcing a refresh, do nothing.
+    if (userProvider.userProfile != null && !forceRefresh) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = false;
+        });
+      }
+      return;
+    }
 
     try {
       setState(() {
@@ -37,7 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _errorMessage = null;
       });
 
-      final success = await userProvider.fetchUserProfile();
+      final success =
+          await userProvider.fetchUserProfile(forceRefresh: forceRefresh);
 
       if (mounted) {
         setState(() {
@@ -182,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       MaterialPageRoute(
                         builder: (context) => const EditProfileScreen(),
                       ),
-                    ).then((_) => _loadUserProfile());
+                    ).then((_) => _loadUserProfile(forceRefresh: true));
                   },
           ),
         ],
@@ -237,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: _loadUserProfile,
+            onPressed: () => _loadUserProfile(forceRefresh: true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,

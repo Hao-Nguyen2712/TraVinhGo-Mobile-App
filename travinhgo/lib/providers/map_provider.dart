@@ -31,6 +31,7 @@ import 'map/search_map_provider.dart';
 import 'map/category_map_provider.dart';
 import 'map/boundary_map_provider.dart';
 import 'map/ocop_map_provider.dart';
+import 'map/local_specialty_map_provider.dart';
 
 // Re-export the TransportMode enum for backward compatibility
 export 'map/navigation_map_provider.dart' show TransportMode;
@@ -299,6 +300,7 @@ class MapProvider extends ChangeNotifier {
   late CategoryMapProvider _categoryMapProvider;
   late BoundaryMapProvider _boundaryMapProvider;
   late OcopMapProvider _ocopMapProvider;
+  late LocalSpecialtyMapProvider _localSpecialtyMapProvider;
   late DestinationProvider _destinationProvider;
   late DestinationMapProvider _destinationMapProvider;
   bool _destinationCategoriesLoaded = false;
@@ -329,6 +331,8 @@ class MapProvider extends ChangeNotifier {
     _destinationProvider = DestinationProvider();
     _destinationMapProvider = DestinationMapProvider(
         _baseMapProvider, _markerMapProvider, _destinationProvider);
+    _localSpecialtyMapProvider =
+        LocalSpecialtyMapProvider(_baseMapProvider, _markerMapProvider);
     _categoryMapProvider = CategoryMapProvider(
         _baseMapProvider, _markerMapProvider,
         boundaryProvider: _boundaryMapProvider);
@@ -409,6 +413,10 @@ class MapProvider extends ChangeNotifier {
 
   // Properties from OcopMapProvider
   bool get isOcopDisplayed => _ocopMapProvider.isOcopDisplayed;
+
+  // Properties from LocalSpecialtyMapProvider
+  bool get isLocalSpecialtyDisplayed =>
+      _localSpecialtyMapProvider.isLocalSpecialtyDisplayed;
 
   // Other state variables
   int currentDestinationIndex = 0;
@@ -668,6 +676,12 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Toggles display of Local Specialties on the map
+  void toggleLocalSpecialtyDisplay() {
+    _localSpecialtyMapProvider.toggleLocalSpecialtyDisplay();
+    notifyListeners();
+  }
+
   /// Display OCOP products on the map
   void displayOcopProducts() {
     _ocopMapProvider.displayOcopProducts();
@@ -677,6 +691,18 @@ class MapProvider extends ChangeNotifier {
   /// Clear OCOP products from the map
   void clearOcopProducts() {
     _ocopMapProvider.clearOcopMarkers();
+    notifyListeners();
+  }
+
+  /// Display Local Specialties on the map
+  void displayLocalSpecialties() {
+    _localSpecialtyMapProvider.displayLocalSpecialties();
+    notifyListeners();
+  }
+
+  /// Clear Local Specialties from the map
+  void clearLocalSpecialties() {
+    _localSpecialtyMapProvider.clearLocalSpecialtyMarkers();
     notifyListeners();
   }
 
@@ -693,6 +719,7 @@ class MapProvider extends ChangeNotifier {
         MarkerMapProvider.MARKER_TYPE_TOURIST_DESTINATION
       ]);
       _ocopMapProvider.clearOcopMarkers();
+      _localSpecialtyMapProvider.clearLocalSpecialtyMarkers();
       categoryProvider.removeSearchRadiusCircle();
       // TODO: Re-enable default POIs when API is clarified
       // mapController?.mapScene.enableFeatures({MapFeatures.poi: MapFeatureModes.all});
@@ -710,6 +737,7 @@ class MapProvider extends ChangeNotifier {
       MarkerMapProvider.MARKER_TYPE_TOURIST_DESTINATION
     ]);
     _ocopMapProvider.clearOcopMarkers();
+    _localSpecialtyMapProvider.clearLocalSpecialtyMarkers();
     categoryProvider.removeSearchRadiusCircle();
 
     final selectedCategory = categoryProvider.availableCategories[index];
@@ -731,6 +759,8 @@ class MapProvider extends ChangeNotifier {
             .displayDestinationMarkers(selectedCategory.categoryId);
       } else if (selectedCategory.name == "OCOP") {
         _ocopMapProvider.displayOcopProducts();
+      } else if (selectedCategory.name == "Đặc sản") {
+        _localSpecialtyMapProvider.displayLocalSpecialties();
       } else {
         // It's a standard POI category
         _categoryMapProvider.displayCategoryPlaces(selectedCategory);
@@ -746,6 +776,7 @@ class MapProvider extends ChangeNotifier {
     _destinationMapProvider.displayDestinationMarkers(null);
     _categoryMapProvider.displayAllCategories();
     _ocopMapProvider.displayOcopProducts();
+    _localSpecialtyMapProvider.displayLocalSpecialties();
   }
 
   /// Get category icon by index
@@ -1013,6 +1044,7 @@ class MapProvider extends ChangeNotifier {
     if (_ocopMapProvider != null) {
       _ocopMapProvider.clearOcopMarkers();
     }
+    _localSpecialtyMapProvider.clearLocalSpecialtyMarkers();
 
     // Clear POI data
     lastPoiName = null;

@@ -69,13 +69,12 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
+    _debounce = Timer(const Duration(milliseconds: 500), () {
       if (!mounted) return;
 
       final provider =
           Provider.of<LocalSpecialtyProvider>(context, listen: false);
       provider.applySearchQuery(query);
-      provider.fetchLocalSpecialties(isRefresh: true);
     });
   }
 

@@ -49,7 +49,7 @@ class SuccessDialog extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 14.sp,
               ),
             ),
             SizedBox(height: 3.h),
@@ -70,7 +70,7 @@ class SuccessDialog extends StatelessWidget {
                   AppLocalizations.of(context)!.ok,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 12.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

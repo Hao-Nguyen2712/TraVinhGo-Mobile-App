@@ -102,7 +102,7 @@ class EventFestivalService {
   }
 
   Future<List<EventAndFestival>> getEventFestivalsPaging(
-      int page, int limit, String query) async {
+      int page, int limit) async {
     try {
       var endPoint = '${_baseUrl}GetEventAndFestivalPaging';
 
@@ -110,7 +110,6 @@ class EventFestivalService {
           queryParameters: {
             'page': page,
             'limit': limit,
-            'query': query,
           },
           options: Options(headers: {
             'Content-Type': 'application/json charset=UTF-8',
@@ -127,6 +126,31 @@ class EventFestivalService {
       }
     } catch (e) {
       debugPrint('Error during get event and festival list: $e');
+      return [];
+    }
+  }
+
+  Future<List<EventAndFestival>> searchEventFestivals(String query) async {
+    try {
+      var endPoint = '${_baseUrl}search';
+      final params = {'name': query};
+      debugPrint('Searching for event/festival: $query');
+      final response = await dio.get(endPoint,
+          queryParameters: params,
+          options: Options(headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          }));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data['data'];
+        List<EventAndFestival> eventAndFestivals =
+            data.map((item) => EventAndFestival.fromJson(item)).toList();
+        return eventAndFestivals;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      debugPrint('Error during search event and festival list: $e');
       return [];
     }
   }

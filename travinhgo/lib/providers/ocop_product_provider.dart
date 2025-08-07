@@ -3,127 +3,141 @@ import 'package:hive/hive.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/services/ocop_product_service.dart';
 import 'dart:developer' as developer;
-import 'package:diacritic/diacritic.dart';
 
 class OcopProductProvider with ChangeNotifier {
   final OcopProductService _ocopService = OcopProductService();
-
   final String _cacheBoxName = 'ocopProducts';
 
-  // --- State Variables ---
-  List<OcopProduct> _allOcopProducts = []; // Master list for paginated items
-
-  // Pagination State
+  // --- State ---
+  List<OcopProduct> _ocopProducts = [];
   int _currentPage = 1;
   final int _pageSize = 10;
   bool _hasMore = true;
-  bool _isLoading = false; // For initial load (list)
-  bool _isLoadingMore = false; // For subsequent loads (list)
+  bool _isLoading = false; // For initial load and refresh
+  bool _isLoadingMore = false; // For loading more items
   String? _errorMessage;
-
-  // Filter/Search State
   String? _currentSearchQuery;
+  bool _isSearchActive = false;
 
   // --- Getters ---
-  List<OcopProduct> get ocopProducts {
-    List<OcopProduct> filtered = List.from(_allOcopProducts);
-
-    // Apply search query
-    if (_currentSearchQuery != null && _currentSearchQuery!.isNotEmpty) {
-      final a = _currentSearchQuery!.toLowerCase();
-      final formattedQuery = removeDiacritics(a);
-      filtered = filtered
-          .where((d) => removeDiacritics(d.productName.toLowerCase())
-              .contains(formattedQuery))
-          .toList();
-    }
-
-    return filtered;
-  }
-
+  List<OcopProduct> get ocopProducts => _ocopProducts;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
   String? get errorMessage => _errorMessage;
 
-  // --- Filter Management ---
+  // --- Search Management ---
   void applySearchQuery(String? searchQuery) {
     _currentSearchQuery = searchQuery;
-    notifyListeners();
-  }
-
-  // --- Main Data Fetching Method ---
-  Future<void> loadInitialOcopProducts() async {
-    // 1. Load from cache first to display something immediately
-    final cachedProducts = _loadFromCache();
-    if (cachedProducts.isNotEmpty) {
-      _allOcopProducts = cachedProducts;
-      _isLoading = false;
-      notifyListeners();
-    }
-
-    // 2. Then, fetch from the network to get the latest data
-    await fetchOcopProducts(isRefresh: true);
-  }
-
-  Future<void> fetchOcopProducts({
-    bool isRefresh = false,
-  }) async {
-    if (_isLoading || (_isLoadingMore && !isRefresh)) return;
-
-    if (isRefresh) {
-      _currentPage = 1;
-      _hasMore = true;
-      _isLoading = true;
-      _errorMessage = null;
-      // Don't clear the list here if we want to avoid flicker.
-      // The new data will replace the old.
-      notifyListeners();
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      _isSearchActive = true;
+      searchOcopProducts(searchQuery);
     } else {
-      _isLoadingMore = true;
-      notifyListeners();
+      _isSearchActive = false;
+      refreshProducts(); // Reset to the full list
     }
+  }
 
-    if (!_hasMore && !isRefresh) {
-      _isLoading = false;
-      _isLoadingMore = false;
-      notifyListeners();
-      return;
-    }
+  Future<void> searchOcopProducts(String query) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
     try {
-      // Always call API to get the latest data
-      final newOcopProducts = await _ocopService.getOcopProduct(
-        pageIndex: _currentPage,
-        pageSize: _pageSize,
-        searchQuery: _currentSearchQuery,
-      );
-
-      if (isRefresh) {
-        await _clearCache();
-        _allOcopProducts.clear(); // Clear list before adding new fresh data
-      }
-
-      if (newOcopProducts.isEmpty || newOcopProducts.length < _pageSize) {
-        _hasMore = false;
-      }
-
-      _allOcopProducts.addAll(newOcopProducts);
-      _currentPage++;
-
-      // Save new data to cache (only save the first page on refresh)
-      if (isRefresh && newOcopProducts.isNotEmpty) {
-        await _saveToCache(newOcopProducts);
-      }
-
-      developer.log(
-          'Fetched page $_currentPage. Has more: $_hasMore. Total items: ${_allOcopProducts.length}',
-          name: 'OcopProductProvider');
+      final searchResult = await _ocopService.searchOcopProducts(query);
+      _ocopProducts = searchResult;
+      _hasMore = false; // Search results are not paginated
     } catch (e) {
-      _errorMessage = "Failed to load ocop product data: ${e.toString()}";
+      _errorMessage = "Failed to search for OCOP products: ${e.toString()}";
       developer.log(_errorMessage!, name: 'OcopProductProvider');
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // --- Data Fetching Logic ---
+
+  /// Loads initial products. Uses cache for instant UI, then fetches fresh data.
+  /// Call this from `initState`.
+  Future<void> loadInitialProducts() async {
+    _isLoading = true;
+    // Don't notify yet, let cache load first
+
+    final cachedProducts = _loadFromCache();
+    if (cachedProducts.isNotEmpty) {
+      _ocopProducts = cachedProducts;
+      _isLoading = false; // Show cached data immediately
+      notifyListeners();
+    }
+
+    // Fetch fresh data from the network
+    await refreshProducts();
+  }
+
+  /// Fetches the first page of products, replacing the current list.
+  /// Use for pull-to-refresh.
+  Future<void> refreshProducts() async {
+    if (_isSearchActive) {
+      _isSearchActive = false;
+      _currentSearchQuery = null;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final newProducts = await _ocopService.getOcopProduct(
+        pageIndex: 1,
+        pageSize: _pageSize,
+      );
+
+      _ocopProducts = newProducts;
+      _currentPage = 1;
+      _hasMore = newProducts.length >= _pageSize;
+
+      // Update cache with the fresh first page
+      await _clearCache();
+      if (newProducts.isNotEmpty) {
+        await _saveToCache(newProducts);
+      }
+    } catch (e) {
+      _errorMessage = "Failed to load OCOP products: ${e.toString()}";
+      developer.log(_errorMessage!, name: 'OcopProductProvider');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Fetches the next page of products and appends them to the list.
+  /// Use for infinite scrolling.
+  Future<void> loadMoreProducts() async {
+    if (_isLoading || _isLoadingMore || !_hasMore || _isSearchActive) return;
+
+    _isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      final nextPage = _currentPage + 1;
+      final newProducts = await _ocopService.getOcopProduct(
+        pageIndex: nextPage,
+        pageSize: _pageSize,
+      );
+
+      if (newProducts.isEmpty) {
+        _hasMore = false;
+      } else {
+        _ocopProducts.addAll(newProducts);
+        _currentPage = nextPage;
+        _hasMore = newProducts.length >= _pageSize;
+      }
+    } catch (e) {
+      // Optionally handle error, e.g., show a toast
+      developer.log("Failed to load more OCOP products: ${e.toString()}",
+          name: 'OcopProductProvider');
+    } finally {
       _isLoadingMore = false;
       notifyListeners();
     }
@@ -131,40 +145,29 @@ class OcopProductProvider with ChangeNotifier {
 
   OcopProduct? getProductById(String id) {
     try {
-      developer.log('data_ocop: Getting product with ID: $id',
-          name: 'ocop_provider');
-      return _allOcopProducts.firstWhere((product) => product.id == id);
+      return _ocopProducts.firstWhere((product) => product.id == id);
     } catch (e) {
-      developer.log('data_ocop: Product with ID $id not found',
-          name: 'ocop_provider');
+      developer.log('Product with ID $id not found in provider',
+          name: 'OcopProductProvider');
       return null;
     }
   }
 
   // --- Cache Helper Methods ---
-  Future<void> _saveToCache(List<OcopProduct> ocopProducts) async {
-    developer.log('Saving ${ocopProducts.length} OCOP products to cache.',
-        name: 'OcopProductProvider');
+  Future<void> _saveToCache(List<OcopProduct> products) async {
     final box = Hive.box<OcopProduct>(_cacheBoxName);
-    // Use a map with id as key to avoid duplicates
-    final Map<String, OcopProduct> ocopProductMap = {
-      for (var d in ocopProducts) d.id: d
+    final Map<String, OcopProduct> productMap = {
+      for (var p in products) p.id: p
     };
-    await box.putAll(ocopProductMap);
+    await box.putAll(productMap);
   }
 
   List<OcopProduct> _loadFromCache() {
-    developer.log('Loading OCOP products from cache.',
-        name: 'OcopProductProvider');
     final box = Hive.box<OcopProduct>(_cacheBoxName);
-    final products = box.values.toList();
-    developer.log('Loaded ${products.length} products from cache.',
-        name: 'OcopProductProvider');
-    return products;
+    return box.values.toList();
   }
 
   Future<void> _clearCache() async {
-    developer.log('Clearing OCOP product cache.', name: 'OcopProductProvider');
     final box = Hive.box<OcopProduct>(_cacheBoxName);
     await box.clear();
   }

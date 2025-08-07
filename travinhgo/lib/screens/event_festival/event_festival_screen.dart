@@ -30,6 +30,7 @@ class _EventFestivalView extends StatefulWidget {
 class _EventFestivalViewState extends State<_EventFestivalView> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -46,6 +47,7 @@ class _EventFestivalViewState extends State<_EventFestivalView> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -60,8 +62,12 @@ class _EventFestivalViewState extends State<_EventFestivalView> {
   }
 
   void _onSearchChanged(String query) {
-    final provider = Provider.of<EventFestivalProvider>(context, listen: false);
-    provider.applySearchQuery(query);
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final provider =
+          Provider.of<EventFestivalProvider>(context, listen: false);
+      provider.applySearchQuery(query);
+    });
   }
 
   @override

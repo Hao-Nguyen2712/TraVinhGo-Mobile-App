@@ -50,7 +50,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   late String desc;
   late String history;
-  
+
   late bool isAuthen;
 
   late List<String> allImageDestination;
@@ -144,7 +144,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
   Future<void> fetchReviews(String id) async {
     final reviewList = await ReviewService().getReviewsByDestinationId(id);
-    var sessionId =  await AuthService().getSessionId();
+    var sessionId = await AuthService().getSessionId();
     debugPrint('is allow: ${reviewList?.hasReviewed ?? false}');
 
     if (reviewList == null) return;
@@ -391,24 +391,6 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                                 'assets/images/navigations/leftarrowwhile.png')),
                                       ),
                                     )),
-                                Container(
-                                  width: 12.w,
-                                  height: 12.w,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.grey.withOpacity(0.5),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(0.5.w),
-                                    child: IconButton(
-                                        iconSize: 16.sp,
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        icon: Image.asset(
-                                            'assets/images/navigations/share.png')),
-                                  ),
-                                ),
                               ],
                             ),
                           ),
@@ -432,33 +414,34 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                             BorderRadius.circular(8.sp),
                                         color: currentImage == index
                                             ? Theme.of(context)
-                                            .colorScheme
-                                            .primary
+                                                .colorScheme
+                                                .primary
                                             : Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withOpacity(0.3),
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.3),
                                       ),
                                     )),
                           ),
                         ),
-                        if (isAuthen) Positioned(
-                          top: 19.h,
-                          right: 4.w,
-                          child: GestureDetector(
-                            onTap: () {
-                              favoriteProvider
-                                  .toggleDestinationFavorite(destinationDetail);
-                            },
-                            child: Icon(
-                              favoriteProvider.isExist(destinationDetail.id)
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: Colors.red,
-                              size: 28.sp,
+                        if (isAuthen)
+                          Positioned(
+                            top: 19.h,
+                            right: 4.w,
+                            child: GestureDetector(
+                              onTap: () {
+                                favoriteProvider.toggleDestinationFavorite(
+                                    destinationDetail);
+                              },
+                              child: Icon(
+                                favoriteProvider.isExist(destinationDetail.id)
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: Colors.red,
+                                size: 28.sp,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                     SizedBox(

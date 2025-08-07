@@ -233,6 +233,22 @@
     "heremapService": "Data provided by heremap service",
     "noAccommodationsFound": "No accommodations found.",
     "directions": "Directions",
-    "notUpdate" : "Not update"
- 
+    "notUpdate" : "Not update",
+    "eventStatusUpcoming": "Upcoming",
+    "eventStatusOngoing": "Ongoing",
+    "eventStatusEnded": "Ended",
+    "eventDetails": "Event Details",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "eventType": "Event Type",
+    "addFavoriteTitle": "Add to favorites",
+    "addFavoriteContent": "This event has been added to your favorites.",
+    "removeFavoriteTitle": "Remove from favorites",
+    "removeFavoriteContent": "This event has been removed from your favorites.",
+    "eventDescription": "Event Description",
+    "noDescription": "No description available for this event.",
+    "notUpdated": "Not updated",
+    "favoriteSuccessTitle": "Success",
+    "favoriteAddMessage": "Added to favorites successfully.",
+    "favoriteRemoveMessage": "Removed from favorites successfully."
 }

@@ -233,5 +233,22 @@
     "heremapService": "Dữ liệu được cung cấp bởi heremap service",
     "noAccommodationsFound": "Không tìm thấy địa điểm nào.",
     "directions": "Chỉ đường",
-    "notUpdate" : "Chưa cập nhật"
+    "notUpdate" : "Chưa cập nhật",
+    "eventStatusUpcoming": "Sắp diễn ra",
+    "eventStatusOngoing": "Đang diễn ra",
+    "eventStatusEnded": "Đã kết thúc",
+    "eventDetails": "Chi tiết sự kiện",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "eventType": "Loại sự kiện",
+    "addFavoriteTitle": "Thêm vào yêu thích",
+    "addFavoriteContent": "Sự kiện này đã được thêm vào danh sách yêu thích của bạn.",
+    "removeFavoriteTitle": "Xóa khỏi yêu thích",
+    "removeFavoriteContent": "Sự kiện này đã được xóa khỏi danh sách yêu thích của bạn.",
+    "eventDescription": "Mô tả sự kiện",
+    "noDescription": "Chưa có mô tả cho sự kiện này.",
+    "notUpdated": "Chưa cập nhật",
+    "favoriteSuccessTitle": "Thành công",
+    "favoriteAddMessage": "Thêm vào yêu thích thành công.",
+    "favoriteRemoveMessage": "Đã xóa khỏi danh sách yêu thích."
 }
