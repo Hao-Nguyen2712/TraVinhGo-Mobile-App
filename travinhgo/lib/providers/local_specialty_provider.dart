@@ -23,7 +23,7 @@ class LocalSpecialtyProvider with ChangeNotifier {
 
   void applySearchQuery(String? query) {
     _searchQuery = query;
-    notifyListeners();
+    fetchLocalSpecialties(isRefresh: true);
   }
 
   Future<void> fetchLocalSpecialties({bool isRefresh = false}) async {
@@ -39,18 +39,26 @@ class LocalSpecialtyProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final newItems = await _localSpecialtieService.getLocalSpecialtiesPaging(
-        pageNumber: _pageNumber,
-        pageSize: _pageSize,
-        searchQuery: _searchQuery,
-      );
-
-      if (newItems.length < _pageSize) {
+      List<LocalSpecialties> newItems;
+      if (_searchQuery != null && _searchQuery!.isNotEmpty) {
+        newItems =
+            await _localSpecialtieService.searchLocalSpecialties(_searchQuery!);
         _hasMore = false;
+      } else {
+        newItems = await _localSpecialtieService.getLocalSpecialtiesPaging(
+          pageNumber: _pageNumber,
+          pageSize: _pageSize,
+        );
+        if (newItems.length < _pageSize) {
+          _hasMore = false;
+        }
+        _pageNumber++;
       }
 
+      if (isRefresh) {
+        _localSpecialties.clear();
+      }
       _localSpecialties.addAll(newItems);
-      _pageNumber++;
       _errorMessage = null;
     } catch (e) {
       _errorMessage = 'Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.';

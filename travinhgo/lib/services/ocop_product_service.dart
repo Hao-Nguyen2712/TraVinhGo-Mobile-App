@@ -32,7 +32,6 @@ class OcopProductService {
   Future<List<OcopProduct>> getOcopProduct({
     int pageIndex = 1,
     int pageSize = 10,
-    String? searchQuery,
     String? sortOrder,
   }) async {
     try {
@@ -40,8 +39,6 @@ class OcopProductService {
       final params = {
         'PageIndex': pageIndex.toString(),
         'PageSize': pageSize.toString(),
-        if (searchQuery != null && searchQuery.isNotEmpty)
-          'Search': searchQuery,
         if (sortOrder != null) 'Sort': sortOrder,
       };
 
@@ -56,6 +53,34 @@ class OcopProductService {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data']['data'];
+        List<OcopProduct> ocopProducts =
+            data.map((item) => OcopProduct.fromJson(item)).toList();
+        return ocopProducts;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      debugPrint('ocop_api_error: $e');
+      return [];
+    }
+  }
+
+  Future<List<OcopProduct>> searchOcopProducts(String query) async {
+    try {
+      var endPoint = '${_baseUrl}search';
+      final params = {'name': query};
+      debugPrint('Searching for: $query');
+      final response = await dio.get(endPoint,
+          queryParameters: params,
+          options: Options(headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          }));
+
+      debugPrint(
+          'ocop_api_response: status=${response.statusCode}, data=${response.data}');
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data['data'];
         List<OcopProduct> ocopProducts =
             data.map((item) => OcopProduct.fromJson(item)).toList();
         return ocopProducts;
@@ -101,6 +126,32 @@ class OcopProductService {
           data: ids,
           options: Options(headers: {
             'Content-Type': 'application/json; charset=UTF-8',
+          }));
+
+      debugPrint(
+          'ocop_api_response: status=${response.statusCode}, data=${response.data}');
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data['data'];
+        List<OcopProduct> ocopProducts =
+            data.map((item) => OcopProduct.fromJson(item)).toList();
+        return ocopProducts;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      debugPrint('ocop_api_error: $e');
+      return [];
+    }
+  }
+
+  Future<List<OcopProduct>> getAllOcopProductForMap() async {
+    try {
+      var endPoint = '${_baseUrl}GetAllOcopProduct';
+
+      final response = await dio.get(endPoint,
+          options: Options(headers: {
+            'Content-Type': 'application/json charset=UTF-8',
           }));
 
       debugPrint(

@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:travinhgo/providers/favorite_provider.dart';
-
+import 'package:travinhgo/widget/success_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../utils/string_helper.dart';
 import '../../Models/interaction/item_type.dart';
 import '../../providers/interaction_provider.dart';
@@ -60,8 +61,22 @@ class LocalSpecialtyItem extends StatelessWidget {
                         right: 2.w,
                         child: GestureDetector(
                           onTap: () {
+                            final isCurrentlyFavorited =
+                                favoriteProvider.isExist(localSpecialty.id);
                             favoriteProvider
                                 .toggleLocalSpecialtiesFavorite(localSpecialty);
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return SuccessDialog(
+                                  message: isCurrentlyFavorited
+                                      ? AppLocalizations.of(context)!
+                                          .favoriteRemoveMessage
+                                      : AppLocalizations.of(context)!
+                                          .favoriteAddMessage,
+                                );
+                              },
+                            );
                           },
                           child: Icon(
                             favoriteProvider.isExist(localSpecialty.id)

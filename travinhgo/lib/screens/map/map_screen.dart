@@ -253,7 +253,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     _mapProvider.showPoiPopup = true;
 
     // Move camera to the POI location
-    _mapProvider.moveCamera(coordinates, 500);
+    _mapProvider.moveCamera(coordinates, 500.0);
 
     // Notify listeners
     _mapProvider.notifyListeners();

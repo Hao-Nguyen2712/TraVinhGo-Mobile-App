@@ -24,6 +24,7 @@ import '../../widget/description_fm.dart';
 import '../../widget/destination_widget/destination_detail_image_slider.dart';
 import '../../widget/ocop_product_widget/ocop_location_card.dart';
 import '../../widget/ocop_product_widget/rating_star_widget.dart';
+import '../../widget/success_dialog.dart';
 
 class OcopProductDetailScreen extends StatefulWidget {
   final String id;
@@ -223,22 +224,6 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                                   'assets/images/navigations/leftarrowwhile.png')),
                                         ),
                                       )),
-                                  Container(
-                                    width: 10.w,
-                                    height: 10.w,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.black.withOpacity(0.3),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(0.5.w),
-                                      child: IconButton(
-                                          iconSize: 18.sp,
-                                          onPressed: () {},
-                                          icon: Image.asset(
-                                              'assets/images/navigations/share.png')),
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -278,8 +263,20 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                               right: 4.w,
                               child: GestureDetector(
                                 onTap: () {
+                                  final isFavorite = favoriteProvider
+                                      .isExist(ocopProductDetail.id);
+                                  final localizations =
+                                      AppLocalizations.of(context)!;
                                   favoriteProvider
                                       .toggleOcopFavorite(ocopProductDetail);
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => SuccessDialog(
+                                      message: isFavorite
+                                          ? localizations.removeFavoriteSuccess
+                                          : localizations.addFavoriteSuccess,
+                                    ),
+                                  );
                                 },
                                 child: Icon(
                                   favoriteProvider.isExist(ocopProductDetail.id)

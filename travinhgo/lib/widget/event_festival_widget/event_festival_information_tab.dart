@@ -14,13 +14,14 @@ class EventFestivalInformationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 2.h,
+            height: 1.h,
           ),
           Row(
             children: [
@@ -28,33 +29,33 @@ class EventFestivalInformationTab extends StatelessWidget {
                   color: const Color(0xFF8F83F3), size: 22.sp),
               SizedBox(width: 3.w),
               Text(
-                "Chi tiết sự kiện",
+                localizations.eventDetails,
                 style: TextStyle(
-                  fontSize: 17.sp,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: 4.h),
           _buildInfoRow(
             icon: Icons.home_filled,
             iconColor: const Color(0xFFF57A82),
-            title: "Địa điểm",
+            title: localizations.location,
             value: "${eventAndFestival.location.name}",
           ),
           SizedBox(height: 2.5.h),
           _buildInfoRow(
             icon: Icons.location_on_rounded,
             iconColor: const Color(0xFFF57A82),
-            title: "Địa chỉ",
+            title: localizations.address,
             value: "${eventAndFestival.location.address}",
           ),
           SizedBox(height: 2.5.h),
           _buildInfoRow(
             icon: Icons.calendar_today_rounded,
             iconColor: const Color(0xFF8F83F3),
-            title: "Ngày bắt đầu",
+            title: localizations.startDate,
             value:
                 StringHelper.formatDate(eventAndFestival.startDate.toString()),
           ),
@@ -62,14 +63,14 @@ class EventFestivalInformationTab extends StatelessWidget {
           _buildInfoRow(
             icon: Icons.timer_rounded,
             iconColor: const Color(0xFFF57A82),
-            title: "Ngày kết thúc",
+            title: localizations.endDate,
             value: StringHelper.formatDate(eventAndFestival.endDate.toString()),
           ),
           SizedBox(height: 2.5.h),
           _buildInfoRow(
             icon: Icons.category_rounded,
             iconColor: const Color(0xFF4B9EFC),
-            title: "Loại sự kiện",
+            title: localizations.eventType,
             value: eventAndFestival.category,
           ),
         ],

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/ocop/ocop_product.dart';
 import 'package:travinhgo/widget/ocop_product_widget/rating_star_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:travinhgo/widget/success_dialog.dart';
 
 import '../../Models/interaction/item_type.dart';
 import '../../providers/favorite_provider.dart';
@@ -15,7 +17,8 @@ class OcopProductItem extends StatelessWidget {
   final OcopProduct ocopProduct;
   final bool isAllowFavorite;
 
-  const OcopProductItem({super.key, required this.ocopProduct, required this.isAllowFavorite});
+  const OcopProductItem(
+      {super.key, required this.ocopProduct, required this.isAllowFavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -61,22 +64,34 @@ class OcopProductItem extends StatelessWidget {
                               fit: BoxFit.cover)),
                     ),
                   ),
-                  if (isAllowFavorite) Positioned(
-                    top: 1.h,
-                    right: 3.w,
-                    child: GestureDetector(
-                      onTap: () {
-                        favoriteProvider.toggleOcopFavorite(ocopProduct);
-                      },
-                      child: Icon(
-                        favoriteProvider.isExist(ocopProduct.id)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: Theme.of(context).colorScheme.error,
-                        size: 20.sp,
+                  if (isAllowFavorite)
+                    Positioned(
+                      top: 1.h,
+                      right: 3.w,
+                      child: GestureDetector(
+                        onTap: () {
+                          final isFavorite =
+                              favoriteProvider.isExist(ocopProduct.id);
+                          final localizations = AppLocalizations.of(context)!;
+                          favoriteProvider.toggleOcopFavorite(ocopProduct);
+                          showDialog(
+                            context: context,
+                            builder: (context) => SuccessDialog(
+                              message: isFavorite
+                                  ? localizations.removeFavoriteSuccess
+                                  : localizations.addFavoriteSuccess,
+                            ),
+                          );
+                        },
+                        child: Icon(
+                          favoriteProvider.isExist(ocopProduct.id)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 20.sp,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
               Expanded(
@@ -129,7 +144,7 @@ class OcopProductItem extends StatelessWidget {
                             )
                           else
                             Text(
-                              "Chưa cập nhật giá",
+                              AppLocalizations.of(context)!.notUpdated,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontStyle: FontStyle.italic,

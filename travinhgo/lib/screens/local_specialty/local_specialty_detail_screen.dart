@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/local_specialties/local_specialties.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:travinhgo/widget/success_dialog.dart';
 
 import '../../providers/favorite_provider.dart';
 import '../../providers/interaction_log_provider.dart';
@@ -176,24 +177,6 @@ class _LocalSpecialtyDetailScreenState
                                                   'assets/images/navigations/leftarrowwhile.png')),
                                         ),
                                       )),
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.black.withOpacity(0.3),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(2.0),
-                                      child: IconButton(
-                                          iconSize: 18,
-                                          onPressed: () {
-                                            context.pop();
-                                          },
-                                          icon: Image.asset(
-                                              'assets/images/navigations/share.png')),
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -233,9 +216,23 @@ class _LocalSpecialtyDetailScreenState
                               right: 4.w,
                               child: GestureDetector(
                                 onTap: () {
+                                  final isCurrentlyFavorited = favoriteProvider
+                                      .isExist(localSpecialtyDetail.id);
                                   favoriteProvider
                                       .toggleLocalSpecialtiesFavorite(
                                           localSpecialtyDetail);
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return SuccessDialog(
+                                        message: isCurrentlyFavorited
+                                            ? AppLocalizations.of(context)!
+                                                .favoriteRemoveMessage
+                                            : AppLocalizations.of(context)!
+                                                .favoriteAddMessage,
+                                      );
+                                    },
+                                  );
                                 },
                                 child: Icon(
                                   favoriteProvider

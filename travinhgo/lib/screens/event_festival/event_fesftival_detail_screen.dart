@@ -15,6 +15,7 @@ import '../../utils/string_helper.dart';
 import '../../widget/event_festival_widget/event_festival_content_tab.dart';
 import '../../widget/event_festival_widget/event_festival_image_slider_tab.dart';
 import '../../widget/event_festival_widget/event_festival_information_tab.dart';
+import '../../widget/success_dialog.dart';
 
 class EventFesftivalDetailScreen extends StatefulWidget {
   final String id;
@@ -70,20 +71,13 @@ class _EventFesftivalDetailScreenState
       setState(() {
         eventAndFestival = data;
         screensTab = [
-          SingleChildScrollView(
-            child: EventFestivalInformationTab(
-              eventAndFestival: eventAndFestival,
-            ),
+          EventFestivalInformationTab(
+            eventAndFestival: eventAndFestival,
           ),
-          SingleChildScrollView(
-            child: EventFestivalContentTab(
-                description: eventAndFestival.description),
-          ),
-          SingleChildScrollView(
-            child: EventFestivalImageSliderTab(
-              onChange: (index) {},
-              imageList: eventAndFestival.images,
-            ),
+          EventFestivalContentTab(description: eventAndFestival.description),
+          EventFestivalImageSliderTab(
+            onChange: (index) {},
+            imageList: eventAndFestival.images,
           ),
         ];
         _isLoading = false;
@@ -141,23 +135,24 @@ class _EventFesftivalDetailScreenState
                                   color: isFavorite ? Colors.red : Colors.white,
                                 ),
                                 onPressed: () {
+                                  final isFavorite = favoriteProvider
+                                      .isExist(eventAndFestival.id);
+                                  final localizations =
+                                      AppLocalizations.of(context)!;
                                   favoriteProvider.toggleEventFestivalFavorite(
                                       eventAndFestival);
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => SuccessDialog(
+                                      message: isFavorite
+                                          ? localizations.removeFavoriteSuccess
+                                          : localizations.addFavoriteSuccess,
+                                    ),
+                                  );
                                 },
                               ),
                             );
                           },
-                        ),
-                        Container(
-                          margin: EdgeInsets.all(2.w),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.share, color: Colors.white),
-                            onPressed: () {},
-                          ),
                         ),
                       ],
                       flexibleSpace: FlexibleSpaceBar(
@@ -182,16 +177,29 @@ class _EventFesftivalDetailScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              StringHelper.toTitleCase(
-                                  eventAndFestival.nameEvent),
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 65.w,
+                                  child: Text(
+                                    StringHelper.toTitleCase(
+                                        eventAndFestival.nameEvent),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                                _buildStatusBadge(),
+                              ],
                             ),
-                            SizedBox(height: 1.h),
+                            SizedBox(height: 0.5.h),
                           ],
                         ),
                       ),
@@ -224,32 +232,50 @@ class _EventFesftivalDetailScreenState
     );
   }
 
+  Widget _buildStatusBadge() {
+    final now = DateTime.now();
+    final localizations = AppLocalizations.of(context)!;
+    String statusText;
+    Color statusColor;
+
+    final nowDate = DateUtils.dateOnly(now);
+    final startDate = DateUtils.dateOnly(eventAndFestival.startDate);
+    final endDate = DateUtils.dateOnly(eventAndFestival.endDate);
+
+    if (nowDate.isAfter(endDate)) {
+      statusText = localizations.eventStatusEnded;
+      statusColor = Colors.red;
+    } else if (!nowDate.isBefore(startDate) && !nowDate.isAfter(endDate)) {
+      statusText = localizations.eventStatusOngoing;
+      statusColor = Colors.green;
+    } else {
+      statusText = localizations.eventStatusUpcoming;
+      statusColor = Colors.blueAccent;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      decoration: BoxDecoration(
+        color: statusColor,
+        borderRadius: BorderRadius.circular(15.sp),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 14.sp,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   Widget _buildBottomButtons(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
         child: Row(
           children: [
-            Expanded(
-              flex: 2,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.event_available, color: Colors.white),
-                label: Text(
-                  "Tham gia sự kiện",
-                  style:
-                      TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF39B54A),
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.sp),
-                  ),
-                ),
-              ),
-            ),
             SizedBox(width: 2.w),
             Expanded(
               flex: 1,
@@ -275,12 +301,13 @@ class _EventFesftivalDetailScreenState
                 },
                 icon: const Icon(Icons.directions),
                 label: Text(
-                  "Chỉ đường",
-                  style: TextStyle(fontSize: 14.sp),
+                  AppLocalizations.of(context)!.directions,
+                  style: TextStyle(fontSize: 16.sp),
                 ),
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                  side: BorderSide(color: Colors.grey.shade400),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF39B54A),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 1.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.sp),
                   ),

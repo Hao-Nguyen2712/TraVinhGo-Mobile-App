@@ -91,16 +91,15 @@ class DestinationProvider with ChangeNotifier {
       _hasMore = true;
       _isLoading = true;
       _errorMessage = null;
-      notifyListeners();
 
-      // 1. Load from cache first
+      // Load from cache first to provide instant UI, but keep loading indicator active
       final cachedDestinations = _loadFromCache();
       if (cachedDestinations.isNotEmpty) {
         _allDestinations = cachedDestinations;
-        // Temporarily turn off loading to show cached data immediately
-        _isLoading = false;
-        notifyListeners();
+      } else {
+        _allDestinations.clear(); // Make sure it's empty if cache is empty
       }
+      notifyListeners();
     } else {
       _isLoadingMore = true;
       notifyListeners();
@@ -123,16 +122,16 @@ class DestinationProvider with ChangeNotifier {
       );
 
       if (isRefresh) {
-        _allDestinations =
-            []; // Clear old data (from cache) to replace with new data from network
+        _allDestinations = newDestinations; // Atomically replace the list
         await _clearCache(); // Clear old cache
+      } else {
+        _allDestinations.addAll(newDestinations);
       }
 
       if (newDestinations.isEmpty || newDestinations.length < _pageSize) {
         _hasMore = false;
       }
 
-      _allDestinations.addAll(newDestinations);
       _currentPage++;
 
       // 3. Save new data to cache (only save the first page on refresh)
@@ -163,7 +162,7 @@ class DestinationProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _mapDestinations = await _destinationService.getAllDestinations();
+      _mapDestinations = await _destinationService.getAllDestinationForMap();
       developer.log(
           'Fetched all ${_mapDestinations.length} destinations for map view.',
           name: 'DestinationProvider');

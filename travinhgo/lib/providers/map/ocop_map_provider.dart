@@ -4,6 +4,7 @@ import 'package:here_sdk/mapview.dart';
 import 'dart:developer' as developer;
 
 import '../ocop_product_provider.dart';
+import '../../services/ocop_product_service.dart';
 import 'base_map_provider.dart';
 import 'marker_map_provider.dart';
 import '../../models/ocop/ocop_product.dart';
@@ -14,6 +15,7 @@ class OcopMapProvider {
   final BaseMapProvider baseMapProvider;
   final MarkerMapProvider markerMapProvider;
   final OcopProductProvider ocopProductProvider;
+  final OcopProductService _ocopService = OcopProductService();
 
   // Marker type for OCOP products
   static const String MARKER_TYPE_OCOP = "ocop_product";
@@ -32,7 +34,7 @@ class OcopMapProvider {
   );
 
   /// Displays OCOP products as markers on the map
-  void displayOcopProducts() {
+  Future<void> displayOcopProducts() async {
     if (mapController == null) return;
 
     try {
@@ -40,7 +42,7 @@ class OcopMapProvider {
       clearOcopMarkers();
 
       // Get OCOP products from the global provider
-      final ocopProducts = ocopProductProvider.ocopProducts;
+      final ocopProducts = await _ocopService.getAllOcopProductForMap();
 
       if (ocopProducts.isEmpty) {
         developer.log('data_ocop: No OCOP products available to display',
@@ -154,11 +156,11 @@ class OcopMapProvider {
   }
 
   /// Toggle OCOP product display on the map
-  void toggleOcopProductDisplay() {
+  Future<void> toggleOcopProductDisplay() async {
     if (isOcopDisplayed) {
       clearOcopMarkers();
     } else {
-      displayOcopProducts();
+      await displayOcopProducts();
     }
   }
 }

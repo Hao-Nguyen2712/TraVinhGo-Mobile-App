@@ -42,25 +42,29 @@ class EventFestivalProvider with ChangeNotifier {
 
     try {
       if (isConnected) {
-        final newItems = await EventFestivalService().getEventFestivalsPaging(
-          _currentPage,
-          _limit,
-          _searchQuery,
-        );
-
-        if (isRefresh) {
-          await _eventFestivalBox.clear();
+        if (_searchQuery.isNotEmpty) {
+          final newItems =
+              await EventFestivalService().searchEventFestivals(_searchQuery);
+          if (isRefresh) {
+            _eventFestivals.clear();
+          }
+          _eventFestivals.addAll(newItems);
+          _hasMore = false;
+        } else {
+          final newItems = await EventFestivalService()
+              .getEventFestivalsPaging(_currentPage, _limit);
+          if (isRefresh) {
+            await _eventFestivalBox.clear();
+          }
           for (var item in newItems) {
             _eventFestivalBox.put(item.id, item);
           }
+          if (newItems.length < _limit) {
+            _hasMore = false;
+          }
+          _eventFestivals.addAll(newItems);
+          _currentPage++;
         }
-
-        if (newItems.length < _limit) {
-          _hasMore = false;
-        }
-
-        _eventFestivals.addAll(newItems);
-        _currentPage++;
       } else {
         if (_currentPage == 1) {
           _eventFestivals = _eventFestivalBox.values.toList();
@@ -82,7 +86,7 @@ class EventFestivalProvider with ChangeNotifier {
 
   void applySearchQuery(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
+    _debounce = Timer(const Duration(milliseconds: 200), () {
       if (query != _searchQuery) {
         _searchQuery = query;
         fetchEventFestivals(isRefresh: true);

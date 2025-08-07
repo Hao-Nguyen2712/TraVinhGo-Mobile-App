@@ -15,10 +15,18 @@ class UserProvider with ChangeNotifier {
   String? get error => _error ?? _userService.lastError;
 
   // Fetch user profile
-  Future<bool> fetchUserProfile() async {
+  Future<bool> fetchUserProfile({bool forceRefresh = false}) async {
+    // If profile is already loaded and we are not forcing a refresh, return success.
+    if (_userProfile != null && !forceRefresh) {
+      return true;
+    }
+
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    // Notify listeners only if we are actually going to fetch, to show loading indicator.
+    if (_userProfile == null || forceRefresh) {
+      notifyListeners();
+    }
 
     try {
       final profile = await _userService.getUserProfile();

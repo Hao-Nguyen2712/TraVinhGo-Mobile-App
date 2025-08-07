@@ -88,6 +88,13 @@ class CategoryMapProvider {
       isTintable: false,
     ),
     CategoryType(
+      name: "Đặc sản",
+      categoryId: "local_specialties", // Custom ID for local specialties
+      markerAsset: "assets/images/map/local_specialties.png",
+      iconAsset: "assets/images/map/local_specialties.png",
+      isTintable: false,
+    ),
+    CategoryType(
       name: "Hotels",
       categoryId: PlaceCategory.accommodationHotelMotel,
       markerAsset: "assets/images/markers/hotel.png",
@@ -196,8 +203,9 @@ class CategoryMapProvider {
     availableCategories = [
       originalCategories[0], // "All"
       originalCategories[1], // "OCOP"
+      originalCategories[2], // "Đặc sản"
       ...destinationTypeCategories, // Add destination types
-      ...originalCategories.sublist(2) // Add remaining hardcoded POIs
+      ...originalCategories.sublist(3) // Add remaining hardcoded POIs
     ];
 
     developer.log(

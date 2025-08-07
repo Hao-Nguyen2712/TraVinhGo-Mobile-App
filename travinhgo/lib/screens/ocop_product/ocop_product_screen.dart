@@ -31,7 +31,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
     isAuthentication();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<OcopProductProvider>(context, listen: false);
-      provider.loadInitialOcopProducts();
+      provider.loadInitialProducts();
     });
 
     _scrollController.addListener(_onScroll);
@@ -53,7 +53,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
             _scrollController.position.maxScrollExtent - 200 &&
         !provider.isLoadingMore &&
         provider.hasMore) {
-      provider.fetchOcopProducts();
+      provider.loadMoreProducts();
     }
   }
 
@@ -68,12 +68,10 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
+    _debounce = Timer(const Duration(milliseconds: 200), () {
       if (!mounted) return;
-
       final provider = Provider.of<OcopProductProvider>(context, listen: false);
       provider.applySearchQuery(query);
-      provider.fetchOcopProducts(isRefresh: true);
     });
   }
 
@@ -115,8 +113,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                   child: Consumer<OcopProductProvider>(
                     builder: (context, ocopProvider, child) {
                       return RefreshIndicator(
-                        onRefresh: () =>
-                            ocopProvider.fetchOcopProducts(isRefresh: true),
+                        onRefresh: () => ocopProvider.refreshProducts(),
                         child: CustomScrollView(
                           controller: _scrollController,
                           slivers: [

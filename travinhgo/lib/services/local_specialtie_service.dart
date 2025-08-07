@@ -114,7 +114,6 @@ class LocalSpecialtieService {
   Future<List<LocalSpecialties>> getLocalSpecialtiesPaging({
     int pageNumber = 1,
     int pageSize = 10,
-    String? searchQuery,
   }) async {
     try {
       var endPoint = '${_baseUrl}LocalSpecialities-Paging';
@@ -123,9 +122,6 @@ class LocalSpecialtieService {
         'pageNumber': pageNumber,
         'pageSize': pageSize,
       };
-      if (searchQuery != null && searchQuery.isNotEmpty) {
-        queryParameters.addAll({'searchQuery': searchQuery});
-      }
 
       final response = await dio.get(
         endPoint,
@@ -149,6 +145,91 @@ class LocalSpecialtieService {
       }
     } catch (e) {
       debugPrint('Error during get paged local specialties: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<LocalSpecialties>> searchLocalSpecialties(String query) async {
+    try {
+      var endPoint = '${_baseUrl}search';
+      final params = {'name': query};
+      debugPrint('Searching for local specialty: $query');
+      final response = await dio.get(endPoint,
+          queryParameters: params,
+          options: Options(headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          }));
+
+      if (response.statusCode == 200) {
+        final List<dynamic>? data = response.data['data'];
+        if (data == null) {
+          return [];
+        }
+        List<LocalSpecialties> localSpecialties =
+            data.map((item) => LocalSpecialties.fromJson(item)).toList();
+        return localSpecialties;
+      } else {
+        throw Exception(
+            'Failed to search local specialties. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error during search local specialties: $e');
+      rethrow;
+    }
+  }
+
+  // Returns a list of all local specialties
+  Future<List<LocalSpecialties>> getAllLocalSpecialties() async {
+    try {
+      var endPoint = '${_baseUrl}all';
+
+      final response = await dio.get(endPoint,
+          options: Options(headers: {
+            'Content-Type': 'application/json charset=UTF-8',
+          }));
+
+      if (response.statusCode == 200) {
+        final List<dynamic>? data = response.data['data'];
+        if (data == null) {
+          return [];
+        }
+        List<LocalSpecialties> localSpecialties =
+            data.map((item) => LocalSpecialties.fromJson(item)).toList();
+        return localSpecialties;
+      } else {
+        throw Exception(
+            'Failed to load all local specialties. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error during get all local specialties list: $e');
+      rethrow;
+    }
+  }
+
+  // Returns a list of all local specialties for map display
+  Future<List<LocalSpecialties>> getAllLocalSpecialtyForMap() async {
+    try {
+      var endPoint = '${_baseUrl}all';
+
+      final response = await dio.get(endPoint,
+          options: Options(headers: {
+            'Content-Type': 'application/json charset=UTF-8',
+          }));
+
+      if (response.statusCode == 200) {
+        final List<dynamic>? data = response.data['data'];
+        if (data == null) {
+          return [];
+        }
+        List<LocalSpecialties> localSpecialties =
+            data.map((item) => LocalSpecialties.fromJson(item)).toList();
+        return localSpecialties;
+      } else {
+        throw Exception(
+            'Failed to load all local specialties for map. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error during get all local specialties for map list: $e');
       rethrow;
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EventFestivalContentTab extends StatelessWidget {
   final String? description;
@@ -12,6 +13,7 @@ class EventFestivalContentTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
       child: Column(
@@ -26,7 +28,7 @@ class EventFestivalContentTab extends StatelessWidget {
                   color: const Color(0xFF8F83F3), size: 18.sp),
               SizedBox(width: 2.w),
               Text(
-                "Mô tả sự kiện",
+                localizations.eventDescription,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -34,12 +36,11 @@ class EventFestivalContentTab extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 2.h),
           Html(
-            data: description ?? 'Chưa có mô tả cho sự kiện này.',
+            data: description ?? localizations.noDescription,
             style: {
               "body": Style(
-                fontSize: FontSize(14.sp),
+                fontSize: FontSize(15.sp),
                 color: Colors.grey.shade700,
                 lineHeight: const LineHeight(1.5),
               ),

@@ -177,7 +177,6 @@ class _SplashScreenState extends State<SplashScreen> {
       final tagsFuture = tagProvider.fetchDestinationType();
       final ocopTypeFuture = ocopTypeProvider.fetchOcopType();
       final favoriteFuture = favoriteProvider.fetchFavorites();
-      final ocopProductsFuture = ocopProductProvider.fetchOcopProducts();
 
       // Wait for all data to load
       await Future.wait([
@@ -186,7 +185,6 @@ class _SplashScreenState extends State<SplashScreen> {
         tagsFuture,
         ocopTypeFuture,
         favoriteFuture,
-        ocopProductsFuture,
       ]);
 
       // Initialize the OCOP map provider
