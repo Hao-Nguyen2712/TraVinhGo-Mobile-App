@@ -260,6 +260,18 @@ class AppRouter {
           );
         },
       ),
+      GoRoute(
+          path: '/tourist-destination-detail/:id',
+          name: 'TouristDestinationDetail',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return AuthRequiredScreen(
+              message: 'Please login to use this feature',
+              child: DestinationDetailScreen(
+                id: id,
+              ),
+            );
+          }),
 
       // Main app with ShellRoute
       ShellRoute(
@@ -270,18 +282,6 @@ class AppRouter {
           );
         },
         routes: [
-          GoRoute(
-              path: '/tourist-destination-detail/:id',
-              name: 'TouristDestinationDetail',
-              builder: (context, state) {
-                final id = state.pathParameters['id']!;
-                return AuthRequiredScreen(
-                  message: 'Please login to use this feature',
-                  child: DestinationDetailScreen(
-                    id: id,
-                  ),
-                );
-              }),
           GoRoute(
             path: '/home',
             name: 'home',
@@ -399,9 +399,7 @@ class AppRouter {
           state.matchedLocation.startsWith('/login') ||
           state.matchedLocation.startsWith('/verify-otp') ||
           state.matchedLocation == '/home' ||
-          state.matchedLocation == '/map' ||
-          state.matchedLocation.startsWith('/local-specialty-detail/') ||
-          state.matchedLocation.startsWith('/event-festival-detail/');
+          state.matchedLocation == '/map';
 
       // Protected tab routes that should show the AuthRequiredScreen
       final isProtectedTabRoute = state.matchedLocation == '/events' ||
@@ -411,7 +409,9 @@ class AppRouter {
       // Routes that are protected but should display the AuthRequiredScreen in place
       final isAuthRequiredScreenRoute =
           state.uri.path.startsWith('/ocop-product-detail/') ||
-              state.uri.path.startsWith('/tourist-destination-detail/');
+              state.uri.path.startsWith('/tourist-destination-detail/') ||
+              state.uri.path.startsWith('/local-specialty-detail/') ||
+              state.uri.path.startsWith('/event-festival-detail/');
 
       debugPrint("Log_Auth_flow: ROUTER - Is public route: $isPublicRoute");
       debugPrint(

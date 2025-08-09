@@ -57,12 +57,26 @@ class LocationSelectionPanel extends StatelessWidget {
                         icon: Icons.arrow_back,
                         onPressed: () => provider.cancelRouting(),
                       ),
-                    // Swap button
-                    _buildIconButton(
-                      context,
-                      icon: Icons.swap_vert,
-                      onPressed: () => provider.swapDepartureAndDestination(),
-                      tooltip: AppLocalizations.of(context)!.swapLocations,
+                    Row(
+                      children: [
+                        // Use current location button
+                        _buildIconButton(
+                          context,
+                          icon: Icons.my_location,
+                          onPressed: () =>
+                              provider.useCurrentLocationAsDeparture(),
+                          tooltip: AppLocalizations.of(context)!.myLocation,
+                        ),
+                        const SizedBox(width: 8),
+                        // Swap button
+                        _buildIconButton(
+                          context,
+                          icon: Icons.swap_vert,
+                          onPressed: () =>
+                              provider.swapDepartureAndDestination(),
+                          tooltip: AppLocalizations.of(context)!.swapLocations,
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -9,6 +9,7 @@ import 'dart:developer' as developer;
 import 'base_map_provider.dart';
 import 'marker_map_provider.dart';
 import 'search_map_provider.dart';
+import 'location_map_provider.dart';
 import '../map_provider.dart';
 
 /// Transport mode options for routing
@@ -19,6 +20,7 @@ class NavigationMapProvider {
   // Reference to other providers
   final BaseMapProvider baseMapProvider;
   final MarkerMapProvider markerMapProvider;
+  final LocationMapProvider locationMapProvider;
   late SearchMapProvider _searchMapProvider;
 
   // Routing related variables
@@ -63,7 +65,8 @@ class NavigationMapProvider {
   static const double traVinhLon = 106.3452;
 
   // Constructor
-  NavigationMapProvider(this.baseMapProvider, this.markerMapProvider) {
+  NavigationMapProvider(
+      this.baseMapProvider, this.markerMapProvider, this.locationMapProvider) {
     initializeRoutingEngine();
     _searchMapProvider = SearchMapProvider(baseMapProvider, markerMapProvider);
   }
@@ -123,8 +126,16 @@ class NavigationMapProvider {
     // Get address for destination using reverse geocoding
     updateAddressFromCoordinates(coordinates, false);
 
-    // Automatically use Tra Vinh center as departure point
-    useTraVinhCenterAsDeparture();
+    // Prioritize user's current location as departure.
+    // Fallback to Tra Vinh Center if location is not available.
+    if (locationMapProvider.currentPosition != null) {
+      final currentPos = locationMapProvider.currentPosition!;
+      final departureCoords =
+          GeoCoordinates(currentPos.latitude, currentPos.longitude);
+      addDepartureMarker(departureCoords, "Your Location");
+    } else {
+      useTraVinhCenterAsDeparture();
+    }
   }
 
   /// Cancels the routing mode
@@ -209,6 +220,23 @@ class NavigationMapProvider {
   void useTraVinhCenterAsDeparture() {
     GeoCoordinates coordinates = GeoCoordinates(traVinhLat, traVinhLon);
     addDepartureMarker(coordinates, "Tra Vinh Center");
+  }
+
+  /// Use user's current location as departure point
+  Future<void> useCurrentLocationAsDeparture() async {
+    // First, ensure we have the latest position
+    await locationMapProvider.getCurrentPosition();
+
+    if (locationMapProvider.currentPosition != null) {
+      final currentPos = locationMapProvider.currentPosition!;
+      final departureCoords =
+          GeoCoordinates(currentPos.latitude, currentPos.longitude);
+      addDepartureMarker(departureCoords, "Vị trí của bạn");
+    } else {
+      // Handle case where location is still not available
+      developer.log('Could not get current location to set as departure.',
+          name: 'NavigationMapProvider');
+    }
   }
 
   /// Calculate a route between departure and destination points

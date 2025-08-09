@@ -37,7 +37,11 @@ class PoiPopup extends StatelessWidget {
         metadata?.getString("is_local_specialty") == "true";
     final String? ocopProductId = metadata?.getString("product_id");
     final String? specialtyId = metadata?.getString("specialty_id");
+    final String? destinationId = metadata?.getString("destination_id");
     final colorScheme = Theme.of(context).colorScheme;
+    final bool canNavigateToDetail = (isOcop && ocopProductId != null) ||
+        (isLocalSpecialty && specialtyId != null) ||
+        (destinationId != null);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Positioned(
@@ -130,32 +134,37 @@ class PoiPopup extends StatelessWidget {
                                   mapProvider.lastPoiCoordinates!,
                                   name,
                                 );
-                                mapProvider.closePoiPopup();
+                                mapProvider.hidePoiPopup();
                               }
                             },
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildActionButton(
-                            context,
-                            Icons.info_outline,
-                            AppLocalizations.of(context)!.detail,
-                            false,
-                            () {
-                              if (isOcop && ocopProductId != null) {
-                                GoRouter.of(context).push(
-                                    '/ocop-product-detail/$ocopProductId');
-                              } else if (isLocalSpecialty &&
-                                  specialtyId != null) {
-                                GoRouter.of(context).push(
-                                    '/local-specialty-detail/$specialtyId');
-                              }
-                              mapProvider.closePoiPopup();
-                            },
+                        if (canNavigateToDetail) ...[
+                          Expanded(
+                            child: _buildActionButton(
+                              context,
+                              Icons.info_outline,
+                              AppLocalizations.of(context)!.detail,
+                              false,
+                              () {
+                                if (isOcop && ocopProductId != null) {
+                                  GoRouter.of(context).push(
+                                      '/ocop-product-detail/$ocopProductId');
+                                } else if (isLocalSpecialty &&
+                                    specialtyId != null) {
+                                  GoRouter.of(context).push(
+                                      '/local-specialty-detail/$specialtyId');
+                                } else if (destinationId != null) {
+                                  GoRouter.of(context).push(
+                                      '/tourist-destination-detail/$destinationId');
+                                }
+                                mapProvider.hidePoiPopup();
+                              },
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
+                          const SizedBox(width: 8),
+                        ],
                         Expanded(
                           child: _buildActionButton(
                             context,
@@ -236,7 +245,7 @@ class PoiPopup extends StatelessWidget {
               child: IconButton(
                 icon: Icon(Icons.close, color: colorScheme.onSurface),
                 iconSize: 20,
-                onPressed: () => mapProvider.closePoiPopup(),
+                onPressed: () => mapProvider.hidePoiPopup(),
                 splashRadius: 20,
                 constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(4),
@@ -249,7 +258,7 @@ class PoiPopup extends StatelessWidget {
   }
 
   Widget _buildActionButton(BuildContext context, IconData icon, String label,
-      bool isPrimary, VoidCallback onPressed) {
+      bool isPrimary, VoidCallback? onPressed) {
     return FilledButton.icon(
       icon: Icon(icon, size: 18),
       label: Text(label),

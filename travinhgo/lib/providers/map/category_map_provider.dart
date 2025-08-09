@@ -10,6 +10,7 @@ import '../destination_provider.dart';
 import 'base_map_provider.dart';
 import 'marker_map_provider.dart';
 import 'boundary_map_provider.dart';
+import 'location_map_provider.dart';
 
 /// CategoryType defines types of POIs that can be displayed on the map
 /// with their corresponding user-friendly names and PlaceCategory IDs
@@ -38,6 +39,7 @@ class CategoryMapProvider {
   // Reference to other providers
   final BaseMapProvider baseMapProvider;
   final MarkerMapProvider markerMapProvider;
+  final LocationMapProvider locationMapProvider;
   late final BoundaryMapProvider boundaryMapProvider;
 
   // Callback when OCOP category is selected
@@ -167,7 +169,8 @@ class CategoryMapProvider {
       availableCategories.map((cat) => cat.name).toList();
 
   // Constructor
-  CategoryMapProvider(this.baseMapProvider, this.markerMapProvider,
+  CategoryMapProvider(
+      this.baseMapProvider, this.markerMapProvider, this.locationMapProvider,
       {BoundaryMapProvider? boundaryProvider}) {
     initializeSearchEngine();
     boundaryMapProvider =
@@ -255,6 +258,20 @@ class CategoryMapProvider {
         availableCategories[index].isDestinationType;
   }
 
+  /// Determines the center for searches, prioritizing user location.
+  GeoCoordinates _getSearchCenter() {
+    if (locationMapProvider.currentPosition != null) {
+      developer.log('Using user location for search center.',
+          name: 'CategoryMapProvider');
+      return GeoCoordinates(locationMapProvider.currentPosition!.latitude,
+          locationMapProvider.currentPosition!.longitude);
+    } else {
+      developer.log('Using Tra Vinh center for search.',
+          name: 'CategoryMapProvider');
+      return GeoCoordinates(traVinhLat, traVinhLon);
+    }
+  }
+
   /// Preload all category search results for caching
   Future<void> preloadAllCategories() async {
     if (isPreloadingCategories || hasPreloadedCategories) {
@@ -303,9 +320,8 @@ class CategoryMapProvider {
       List<PlaceCategory> categoryList = [];
       categoryList.add(PlaceCategory(categoryType.categoryId));
 
-      // Create a search area centered at Tra Vinh
-      var queryArea =
-          CategoryQueryArea.withCenter(GeoCoordinates(traVinhLat, traVinhLon));
+      // Create a search area centered at user's location or Tra Vinh
+      var queryArea = CategoryQueryArea.withCenter(_getSearchCenter());
 
       CategoryQuery categoryQuery =
           CategoryQuery.withCategoriesInArea(categoryList, queryArea);
@@ -586,9 +602,8 @@ class CategoryMapProvider {
       List<PlaceCategory> categoryList = [];
       categoryList.add(PlaceCategory(categoryType.categoryId));
 
-      // Create a search area centered at Tra Vinh
-      var queryArea =
-          CategoryQueryArea.withCenter(GeoCoordinates(traVinhLat, traVinhLon));
+      // Create a search area centered at user's location or Tra Vinh
+      var queryArea = CategoryQueryArea.withCenter(_getSearchCenter());
 
       CategoryQuery categoryQuery =
           CategoryQuery.withCategoriesInArea(categoryList, queryArea);
@@ -716,8 +731,7 @@ class CategoryMapProvider {
       removeSearchRadiusCircle();
 
       // Create a GeoCircle with the specified radius
-      GeoCircle circle = GeoCircle(
-          GeoCoordinates(traVinhLat, traVinhLon), searchRadiusInMeters);
+      GeoCircle circle = GeoCircle(_getSearchCenter(), searchRadiusInMeters);
 
       // Convert the GeoCircle to a GeoPolygon
       GeoPolygon circlePolygon = GeoPolygon.withGeoCircle(circle);

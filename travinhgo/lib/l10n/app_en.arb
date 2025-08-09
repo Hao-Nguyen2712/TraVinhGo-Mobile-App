@@ -5,6 +5,7 @@
     "departurePoint": "Departure Point",
     "destinationPoint": "Destination Point",
     "swapLocations": "Swap locations",
+    "useCurrentLocation": "Use current location",
     "enterDeparturePoint": "Enter departure point...",
     "selectDeparturePoint": "Select departure point:",
     "tapOrSearchDeparture": "Tap on the map or enter a location in the search box",
@@ -250,5 +251,8 @@
     "notUpdated": "Not updated",
     "favoriteSuccessTitle": "Success",
     "favoriteAddMessage": "Added to favorites successfully.",
-    "favoriteRemoveMessage": "Removed from favorites successfully."
+    "favoriteRemoveMessage": "Removed from favorites successfully.",
+    "categoryEcology": "Ecology",
+    "categoryReligiousBuildings": "Religious Buildings",
+    "categoryMonuments": "Monuments"
 }
