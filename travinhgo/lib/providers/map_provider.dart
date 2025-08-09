@@ -320,10 +320,10 @@ class MapProvider extends ChangeNotifier {
   MapProvider() : _baseMapProvider = BaseMapProvider() {
     // Initialize sub-providers in the right order
     _markerMapProvider = MarkerMapProvider(_baseMapProvider);
-    _navigationMapProvider =
-        NavigationMapProvider(_baseMapProvider, _markerMapProvider);
     _locationMapProvider =
         LocationMapProvider(_baseMapProvider, _markerMapProvider);
+    _navigationMapProvider = NavigationMapProvider(
+        _baseMapProvider, _markerMapProvider, _locationMapProvider);
     _locationMapProvider.onPositionUpdated = () => notifyListeners();
     _searchMapProvider =
         SearchMapProvider(_baseMapProvider, _markerMapProvider);
@@ -334,7 +334,7 @@ class MapProvider extends ChangeNotifier {
     _localSpecialtyMapProvider =
         LocalSpecialtyMapProvider(_baseMapProvider, _markerMapProvider);
     _categoryMapProvider = CategoryMapProvider(
-        _baseMapProvider, _markerMapProvider,
+        _baseMapProvider, _markerMapProvider, _locationMapProvider,
         boundaryProvider: _boundaryMapProvider);
 
     // Register callback to update UI when route calculation is completed
@@ -440,15 +440,17 @@ class MapProvider extends ChangeNotifier {
     _baseMapProvider.initMapScene(controller, isDarkMode, () async {
       // On successful map scene loading, just move to Tra Vinh center
       // without adding a marker
-      refreshMap();
       _boundaryMapProvider.displayTraVinhBoundary();
       _setupGestureListeners();
+
+      // Get current position first to ensure searches are centered correctly
+      await getCurrentPosition();
 
       // Start preloading all category search data in background
       await _preloadCategories();
 
       // Display all markers by default
-      _displayAllMarkers();
+      await _displayAllMarkers();
 
       // Display OCOP products if provider is initialized
       if (_ocopMapProvider != null) {
@@ -606,6 +608,45 @@ class MapProvider extends ChangeNotifier {
             topmostPickedPlace.name!.trim().isNotEmpty)
         ? topmostPickedPlace.name!
         : 'Lat: ${topmostPickedPlace.coordinates.latitude.toStringAsFixed(6)}, Lon: ${topmostPickedPlace.coordinates.longitude.toStringAsFixed(6)}';
+
+    // --- NEW: Check if this POI matches a known destination ---
+    Destination? matchedDestination;
+    if (_destinationProvider.allDestinationsForMap.isNotEmpty) {
+      // Trim whitespace and convert to lowercase for more robust matching
+      final lowerPoiName = poiName.trim().toLowerCase();
+      for (final dest in _destinationProvider.allDestinationsForMap) {
+        if (dest.name.trim().toLowerCase() == lowerPoiName) {
+          matchedDestination = dest;
+          developer.log('Matched picked POI to destination: ${dest.name}',
+              name: 'MapProvider');
+          break;
+        }
+      }
+    }
+
+    Metadata? metadata;
+    if (matchedDestination != null) {
+      // If a match is found, create metadata with the destination_id and other details
+      metadata = Metadata();
+      metadata.setString("destination_id", matchedDestination.id);
+      metadata.setString("place_name", matchedDestination.name);
+      metadata.setString(
+          "place_category",
+          _destinationProvider
+                  .getDestinationTypeById(matchedDestination.destinationTypeId)
+                  ?.name ??
+              "Destination");
+      if (matchedDestination.address != null) {
+        metadata.setString("place_address", matchedDestination.address!);
+      }
+      metadata.setString(
+          "place_rating", (matchedDestination.avarageRating).toString());
+      if (matchedDestination.images.isNotEmpty) {
+        metadata.setString("place_images", matchedDestination.images.join(','));
+      }
+    }
+    // --- END NEW ---
+
     Map<String, String> placeInfo = {
       'name': poiName,
       'category':
@@ -637,8 +678,9 @@ class MapProvider extends ChangeNotifier {
         'Picked embedded POI: ${placeInfo['name']} at ${placeInfo['latitude']}, ${placeInfo['longitude']}',
         name: 'MapProvider');
 
-    // Show POI popup with the place information
-    showCategoryMarkerPopup(placeInfo, topmostPickedPlace.coordinates);
+    // Show POI popup with the place information and potentially matched metadata
+    showCategoryMarkerPopup(
+        placeInfo, topmostPickedPlace.coordinates, metadata);
   }
 
   /// Shows a popup with information about a place from a category marker or embedded POI
@@ -668,6 +710,18 @@ class MapProvider extends ChangeNotifier {
     showPoiPopup = false;
     lastPoiMetadata = null; // Clear metadata when closing
     notifyListeners();
+  }
+
+  /// Hides the POI popup without notifying listeners immediately,
+  /// useful for transitions.
+  void hidePoiPopup() {
+    if (showPoiPopup) {
+      showPoiPopup = false;
+      lastPoiMetadata = null;
+      // We might not want to notify immediately if a navigation is happening
+      // but in most cases, it's safer to notify.
+      notifyListeners();
+    }
   }
 
   /// Toggles display of OCOP products on the map
@@ -770,10 +824,10 @@ class MapProvider extends ChangeNotifier {
   }
 
   /// Displays all markers on the map, including destinations, OCOPs, and POIs
-  void _displayAllMarkers() {
+  Future<void> _displayAllMarkers() async {
     // TODO: Re-enable default POIs when API is clarified
     // mapController?.mapScene.enableFeatures({MapFeatures.poi: MapFeatureModes.all});
-    _destinationMapProvider.displayDestinationMarkers(null);
+    await _destinationMapProvider.displayDestinationMarkers(null);
     _categoryMapProvider.displayAllCategories();
     _ocopMapProvider.displayOcopProducts();
     _localSpecialtyMapProvider.displayLocalSpecialties();
@@ -806,8 +860,12 @@ class MapProvider extends ChangeNotifier {
 
   /// Refreshes the map to show Tra Vinh province
   void refreshMap() {
-    // Move to Tra Vinh center without adding a marker
-    _boundaryMapProvider.moveToTraVinhCenter();
+    // Attempt to get current position, otherwise move to Tra Vinh center
+    getCurrentPosition().then((_) {
+      if (currentPosition == null) {
+        _boundaryMapProvider.moveToTraVinhCenter();
+      }
+    });
   }
 
   /// Toggle the center marker visibility
@@ -914,6 +972,12 @@ class MapProvider extends ChangeNotifier {
   /// Use Tra Vinh center as departure point
   void useTraVinhCenterAsDeparture() {
     _navigationMapProvider.useTraVinhCenterAsDeparture();
+    notifyListeners();
+  }
+
+  /// Use user's current location as departure point
+  Future<void> useCurrentLocationAsDeparture() async {
+    await _navigationMapProvider.useCurrentLocationAsDeparture();
     notifyListeners();
   }
 
@@ -1032,6 +1096,12 @@ class MapProvider extends ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  void resetCategory() {
+    _categoryMapProvider.selectedCategoryIndex = 0;
+    _categoryMapProvider.isCategoryActive = false;
+    notifyListeners();
   }
 
   /// Cleans up map resources

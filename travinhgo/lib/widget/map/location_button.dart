@@ -45,43 +45,6 @@ class LocationButton extends StatelessWidget {
                   tooltip: AppLocalizations.of(context)!.myLocation,
                 ),
               ),
-
-              SizedBox(height: 10),
-
-              // Tra Vinh center button
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.shadow.withOpacity(0.2),
-                      blurRadius: 6,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.location_city,
-                    // Change color based on marker visibility
-                    color: provider.isCenterMarkerVisible
-                        ? colorScheme.error
-                        : colorScheme.primary,
-                  ),
-                  onPressed: () {
-                    // First move to Tra Vinh center
-                    provider.refreshMap();
-                    // Then toggle the center marker
-                    provider.toggleCenterMarker();
-                  },
-                  tooltip: provider.isCenterMarkerVisible
-                      ? AppLocalizations.of(context)!.removeCenterMarker
-                      : AppLocalizations.of(context)!.showCenterMarker,
-                ),
-              ),
             ],
           ),
         );

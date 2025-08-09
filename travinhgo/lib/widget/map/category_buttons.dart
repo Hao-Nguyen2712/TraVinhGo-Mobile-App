@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/map_provider.dart';
-import '../../utils/constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Widget for displaying category filter buttons on the map
@@ -16,6 +15,14 @@ class CategoryButtons extends StatelessWidget {
         return l10n.all;
       case "OCOP":
         return l10n.ocop;
+      case "Đặc sản":
+        return l10n.localSpecialty;
+      case "Ecology":
+        return l10n.categoryEcology;
+      case "Religious Buildings":
+        return l10n.categoryReligiousBuildings;
+      case "Monuments":
+        return l10n.categoryMonuments;
       case "Hotels":
         return l10n.categoryHotels;
       case "Restaurants":
@@ -49,7 +56,6 @@ class CategoryButtons extends StatelessWidget {
       builder: (context, provider, child) {
         // Get theme to determine dark mode
         final theme = Theme.of(context);
-        final isDarkMode = theme.brightness == Brightness.dark;
 
         // Get selected category index and category list
         final selectedIndex = provider.selectedCategoryIndex;

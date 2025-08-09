@@ -5,6 +5,7 @@
     "departurePoint": "Điểm đi",
     "destinationPoint": "Điểm đến",
     "swapLocations": "Đổi vị trí",
+    "useCurrentLocation": "Sử dụng vị trí hiện tại",
     "enterDeparturePoint": "Nhập điểm đi...",
     "selectDeparturePoint": "Chọn điểm khởi hành:",
     "tapOrSearchDeparture": "Chạm vào vị trí trên bản đồ hoặc nhập địa điểm vào ô tìm kiếm",
@@ -250,5 +251,8 @@
     "notUpdated": "Chưa cập nhật",
     "favoriteSuccessTitle": "Thành công",
     "favoriteAddMessage": "Thêm vào yêu thích thành công.",
-    "favoriteRemoveMessage": "Đã xóa khỏi danh sách yêu thích."
+    "favoriteRemoveMessage": "Đã xóa khỏi danh sách yêu thích.",
+    "categoryEcology": "Sinh thái",
+    "categoryReligiousBuildings": "Tôn giáo",
+    "categoryMonuments": "Di tích"
 }

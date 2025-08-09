@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:here_sdk/mapview.dart'
     show HereMap, HereMapController, MapMarker, MapPickResult;
 import 'package:here_sdk/gestures.dart' show TapListener;
@@ -69,7 +70,22 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // SDK is already initialized in main.dart, no need to initialize again
       _mapProvider.loadTopDestinations();
+      _mapProvider.getCurrentPosition();
     });
+  }
+
+  /// Requests location permission from the user.
+  Future<void> _requestLocationPermission() async {
+    var status = await Permission.location.status;
+    if (status.isDenied) {
+      if (await Permission.location.request().isGranted) {
+        _mapProvider.getCurrentPosition();
+      }
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    } else if (status.isGranted) {
+      _mapProvider.getCurrentPosition();
+    }
   }
 
   @override
@@ -78,6 +94,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     if (_mapProvider != null) {
       // Use the reference cached during initState
       _mapProvider.cleanupMapResources();
+      _mapProvider.resetCategory();
 
       // Clear markers before disposing
       _mapProvider.clearMarkers([
@@ -101,7 +118,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     // Handle app lifecycle changes
     if (state == AppLifecycleState.resumed) {
       // Refresh the map when app is resumed
-      _mapProvider.refreshMap();
+      _mapProvider.getCurrentPosition();
 
       // Clear any previous markers that may have been cached
       _mapProvider.cleanupMapResources();
@@ -322,10 +339,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
               if (!provider.isRoutingMode) ...[
                 const CategoryButtons(),
                 const LocationButton(),
-                if (provider.showPoiPopup) const PoiPopup(),
-                if (provider.destinationsLoaded &&
-                    provider.topDestinations.isNotEmpty &&
-                    !provider.showPoiPopup)
+                if (provider.showPoiPopup)
+                  const PoiPopup()
+                else if (provider.destinationsLoaded &&
+                    provider.topDestinations.isNotEmpty)
                   const FavoriteDestinationsSlider(),
               ] else ...[
                 const RoutingUI(),
