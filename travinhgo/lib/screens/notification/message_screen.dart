@@ -70,77 +70,74 @@ class _MessageScreenState extends State<MessageScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: colorScheme.primary,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              backgroundColor: colorScheme.primary,
-              elevation: 0,
-              title: Text(
-                AppLocalizations.of(context)!
-                    .notificationTitle(_userNotification.length),
-                style: TextStyle(
-                  color: colorScheme.onPrimary,
-                ),
-              ),
-              centerTitle: true,
-              leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: colorScheme.onPrimary,
-                ),
-                onPressed: () {
-                  final router = GoRouter.of(context);
-                  if (router.canPop()) {
-                    router.pop();
-                  } else {
-                    router.go('/home');
-                  }
-                },
+      backgroundColor: colorScheme.surface,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            backgroundColor: colorScheme.primary,
+            elevation: 0,
+            title: Text(
+              AppLocalizations.of(context)!
+                  .notificationTitle(_userNotification.length),
+              style: TextStyle(
+                color: Colors.white,
               ),
             ),
-            SliverFillRemaining(
-              hasScrollBody: true,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(0),
-                    topRight: Radius.circular(0),
-                  ),
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                final router = GoRouter.of(context);
+                if (router.canPop()) {
+                  router.pop();
+                } else {
+                  router.go('/home');
+                }
+              },
+            ),
+          ),
+          SliverFillRemaining(
+            hasScrollBody: true,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(0),
+                  topRight: Radius.circular(0),
                 ),
-                child: _isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: colorScheme.primary,
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        itemCount: _userNotification.length,
-                        itemBuilder: (context, index) {
-                          final isNew = index <
-                              notificationProvider.userNotification.length;
-                          final notification = _userNotification[index];
-
-                          return GestureDetector(
-                            onTap: () =>
-                                _showNotificationDetailsDialog(notification),
-                            child: NotificationItem(
-                              userNotification: notification,
-                              isNew: isNew,
-                            ),
-                          );
-                        },
+              ),
+              child: _isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: colorScheme.primary,
                       ),
-              ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: _userNotification.length,
+                      itemBuilder: (context, index) {
+                        final isNew = index <
+                            notificationProvider.userNotification.length;
+                        final notification = _userNotification[index];
+
+                        return GestureDetector(
+                          onTap: () =>
+                              _showNotificationDetailsDialog(notification),
+                          child: NotificationItem(
+                            userNotification: notification,
+                            isNew: isNew,
+                          ),
+                        );
+                      },
+                    ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -174,7 +171,7 @@ class _MessageScreenState extends State<MessageScreen> {
               // Style này không giới hạn dòng (maxLines)
               style: {
                 "body": Style(
-                  maxLines: 2,
+                  maxLines: 4,
                   textOverflow: TextOverflow.ellipsis,
                   fontSize: FontSize(16.0),
                   lineHeight: LineHeight(1.5),
@@ -233,7 +230,7 @@ class _MessageScreenState extends State<MessageScreen> {
           actions: <Widget>[
             TextButton(
               child: Text(
-                'Đóng',
+                AppLocalizations.of(context)!.close,
                 style: TextStyle(color: colorScheme.primary),
               ),
               onPressed: () {

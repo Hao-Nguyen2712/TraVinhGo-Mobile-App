@@ -110,66 +110,62 @@ class FavoriteProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleDestinationFavorite(Destination item) async {
-    final index = _favorites
-        .indexWhere((f) => f.itemId == item.id && f.itemType == "Destination");
-    if (index != -1) {
-      _favorites.removeAt(index);
-      _destinationList.remove(item);
-      await FavoriteService().removeFavoriteList(item.id);
+  void toggleDestinationFavorite(Destination item) {
+    final isCurrentlyFavorite = isExist(item.id);
+    if (isCurrentlyFavorite) {
+      _favorites.removeWhere((f) => f.itemId == item.id);
+      _destinationList.removeWhere((d) => d.id == item.id);
+      FavoriteService().removeFavoriteList(item.id);
     } else {
       final fav = Favorite(itemId: item.id, itemType: "Destination");
       _favorites.add(fav);
       _destinationList.add(item);
-      await FavoriteService().addFavoriteList(fav);
+      FavoriteService().addFavoriteList(fav);
     }
     notifyListeners();
   }
 
-  Future<void> toggleOcopFavorite(OcopProduct item) async {
-    final index = _favorites
-        .indexWhere((f) => f.itemId == item.id && f.itemType == "OcopProduct");
-    if (index != -1) {
-      _favorites.removeAt(index);
-      _ocopProductList.remove(item);
-      await FavoriteService().removeFavoriteList(item.id);
+  void toggleOcopFavorite(OcopProduct item) {
+    final isCurrentlyFavorite = isExist(item.id);
+    if (isCurrentlyFavorite) {
+      _favorites.removeWhere((f) => f.itemId == item.id);
+      _ocopProductList.removeWhere((o) => o.id == item.id);
+      FavoriteService().removeFavoriteList(item.id);
     } else {
       final fav = Favorite(itemId: item.id, itemType: "OcopProduct");
       _favorites.add(fav);
       _ocopProductList.add(item);
-      await FavoriteService().addFavoriteList(fav);
+      FavoriteService().addFavoriteList(fav);
     }
     notifyListeners();
   }
 
-  Future<void> toggleLocalSpecialtiesFavorite(LocalSpecialties item) async {
-    final index = _favorites.indexWhere(
-        (f) => f.itemId == item.id && f.itemType == "LocalSpecialties");
-    if (index != -1) {
-      _favorites.removeAt(index);
-      _localSpecialteList.remove(item);
-      await FavoriteService().removeFavoriteList(item.id);
+  void toggleLocalSpecialtiesFavorite(LocalSpecialties item) {
+    final isCurrentlyFavorite = isExist(item.id);
+    if (isCurrentlyFavorite) {
+      _favorites.removeWhere((f) => f.itemId == item.id);
+      _localSpecialteList.removeWhere((l) => l.id == item.id);
+      FavoriteService().removeFavoriteList(item.id);
     } else {
       final fav = Favorite(itemId: item.id, itemType: "LocalSpecialties");
       _favorites.add(fav);
       _localSpecialteList.add(item);
-      await FavoriteService().addFavoriteList(fav);
+      FavoriteService().addFavoriteList(fav);
     }
     notifyListeners();
   }
 
-  Future<void> toggleEventFestivalFavorite(EventAndFestival item) async {
-    final index = _favorites.indexWhere(
-        (f) => f.itemId == item.id && f.itemType == "EventAndFestival");
-    if (index != -1) {
-      _favorites.removeAt(index);
-      _eventFestivalList.remove(item);
-      await FavoriteService().removeFavoriteList(item.id);
+  void toggleEventFestivalFavorite(EventAndFestival item) {
+    final isCurrentlyFavorite = isExist(item.id);
+    if (isCurrentlyFavorite) {
+      _favorites.removeWhere((f) => f.itemId == item.id);
+      _eventFestivalList.removeWhere((e) => e.id == item.id);
+      FavoriteService().removeFavoriteList(item.id);
     } else {
       final fav = Favorite(itemId: item.id, itemType: "EventAndFestival");
       _favorites.add(fav);
       _eventFestivalList.add(item);
-      await FavoriteService().addFavoriteList(fav);
+      FavoriteService().addFavoriteList(fav);
     }
     notifyListeners();
   }

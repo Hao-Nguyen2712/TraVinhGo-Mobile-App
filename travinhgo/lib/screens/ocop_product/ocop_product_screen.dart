@@ -136,9 +136,15 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 32),
-                                    child: Text(AppLocalizations.of(context)!
-                                        .errorPrefix(
-                                            ocopProvider.errorMessage!)),
+                                    child: Text(
+                                        AppLocalizations.of(context)!
+                                            .errorPrefix(
+                                                ocopProvider.errorMessage!),
+                                        style: TextStyle(
+                                            color: theme.brightness ==
+                                                    Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black)),
                                   ),
                                 ),
                               )
@@ -195,8 +201,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: Theme.of(context).colorScheme.onPrimary),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
           Expanded(
@@ -204,7 +209,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
               AppLocalizations.of(context)!.ocopProduct,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Colors.white,
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -219,6 +224,7 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
   Widget _buildSearchBar(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
@@ -226,9 +232,13 @@ class _OcopProductScreenState extends State<OcopProductScreen> {
         controller: _searchController,
         focusNode: _focusNode,
         onChanged: _onSearchChanged,
+        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.searchOcopProduct,
-          prefixIcon: const Icon(Icons.search),
+          hintStyle:
+              TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey),
+          prefixIcon: Icon(Icons.search,
+              color: isDarkMode ? Colors.white70 : Colors.grey),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(60),
             borderSide: BorderSide.none,

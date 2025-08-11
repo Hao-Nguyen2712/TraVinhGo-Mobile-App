@@ -31,7 +31,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
 </ul>
 <p><strong>Trà Vinh</strong> là tỉnh <em>mưa thuận, gió hòa</em> 🌦️, nhiệt độ trung bình từ <strong>26–27°C</strong> 🌡️, hiếm khi có bão. Vì thế, bất cứ mùa nào trong năm, du khách cũng có thể đến <strong>miền Duyên hải</strong> để trải nghiệm.</p>
 """;
-  final String contentSecond =  """
+  final String contentSecond = """
 <p><strong>TraVinhGo</strong> 📱 là một ứng dụng đa ngôn ngữ giúp khám phá <strong>Trà Vinh</strong> bằng bản đồ số 🗺️, tạo một trải nghiệm dễ dàng và tiện dụng để người dùng kết nối đến các địa điểm du lịch 🏖️, đặc sản địa phương 🍲, sản phẩm <strong>OCOP</strong> 🛍️ và các sự kiện 🎉 trên địa bàn <strong>Trà Vinh</strong>.</p>
 
 <p><strong>TraVinhGo</strong> cung cấp nhiều địa điểm du lịch và thông tin chính xác, kèm theo hình ảnh 📸 và bản đồ 🧭 để bạn khám phá theo sở thích của mình.</p>
@@ -42,7 +42,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
 
 <p>Cuối cùng là phần <strong>sự kiện và lễ hội</strong> 🎊, được cập nhật hàng ngày 📅 với thông tin rõ ràng, giúp người dùng theo dõi các hoạt động văn hóa, giải trí của <strong>Trà Vinh</strong> một cách sinh động và trực quan.</p>
 """;
-  
+
   final String thankContent = """
 <p>🙏 <strong>Cảm ơn bạn</strong> đã tải ứng dụng <strong>TràVinhGo</strong> của chúng tôi!</p>
 <p>Chúng tôi chúc bạn tận hưởng chuyến du lịch của mình một cách <strong>trọn vẹn nhất</strong> 🧳 cùng với <strong>TraVinhGo</strong> 🌟.</p>
@@ -51,16 +51,23 @@ class _IntroductionPageState extends State<IntroductionPage> {
 """;
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.introduce),
+        title: Text(l10n.introduce),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          color: Theme.of(context).cardColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 4,
           margin: const EdgeInsets.only(bottom: 20),
           child: Padding(
@@ -69,16 +76,18 @@ class _IntroductionPageState extends State<IntroductionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  l10n.welcomeToTraVinhGo,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: isDarkMode
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Html(
-                  data: contentFirst,
+                  data: l10n.introductionContentFirst,
                   style: _htmlStyle(context),
                 ),
                 Padding(
@@ -89,13 +98,21 @@ class _IntroductionPageState extends State<IntroductionPage> {
                         "assets/images/introduction/gocconchim.png",
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 5,),
-                      Text('Một góc Cồn Chim', style: TextStyle(fontStyle: FontStyle.italic),)
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        l10n.captionChimIslet,
+                        style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            color:
+                                isDarkMode ? Colors.white70 : Colors.black87),
+                      )
                     ],
-                  )
+                  ),
                 ),
                 Html(
-                  data: contentSecond,
+                  data: l10n.introductionContentSecond,
                   style: _htmlStyle(context),
                 ),
                 Padding(
@@ -106,13 +123,20 @@ class _IntroductionPageState extends State<IntroductionPage> {
                           "assets/images/introduction/thienvientruclam.png",
                           fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 5,),
-                        Text('Thiền viện Trúc Lâm (Ảnh: Dương Văn Hưởng)', style: TextStyle(fontStyle: FontStyle.italic),)
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          l10n.captionTrucLamMonastery,
+                          style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color:
+                                  isDarkMode ? Colors.white70 : Colors.black87),
+                        )
                       ],
-                    )
-                ),
+                    )),
                 Html(
-                  data: thankContent,
+                  data: l10n.introductionThankContent,
                   style: _htmlStyle(context),
                 ),
               ],
@@ -125,12 +149,13 @@ class _IntroductionPageState extends State<IntroductionPage> {
 
   Map<String, Style> _htmlStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return {
       "body": Style(
         fontSize: FontSize(16.0),
         lineHeight: LineHeight(1.5),
-        color: colorScheme.onSurface,
+        color: isDarkMode ? Colors.white : Colors.black,
       ),
       "p": Style(margin: Margins.only(bottom: 10)),
       "strong": Style(fontWeight: FontWeight.bold),

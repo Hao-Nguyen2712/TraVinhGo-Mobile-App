@@ -3,29 +3,34 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:travinhgo/providers/auth_provider.dart';
-import 'package:travinhgo/widget/login_button_widget.dart';
-import 'package:travinhgo/utils/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AuthRequiredScreen extends StatelessWidget {
   final Widget child;
-  final String message;
+  final String? message;
 
   const AuthRequiredScreen({
     super.key,
     required this.child,
-    this.message = 'Please login to access this feature',
+    this.message,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final displayMessage = message ?? l10n.loginToUseFeature;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     // Debug print to verify the AuthRequiredScreen is being displayed
-    debugPrint("AUTH REQUIRED SCREEN: Building screen with message: $message");
+    debugPrint(
+        "AUTH REQUIRED SCREEN: Building screen with message: $displayMessage");
 
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
         // Show login UI if not authenticated
         if (!authProvider.isAuthenticated) {
           return Scaffold(
+            resizeToAvoidBottomInset: false,
             body: SafeArea(
               child: Center(
                 child: Padding(
@@ -49,29 +54,31 @@ class AuthRequiredScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
-                      SizedBox(height: 3.h),
+                      SizedBox(height: 2.h),
 
                       // Title
                       Text(
-                        'Authentication Required',
+                        l10n.authRequiredTitle,
                         style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : Colors.black),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 1.5.h),
 
                       // Message
                       Text(
-                        message,
+                        displayMessage,
                         style: TextStyle(
                           fontSize: 14.sp,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: isDarkMode
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 3.h),
 
                       // Login button
                       SizedBox(
@@ -98,11 +105,12 @@ class AuthRequiredScreen extends StatelessWidget {
                             elevation: 2,
                           ),
                           child: Text(
-                            'Login',
+                            l10n.signIn,
                             style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.white),
                           ),
                         ),
                       ),
@@ -114,9 +122,13 @@ class AuthRequiredScreen extends StatelessWidget {
                           context.go('/home');
                         },
                         child: Text(
-                          'Back to Home',
+                          l10n.backToHomeButton,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: isDarkMode
+                                ? Colors.white
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                             fontSize: 14.sp,
                           ),
                         ),

@@ -42,17 +42,20 @@ class NotificationItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  textAlign: TextAlign.left,
-                  StringHelper.formatDateTime(
-                      userNotification.createdAt.toString()),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
               ],
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 7.0),
+              child: Text(
+                textAlign: TextAlign.left,
+                StringHelper.formatDateTime(
+                    userNotification.createdAt.toString()),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
             const SizedBox(height: 4),
             Html(

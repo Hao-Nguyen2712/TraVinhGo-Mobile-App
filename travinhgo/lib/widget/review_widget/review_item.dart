@@ -175,14 +175,17 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                                 Text(
                                   review.rating.toStringAsFixed(1),
                                   style: TextStyle(
-                                    color: colorScheme.onPrimary,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : colorScheme.onPrimary,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 10.sp,
+                                    fontSize: 14.sp,
                                   ),
                                 ),
                                 SizedBox(width: 1.w),
                                 Icon(Icons.star,
-                                    size: 11.sp, color: colorScheme.onPrimary),
+                                    size: 11.sp, color: Colors.amber),
                               ],
                             ),
                           ),
@@ -204,7 +207,7 @@ class _ReviewItemState extends State<ReviewItem> with TickerProviderStateMixin {
                             review.comment!,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               height: 1.4,
-                              color: colorScheme.onSurfaceVariant,
+                              color: theme.textTheme.bodyLarge?.color,
                             ),
                           ),
                         ),

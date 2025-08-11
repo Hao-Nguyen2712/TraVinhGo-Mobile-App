@@ -58,15 +58,98 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAddressData();
-    _loadUserData();
+    _loadInitialData();
   }
 
-  Future<void> _loadAddressData() async {
+  Future<void> _loadInitialData() async {
+    // 1. Load address data from the service
     await _addressService.loadAddressData();
-    setState(() {
-      _provinces = _addressService.getProvinceNames();
-    });
+    final allProvinces = _addressService.getProvinceNames().toSet().toList();
+
+    // 2. Load user profile data
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final profile = userProvider.userProfile;
+
+    debugPrint("Loading user data for profile screen");
+
+    if (profile != null) {
+      debugPrint(
+          "Profile data received: email=${profile.email}, avatar=${profile.avatar}, fullname=${profile.fullname}");
+
+      // Set text controllers with default values if data is empty
+      _fullNameController.text =
+          profile.fullname.isNotEmpty ? profile.fullname : '';
+      _phoneController.text = profile.phone.isNotEmpty ? profile.phone : '';
+      _emailController.text = profile.email;
+
+      _displayName = profile.fullname.isNotEmpty ? profile.fullname : 'User';
+      _avatarUrl = profile.avatar;
+      _selectedGender = profile.gender.isNotEmpty ? profile.gender : 'Male';
+      _dateOfBirth = profile.dateOfBirth ?? '01/01/2000';
+
+      // Initialize address fields
+      List<String> loadedDistricts = [];
+      List<String> loadedWards = [];
+      String? loadedSelectedProvince;
+      String? loadedSelectedDistrict;
+      String? loadedSelectedWard;
+
+      if (profile.address.isNotEmpty) {
+        _addressController.text = profile.address;
+        final addressComponents = _addressService.parseAddress(profile.address);
+        _streetAddressController.text =
+            addressComponents['streetAddress'] ?? '';
+
+        final parsedProvince = addressComponents['province'];
+        if (parsedProvince != null && allProvinces.contains(parsedProvince)) {
+          loadedSelectedProvince = parsedProvince;
+          loadedDistricts = _addressService
+              .getDistrictNames(loadedSelectedProvince)
+              .toSet()
+              .toList();
+
+          final parsedDistrict = addressComponents['district'];
+          if (parsedDistrict != null &&
+              loadedDistricts.contains(parsedDistrict)) {
+            loadedSelectedDistrict = parsedDistrict;
+            loadedWards = _addressService
+                .getWardNames(loadedSelectedProvince, loadedSelectedDistrict)
+                .toSet()
+                .toList();
+
+            final parsedWard = addressComponents['ward'];
+            if (parsedWard != null && loadedWards.contains(parsedWard)) {
+              loadedSelectedWard = parsedWard;
+            }
+          }
+        }
+      } else {
+        _addressController.text = '';
+        _streetAddressController.text = '';
+      }
+
+      setState(() {
+        _dataLoaded = true;
+        _isLoading = false;
+        _provinces = allProvinces;
+        _districts = loadedDistricts;
+        _wards = loadedWards;
+        _selectedProvince = loadedSelectedProvince;
+        _selectedDistrict = loadedSelectedDistrict;
+        _selectedWard = loadedSelectedWard;
+        debugPrint(
+            "Profile data loaded into UI - email: ${_emailController.text}, avatar: $_avatarUrl, fullname: ${_fullNameController.text}");
+      });
+    } else {
+      // Profile is null
+      setState(() {
+        _isLoading = false;
+        _provinces = allProvinces;
+        _fullNameController.text = '';
+        _displayName = 'User';
+        debugPrint("Failed to load profile data - profile is null");
+      });
+    }
   }
 
   @override
@@ -84,80 +167,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _streetAddressFocus.dispose();
 
     super.dispose();
-  }
-
-  void _loadUserData() {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final profile = userProvider.userProfile;
-
-    debugPrint("Loading user data for profile screen");
-
-    if (profile != null) {
-      debugPrint(
-          "Profile data received: email=${profile.email}, avatar=${profile.avatar}, fullname=${profile.fullname}");
-      setState(() {
-        _dataLoaded = true;
-        _isLoading = false;
-
-        // Store the original display name for the profile picture
-        _displayName = profile.fullname.isNotEmpty ? profile.fullname : 'User';
-
-        // Set text controllers with default values if data is empty
-        _fullNameController.text = profile.fullname.isNotEmpty
-            ? profile.fullname
-            : ''; // Empty string instead of 'User'
-
-        _phoneController.text = profile.phone.isNotEmpty ? profile.phone : '';
-
-        // Parse address if it exists
-        if (profile.address.isNotEmpty) {
-          _addressController.text = profile.address;
-
-          // Parse the address into components
-          final addressComponents =
-              _addressService.parseAddress(profile.address);
-          _streetAddressController.text =
-              addressComponents['streetAddress'] ?? '';
-          _selectedWard = addressComponents['ward'];
-          _selectedDistrict = addressComponents['district'];
-          _selectedProvince = addressComponents['province'];
-
-          // Load districts and wards if province and district are set
-          if (_selectedProvince != null && _selectedProvince!.isNotEmpty) {
-            _districts = _addressService.getDistrictNames(_selectedProvince!);
-
-            if (_selectedDistrict != null && _selectedDistrict!.isNotEmpty) {
-              _wards = _addressService.getWardNames(
-                  _selectedProvince!, _selectedDistrict!);
-            }
-          }
-        } else {
-          _addressController.text = '';
-          _streetAddressController.text = '';
-        }
-
-        // Store email and avatar directly
-        _emailController.text = profile.email;
-        _avatarUrl = profile.avatar;
-
-        // Gender might be empty, set a default
-        _selectedGender = profile.gender.isNotEmpty ? profile.gender : 'Male';
-
-        // Date of birth might be null, set a default
-        _dateOfBirth = profile.dateOfBirth ?? '01/01/2000';
-
-        debugPrint(
-            "Profile data loaded into UI - email: ${_emailController.text}, avatar: $_avatarUrl, fullname: ${_fullNameController.text}");
-      });
-    } else {
-      setState(() {
-        _isLoading = false;
-        // Don't set default value for fullname when profile is null
-        _fullNameController.text = '';
-        _displayName = 'User';
-      });
-      debugPrint("Failed to load profile data - profile is null");
-    }
   }
 
   // Toggle edit mode or save changes
@@ -320,7 +329,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     setState(() {
       _selectedProvince = province;
-      _districts = _addressService.getDistrictNames(province);
+      _districts = _addressService.getDistrictNames(province).toSet().toList();
       _selectedDistrict = null;
       _selectedWard = null;
       _wards = [];
@@ -334,7 +343,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     setState(() {
       _selectedDistrict = district;
-      _wards = _addressService.getWardNames(_selectedProvince!, district);
+      _wards = _addressService
+          .getWardNames(_selectedProvince!, district)
+          .toSet()
+          .toList();
       _selectedWard = null;
       _formChanged = true;
     });
@@ -501,13 +513,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 // Update districts and wards lists
                 if (_selectedProvince != null &&
                     _selectedProvince!.isNotEmpty) {
-                  _districts =
-                      _addressService.getDistrictNames(_selectedProvince!);
+                  _districts = _addressService
+                      .getDistrictNames(_selectedProvince!)
+                      .toSet()
+                      .toList();
 
                   if (_selectedDistrict != null &&
                       _selectedDistrict!.isNotEmpty) {
-                    _wards = _addressService.getWardNames(
-                        _selectedProvince!, _selectedDistrict!);
+                    _wards = _addressService
+                        .getWardNames(_selectedProvince!, _selectedDistrict!)
+                        .toSet()
+                        .toList();
                   }
                 }
               }
@@ -597,7 +613,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         backgroundColor: theme.colorScheme.surface,
         appBar: AppBar(
           backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
+          foregroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
           title: Text(
@@ -605,10 +621,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: GoogleFonts.montserrat(
               fontWeight: FontWeight.w600,
               fontSize: 20,
+              color: Colors.white,
             ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            icon:
+                const Icon(Icons.arrow_back_ios, size: 20, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
           actions: [
@@ -620,7 +638,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     : AppLocalizations.of(context)!
                         .edit, // Change text based on mode
                 style: GoogleFonts.montserrat(
-                  color: theme.colorScheme.onPrimary,
+                  color: Colors.white,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -640,10 +658,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildEditForm() {
     final userProvider = Provider.of<UserProvider>(context);
     final profile = userProvider.userProfile;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (profile == null) {
       return Center(
-        child: Text('No profile data available'),
+        child: Text(
+          'No profile data available',
+          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+        ),
       );
     }
 
@@ -724,15 +746,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         children: [
                           Text(
                             _dateOfBirth,
-                            style: GoogleFonts.montserrat(fontSize: 16),
+                            style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black),
                           ),
                           const Spacer(),
                           if (_editMode)
                             Icon(
                               Icons.calendar_today,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                               size: 20,
                             )
                           else
@@ -769,6 +796,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildProfileDataSection() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -816,7 +844,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
         const SizedBox(height: 4),
@@ -826,7 +854,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Text(
               AppLocalizations.of(context)!.changeProfilePicture,
               style: GoogleFonts.montserrat(
-                color: Theme.of(context).colorScheme.primary,
+                color: isDarkMode
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),
@@ -839,6 +869,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _showGenderSelector() {
     if (!_editMode) return; // Only allow in edit mode
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
       context: context,
@@ -855,13 +886,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Text(
               AppLocalizations.of(context)!.selectGenderTitle,
               style: GoogleFonts.montserrat(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: isDarkMode ? Colors.white : Colors.black),
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: Text(AppLocalizations.of(context)!.male),
+              title: Text(AppLocalizations.of(context)!.male,
+                  style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black)),
               trailing: _selectedGender == 'Male'
                   ? Icon(Icons.check,
                       color: Theme.of(context).colorScheme.primary)
@@ -875,7 +908,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               },
             ),
             ListTile(
-              title: Text(AppLocalizations.of(context)!.female),
+              title: Text(AppLocalizations.of(context)!.female,
+                  style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black)),
               trailing: _selectedGender == 'Female'
                   ? Icon(Icons.check,
                       color: Theme.of(context).colorScheme.primary)
@@ -895,12 +930,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildLabelText(String label) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Text(
       label,
       style: GoogleFonts.montserrat(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: isDarkMode ? Colors.white : Colors.black,
       ),
     );
   }
@@ -917,6 +953,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     String? Function(String?)? validator,
     TextAlign textAlign = TextAlign.start,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -930,12 +967,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           maxLines: maxLines,
           enabled: enabled,
           textAlign: textAlign,
-          style: GoogleFonts.montserrat(fontSize: 16),
+          style: GoogleFonts.montserrat(
+              fontSize: 16, color: isDarkMode ? Colors.white : Colors.black),
           decoration: InputDecoration(
             filled: true,
             fillColor: Theme.of(context).colorScheme.surfaceVariant,
             prefixText: prefixText,
             hintText: enabled ? hint : null,
+            hintStyle: TextStyle(color: Colors.grey[400]),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
@@ -970,6 +1009,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     VoidCallback? onTap,
     String? hint,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -987,15 +1027,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             if (prefixText != null)
               Text(
                 '$prefixText ',
-                style: GoogleFonts.montserrat(fontSize: 16),
+                style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    color: isDarkMode ? Colors.white : Colors.black),
               ),
             Text(
               value.isEmpty && _editMode ? hint ?? '' : value,
               style: GoogleFonts.montserrat(
                 fontSize: 16,
                 color: value.isEmpty && _editMode
-                    ? Theme.of(context).colorScheme.onSurfaceVariant
-                    : Theme.of(context).colorScheme.onSurface,
+                    ? Colors.grey[400]
+                    : (isDarkMode ? Colors.white : Colors.black),
               ),
             ),
             const Spacer(),
@@ -1017,6 +1059,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String emptyStateText,
     List<TextInputFormatter>? inputFormatters,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1037,9 +1080,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         controller: controller,
                         keyboardType: keyboardType,
                         inputFormatters: inputFormatters,
-                        style: GoogleFonts.montserrat(fontSize: 16),
+                        style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            color: isDarkMode ? Colors.white : Colors.black),
                         decoration: InputDecoration(
                           hintText: hint,
+                          hintStyle: TextStyle(color: Colors.grey[400]),
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
@@ -1055,7 +1101,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         controller.text.isEmpty
                             ? emptyStateText
                             : controller.text,
-                        style: GoogleFonts.montserrat(fontSize: 16),
+                        style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            color: isDarkMode ? Colors.white : Colors.black),
                         overflow: TextOverflow.ellipsis,
                       ),
               ),
@@ -1078,6 +1126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required bool showError,
     required String errorText,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1099,12 +1148,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
+                  dropdownColor: isDarkMode
+                      ? Theme.of(context).colorScheme.surfaceVariant
+                      : null,
                   value: value,
                   hint: Text(
                     hint,
                     style: GoogleFonts.montserrat(
                       fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: Colors.grey[400],
                     ),
                   ),
                   isExpanded: true,
@@ -1113,11 +1165,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       value: item,
                       child: Text(
                         item,
-                        style: GoogleFonts.montserrat(fontSize: 16),
+                        style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            color: isDarkMode ? Colors.white : Colors.black),
                       ),
                     );
                   }).toList(),
                   onChanged: onChanged,
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    color: isDarkMode ? Colors.white : Colors.grey,
+                  ),
                 ),
               ),
               if (showError)
@@ -1140,6 +1198,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   // Build the address section with dropdowns when in edit mode
   Widget _buildAddressSection() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     if (_editMode) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1152,11 +1211,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             controller: _streetAddressController,
             focusNode: _streetAddressFocus,
             keyboardType: TextInputType.streetAddress,
-            style: GoogleFonts.montserrat(fontSize: 16),
+            style: GoogleFonts.montserrat(
+                fontSize: 16, color: isDarkMode ? Colors.white : Colors.black),
             decoration: InputDecoration(
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceVariant,
               hintText: AppLocalizations.of(context)!.enterStreetAddress,
+              hintStyle: TextStyle(color: Colors.grey[400]),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,

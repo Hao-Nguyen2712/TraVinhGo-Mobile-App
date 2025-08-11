@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:travinhgo/widget/placeholder/empty_favorite_placeholder.dart';
+import 'dart:math';
 
 import '../../../providers/favorite_provider.dart';
 import '../../../widget/destination_widget/destination_item.dart';
@@ -19,6 +20,7 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
   bool showAllDestinations = false;
   bool showAllOcop = false;
   bool showAllLocals = false;
+  final int _maxItem = 4;
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +51,10 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               title: AppLocalizations.of(context)!.destination,
               itemCount: destinations.length,
               items: destinations,
-              itemBuilder: (context, index) =>
-                  DestinationItem(destination: destinations[index], isAllowFavorite: true,),
+              itemBuilder: (context, index) => DestinationItem(
+                destination: destinations[index],
+                isAllowFavorite: true,
+              ),
               crossAxisCount: destinationPerRow,
               childAspectRatio: 0.58,
               showAll: showAllDestinations,
@@ -66,8 +70,10 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               title: AppLocalizations.of(context)!.ocop,
               itemCount: ocops.length,
               items: ocops,
-              itemBuilder: (context, index) =>
-                  OcopProductItem(ocopProduct: ocops[index], isAllowFavorite: true,),
+              itemBuilder: (context, index) => OcopProductItem(
+                ocopProduct: ocops[index],
+                isAllowFavorite: true,
+              ),
               crossAxisCount: ocopPerRow,
               childAspectRatio: 0.58,
               showAll: showAllOcop,
@@ -83,8 +89,10 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               title: AppLocalizations.of(context)!.local,
               itemCount: locals.length,
               items: locals,
-              itemBuilder: (context, index) =>
-                  LocalSpecialtyItem(localSpecialty: locals[index], isAllowFavorite: true,),
+              itemBuilder: (context, index) => LocalSpecialtyItem(
+                localSpecialty: locals[index],
+                isAllowFavorite: true,
+              ),
               crossAxisCount: localPerRow,
               childAspectRatio: 1.5,
               showAll: showAllLocals,
@@ -127,9 +135,7 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
         GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: showAll
-              ? itemCount
-              : (itemCount > crossAxisCount ? crossAxisCount : itemCount),
+          itemCount: showAll ? itemCount : min(itemCount, _maxItem),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 4.w,
@@ -138,7 +144,7 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
           ),
           itemBuilder: itemBuilder,
         ),
-        if (itemCount > crossAxisCount)
+        if (itemCount > _maxItem)
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -146,7 +152,7 @@ class _FavoriteAllTabState extends State<FavoriteAllTab> {
               child: Text(
                 showAll ? l10n.less : l10n.more,
                 style: TextStyle(
-                    color: theme.colorScheme.primary, fontSize: 12.sp),
+                    color: theme.colorScheme.primary, fontSize: 14.sp),
               ),
             ),
           ),

@@ -84,6 +84,7 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
     final colorScheme = theme.colorScheme;
     final isTablet = MediaQuery.of(context).size.width >= 600;
     final statusBarHeight = MediaQuery.of(context).viewPadding.top;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -140,8 +141,14 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 32),
-                                    child: Text(AppLocalizations.of(context)!
-                                        .errorPrefix(provider.errorMessage!)),
+                                    child: Text(
+                                        AppLocalizations.of(context)!
+                                            .errorPrefix(
+                                                provider.errorMessage!),
+                                        style: TextStyle(
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black)),
                                   ),
                                 ),
                               )
@@ -151,8 +158,13 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 32),
-                                    child: Text(AppLocalizations.of(context)!
-                                        .noLocalSpecialtyFound),
+                                    child: Text(
+                                        AppLocalizations.of(context)!
+                                            .noLocalSpecialtyFound,
+                                        style: TextStyle(
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black)),
                                   ),
                                 ),
                               )
@@ -209,8 +221,7 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: Theme.of(context).colorScheme.onPrimary),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
           Expanded(
@@ -218,7 +229,7 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
               AppLocalizations.of(context)!.localSpecialty,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Colors.white,
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -233,6 +244,7 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
   Widget _buildSearchBar(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
@@ -240,9 +252,13 @@ class _LocalSpecialtyScreenState extends State<LocalSpecialtyScreen> {
         controller: _searchController,
         focusNode: _focusNode,
         onChanged: _onSearchChanged,
+        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.search,
-          prefixIcon: const Icon(Icons.search),
+          hintStyle:
+              TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey),
+          prefixIcon: Icon(Icons.search,
+              color: isDarkMode ? Colors.white70 : Colors.grey),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(60),
             borderSide: BorderSide.none,

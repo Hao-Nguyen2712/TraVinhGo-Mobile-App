@@ -200,7 +200,6 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return AuthRequiredScreen(
-            message: 'Please login to use this feature',
             child: LocalSpecialtyDetailScreen(
               id: id,
             ),
@@ -221,7 +220,6 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return AuthRequiredScreen(
-            message: 'Please login to use this feature',
             child: OcopProductDetailScreen(
               id: id,
             ),
@@ -242,7 +240,13 @@ class AppRouter {
       GoRoute(
         path: '/notification',
         name: 'Notification',
-        builder: (context, state) => const MessageScreen(),
+        // builder: (context, state) => const MessageScreen(),
+        builder: (context, state) {
+          return AuthRequiredScreen(
+            message: 'Please login to use this feature',
+            child: MessageScreen(),
+          );
+        },
       ),
       GoRoute(
         path: '/feedback',
@@ -255,7 +259,6 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return AuthRequiredScreen(
-            message: 'Please login to use this feature',
             child: EventFesftivalDetailScreen(id: id),
           );
         },
@@ -266,7 +269,6 @@ class AppRouter {
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             return AuthRequiredScreen(
-              message: 'Please login to use this feature',
               child: DestinationDetailScreen(
                 id: id,
               ),
@@ -308,7 +310,6 @@ class AppRouter {
             path: '/favorites',
             name: 'favorites',
             builder: (context, state) => const AuthRequiredScreen(
-              message: 'Please login to use this feature',
               child: FavoriteScreen(),
             ),
           ),
@@ -316,7 +317,6 @@ class AppRouter {
             path: '/profile',
             name: 'profile',
             builder: (context, state) => const AuthRequiredScreen(
-              message: 'Please login to use this feature',
               child: ProfileScreen(),
             ),
           ),
@@ -411,7 +411,8 @@ class AppRouter {
           state.uri.path.startsWith('/ocop-product-detail/') ||
               state.uri.path.startsWith('/tourist-destination-detail/') ||
               state.uri.path.startsWith('/local-specialty-detail/') ||
-              state.uri.path.startsWith('/event-festival-detail/');
+              state.uri.path.startsWith('/event-festival-detail/') ||
+              state.uri.path.startsWith('/notification');
 
       debugPrint("Log_Auth_flow: ROUTER - Is public route: $isPublicRoute");
       debugPrint(

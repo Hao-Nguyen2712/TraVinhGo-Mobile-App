@@ -147,6 +147,7 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDarkmode = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -186,7 +187,7 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                 AppLocalizations.of(context)!.addFeedback,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
+                  color: isDarkmode ? Colors.white : theme.primaryColor,
                   fontSize: 16,
                 ),
               ),
@@ -311,9 +312,12 @@ class _FeedbackFormScreenState extends State<FeedbackFormScreen> {
                                 )
                               : Text(
                                   AppLocalizations.of(context)!.send,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkmode
+                                          ? Colors.white
+                                          : theme.primaryColor,
+                                      fontSize: 16),
                                 ),
                         ),
                       ],

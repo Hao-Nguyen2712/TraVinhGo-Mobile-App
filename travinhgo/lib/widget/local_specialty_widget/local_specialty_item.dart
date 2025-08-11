@@ -21,6 +21,7 @@ class LocalSpecialtyItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final favoriteProvider = FavoriteProvider.of(context);
     final interactionProvider = InteractionProvider.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -122,7 +123,9 @@ class LocalSpecialtyItem extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.primary,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : Theme.of(context).colorScheme.primary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -138,8 +141,11 @@ class LocalSpecialtyItem extends StatelessWidget {
                           StringHelper.stripHtml(localSpecialty.description),
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: isDarkMode
+                                ? Colors.white70
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                           ),
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,

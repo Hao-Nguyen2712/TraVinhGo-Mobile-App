@@ -14,6 +14,7 @@ class EventFestivalContentTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
       child: Column(
@@ -32,6 +33,7 @@ class EventFestivalContentTab extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
             ],
@@ -41,7 +43,7 @@ class EventFestivalContentTab extends StatelessWidget {
             style: {
               "body": Style(
                 fontSize: FontSize(15.sp),
-                color: Colors.grey.shade700,
+                color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
                 lineHeight: const LineHeight(1.5),
               ),
             },

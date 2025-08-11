@@ -131,18 +131,27 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
   }
 
   void _launchLink(BuildContext context, String url) async {
-    String urlToLaunch = url;
-    if (!urlToLaunch.startsWith(RegExp(r'https?://'))) {
-      urlToLaunch = 'https://$urlToLaunch';
-    }
-
+    final String urlToLaunch =
+        url.startsWith(RegExp(r'https?://')) ? url : 'https://$url';
     final uri = Uri.parse(urlToLaunch);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint(
+            'Could not launch $urlToLaunch: "canLaunchUrl" returned false.');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Không thể mở đường dẫn: $urlToLaunch')),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error launching URL $urlToLaunch: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể mở đường dẫn: $urlToLaunch')),
+          SnackBar(content: Text('Đã xảy ra lỗi khi mở đường dẫn: $e')),
         );
       }
     }
@@ -329,9 +338,11 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                   AppLocalizations.of(context)!.information,
                                   style: TextStyle(
                                       fontSize: 24,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary),
                                 )),
                             SizedBox(height: 2.h),
                             Row(
@@ -351,7 +362,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                     textAlign: TextAlign.right,
                                     style: TextStyle(
                                         fontSize: 15.sp,
-                                        color: colorScheme.primary),
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : colorScheme.primary),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -374,7 +387,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                             ocopProductDetail.productPrice),
                                         style: TextStyle(
                                             fontSize: 15.sp,
-                                            color: colorScheme.onBackground,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : colorScheme.onBackground,
                                             fontWeight: FontWeight.w800),
                                       ),
                                       TextSpan(
@@ -382,7 +397,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                             .currencyVnd,
                                         style: TextStyle(
                                           fontSize: 15.sp,
-                                          color: colorScheme.onBackground,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : colorScheme.onBackground,
                                         ),
                                       ),
                                     ],
@@ -430,7 +447,9 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                           style: TextStyle(
                                               fontSize: 15.sp,
                                               fontStyle: FontStyle.italic,
-                                              color: Colors.grey),
+                                              color: isDarkMode
+                                                  ? Colors.white70
+                                                  : Colors.grey),
                                         )
                                       : DropdownButtonFormField<SellingLink>(
                                           decoration: InputDecoration(
@@ -444,13 +463,28 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                                   BorderRadius.circular(12),
                                             ),
                                           ),
-                                          hint: const Text('Chọn liên kết'),
+                                          hint: Text('Chọn liên kết',
+                                              style: TextStyle(
+                                                  color: isDarkMode
+                                                      ? Colors.white
+                                                      : Colors.black)),
                                           isExpanded: true,
+                                          dropdownColor: isDarkMode
+                                              ? colorScheme.surfaceVariant
+                                              : null,
+                                          icon: Icon(Icons.arrow_drop_down,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black),
                                           items: _sellingLinks
                                               .map((link) =>
                                                   DropdownMenuItem<SellingLink>(
                                                     value: link,
                                                     child: Text(link.title,
+                                                        style: TextStyle(
+                                                            color: isDarkMode
+                                                                ? Colors.white
+                                                                : Colors.black),
                                                         overflow: TextOverflow
                                                             .ellipsis),
                                                   ))
@@ -474,9 +508,11 @@ class _OcopProductDetailScreenState extends State<OcopProductDetailScreen> {
                                         .availableStore,
                                     style: TextStyle(
                                         fontSize: 24,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary),
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .primary),
                                   )),
                               const SizedBox(height: 16),
                               GridView.builder(

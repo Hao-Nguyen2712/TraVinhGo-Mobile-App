@@ -29,58 +29,69 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final favoriteProvider = Provider.of<FavoriteProvider>(context);
-    final destinationCount = favoriteProvider.destinationList.length;
-    final ocopCount = favoriteProvider.ocopProductList.length;
-    final localCount = favoriteProvider.localSpecialteList.length;
-    final allCount = destinationCount + ocopCount + localCount;
+    return Consumer<FavoriteProvider>(
+      builder: (context, favoriteProvider, child) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final destinationCount = favoriteProvider.destinationList.length;
+        final ocopCount = favoriteProvider.ocopProductList.length;
+        final localCount = favoriteProvider.localSpecialteList.length;
+        final allCount = destinationCount + ocopCount + localCount;
 
-    final counts = [allCount, destinationCount, ocopCount, localCount];
+        final counts = [allCount, destinationCount, ocopCount, localCount];
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              backgroundColor: colorScheme.primary,
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              title: Text(
-                AppLocalizations.of(context)!.favoriteTitle,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16.sp,
+        final bool isSelectedTabEmpty;
+        if (_selectedTab == 0) {
+          isSelectedTabEmpty = allCount == 0;
+        } else {
+          isSelectedTabEmpty = counts[_selectedTab] == 0;
+        }
+
+        return Scaffold(
+          backgroundColor: colorScheme.surface,
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  backgroundColor: colorScheme.primary,
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  title: Text(
+                    AppLocalizations.of(context)!.favoriteTitle,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16.sp,
+                    ),
+                  ),
+                  centerTitle: true,
                 ),
-              ),
-              centerTitle: true,
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 2.w),
-                color: colorScheme.primary,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(
-                    _tabs.length,
-                    (index) => _buildTab(index, counts[index]),
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 2.w),
+                    color: colorScheme.primary,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: List.generate(
+                        _tabs.length,
+                        (index) => _buildTab(index, counts[index]),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                SliverFillRemaining(
+                  hasScrollBody: !isSelectedTabEmpty,
+                  child: _buildTabContent(),
+                ),
+              ],
             ),
-            SliverFillRemaining(
-              hasScrollBody: true,
-              child: _buildTabContent(),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

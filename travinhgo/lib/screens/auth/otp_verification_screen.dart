@@ -105,6 +105,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     try {
       final bool isGoogleAuth = widget.googleEmail != null;
@@ -146,7 +147,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     isGoogleAuth
                         ? Icons.email_outlined
                         : Icons.message_outlined,
-                    color: colorScheme.onPrimary,
+                    color: Colors.white,
                     size: 8.w,
                   ),
                 ),
@@ -159,8 +160,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       : AppLocalizations.of(context)!.checkYourMessage,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16.sp,
-                    color: colorScheme.onSurface,
+                    fontSize: 18.sp,
+                    color: isDarkMode
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -178,8 +181,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                 .otpSentToConfirmPhone,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 11.sp,
+                          color: isDarkMode
+                              ? Colors.white
+                              : colorScheme.onSurfaceVariant,
+                          fontSize: 14.sp,
                           height: 1.5,
                         ),
                       ),
@@ -196,8 +201,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             recipient,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 11.sp,
-                              color: colorScheme.onSurface,
+                              fontSize: 14.sp,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -206,8 +215,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           AppLocalizations.of(context)!.checkInboxToContinue,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 11.sp,
+                            color: isDarkMode
+                                ? Colors.white
+                                : colorScheme.onSurfaceVariant,
+                            fontSize: 14.sp,
                             height: 1.5,
                           ),
                         ),
@@ -225,7 +236,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     onPressed: () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
+                      foregroundColor:
+                          isDarkMode ? Colors.white : colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.sp),
                       ),
@@ -235,7 +247,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       AppLocalizations.of(context)!.ok,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 12.sp,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ),
@@ -347,26 +359,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
         if (mounted) {
           debugPrint("OTP: Showing error dialog");
-          await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(AppLocalizations.of(context)!.error),
-              content: Text(authProvider.error ??
-                  AppLocalizations.of(context)!.authFailed),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    debugPrint("OTP: Error dialog dismissed");
-                    Navigator.of(context).pop(); // Dismiss dialog
-                    setState(() {
-                      _otpError = AppLocalizations.of(context)!.invalidOtp;
-                    });
-                  },
-                  child: Text(AppLocalizations.of(context)!.ok),
-                ),
-              ],
-            ),
-          );
         }
       }
     } catch (e) {
@@ -605,6 +597,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isKeyboardVisible = keyboardHeight > 0;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Calculate header height - smaller when keyboard is visible
     final headerHeight = isKeyboardVisible
@@ -858,7 +851,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               _otpError!,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.error,
-                                fontSize: 10.sp,
+                                fontSize: 14.sp,
                               ),
                             ),
                           ),
@@ -875,6 +868,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                   ? null
                                   : _verifyOtp,
                               style: ElevatedButton.styleFrom(
+                                foregroundColor: isDarkMode
+                                    ? Colors.white
+                                    : Theme.of(context).colorScheme.onPrimary,
                                 backgroundColor:
                                     Theme.of(context).colorScheme.primary,
                                 disabledBackgroundColor: Theme.of(context)
@@ -899,9 +895,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                       style: TextStyle(
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
                                       ),
                                     ),
                             ),
@@ -990,9 +988,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       Text(
                         AppLocalizations.of(context)!.verifying,
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: colorScheme.primary,
+                          color: isDarkMode
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(height: 1.h),
@@ -1001,8 +1001,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         AppLocalizations.of(context)!.verifyingYourCode,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 11.sp,
-                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 14.sp,
+                          color: isDarkMode
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
