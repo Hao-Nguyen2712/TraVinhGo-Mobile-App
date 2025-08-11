@@ -12,6 +12,7 @@ class DataFieldRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -20,7 +21,9 @@ class DataFieldRow extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 15.sp, color: colorScheme.onSurface),
+              style: TextStyle(
+                  fontSize: 15.sp,
+                  color: isDarkMode ? Colors.white : Colors.black),
             ),
             const Spacer(),
             ConstrainedBox(
@@ -41,7 +44,7 @@ class DataFieldRow extends StatelessWidget {
                   value ?? 'N/A',
                   style: TextStyle(
                     fontSize: 15.sp,
-                    color: Theme.of(context).brightness == Brightness.dark
+                    color: isDarkMode
                         ? Colors.white
                         : colorScheme.onSurfaceVariant,
                   ),

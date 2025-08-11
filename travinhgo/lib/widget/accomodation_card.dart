@@ -28,7 +28,7 @@ class AccomodationCard extends StatelessWidget {
           children: [
             Text(
               place.title,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,

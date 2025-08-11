@@ -37,8 +37,8 @@ class LocalSpecialtyLocationCard extends StatelessWidget {
                 children: [
                   Image.network(
                     tagImage,
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                   ),
                   SizedBox(width: 2.w),
                   Text(AppLocalizations.of(context)!.local),
@@ -55,7 +55,7 @@ class LocalSpecialtyLocationCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 1.h),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -66,7 +66,7 @@ class LocalSpecialtyLocationCard extends StatelessWidget {
                 child: Text(
                   location.address,
                   style: theme.textTheme.bodyMedium,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

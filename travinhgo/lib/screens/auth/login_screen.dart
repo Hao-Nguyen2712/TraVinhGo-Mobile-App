@@ -30,6 +30,13 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   static const String _resumingFromGoogleSignInKey =
       'resuming_from_google_signin';
 
+  bool _isValidVietnamesePhoneNumber(String phoneNumber) {
+    // Vietnamese phone numbers must start with 0, have 10 digits,
+    // and the second digit must be 3, 5, 7, 8, or 9.
+    final RegExp vietnamesePhoneRegex = RegExp(r'^0[35789]\d{8}$');
+    return vietnamesePhoneRegex.hasMatch(phoneNumber);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -270,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     }
 
     // Basic phone number validation
-    if (phoneNumber.length < 10) {
+    if (!_isValidVietnamesePhoneNumber(phoneNumber)) {
       setState(() {
         _phoneError = AppLocalizations.of(context)!.enterValidPhoneNumber;
       });
@@ -387,7 +394,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                     Text(
                       AppLocalizations.of(context)!.authenticating,
                       style: GoogleFonts.montserrat(
-                        fontSize: 14.sp,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
                         color: colorScheme.primary,
                       ),
@@ -398,7 +405,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                       AppLocalizations.of(context)!.verifyingCredentials,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.montserrat(
-                        fontSize: 11.sp,
+                        fontSize: 15.sp,
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -492,6 +499,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     // Store the current route info but only once when widget first builds
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
@@ -667,7 +675,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                           text: AppLocalizations.of(context)!
                                               .phoneNumber,
                                           style: TextStyle(
-                                            fontSize: 14.sp,
+                                            fontSize: 16.sp,
                                             fontWeight: FontWeight.w500,
                                             color: colorScheme.onSurface,
                                           ),
@@ -746,7 +754,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                       _phoneError!,
                                       style: TextStyle(
                                         color: colorScheme.error,
-                                        fontSize: 10.sp,
+                                        fontSize: 14.sp,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
@@ -775,7 +783,9 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                       style: TextStyle(
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: colorScheme.onPrimary,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.white,
                                       ),
                                     ),
                                   ),
@@ -948,9 +958,13 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                             Text(
                               AppLocalizations.of(context)!.authenticating,
                               style: GoogleFonts.montserrat(
-                                fontSize: 14.sp,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
-                                color: colorScheme.primary,
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                               ),
                             ),
                             SizedBox(height: 1.h),
@@ -960,8 +974,12 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   .verifyingCredentials,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.montserrat(
-                                fontSize: 11.sp,
-                                color: colorScheme.onSurfaceVariant,
+                                fontSize: 14.sp,
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                               ),
                             ),
                           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../Models/itinerary_plan/itinerary_plan.dart';
 import '../../providers/destination_type_provider.dart';
@@ -11,13 +12,22 @@ class ItineraryPlanDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
+            backgroundColor: colorScheme.primary,
+            foregroundColor: Colors.white,
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
+            iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               titlePadding: const EdgeInsets.only(bottom: 16.0),
@@ -36,7 +46,7 @@ class ItineraryPlanDetailScreen extends StatelessWidget {
                 ),
               ),
               background: Container(
-                color: const Color(0xFF18A558),
+                color: colorScheme.primary,
                 child: const Icon(
                   Icons.directions_walk,
                   size: 80,
@@ -54,6 +64,7 @@ class ItineraryPlanDetailScreen extends StatelessWidget {
                 children: [
                   Card(
                     elevation: 2,
+                    color: theme.cardColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -62,18 +73,27 @@ class ItineraryPlanDetailScreen extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildInfoColumn(Icons.access_time, "Thời lượng",
-                              itineraryPlan.duration ?? 'N/A'),
-                          _buildInfoColumn(Icons.monetization_on, "Chi phí",
-                              itineraryPlan.estimatedCost ?? 'N/A'),
+                          _buildInfoColumn(
+                              context,
+                              Icons.access_time,
+                              l10n.duration,
+                              itineraryPlan.duration ?? l10n.notAvailable),
+                          _buildInfoColumn(
+                              context,
+                              Icons.monetization_on,
+                              l10n.cost,
+                              itineraryPlan.estimatedCost ?? l10n.notAvailable),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    "Chi tiết lịch trình",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.itineraryDetails,
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -104,15 +124,24 @@ class ItineraryPlanDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoColumn(IconData icon, String label, String value) {
+  Widget _buildInfoColumn(
+      BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
     return Column(
       children: [
-        Icon(icon, color: const Color(0xFF18A558), size: 28),
+        Icon(icon,
+            color: isDarkMode ? Colors.white : colorScheme.primary, size: 28),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(label,
+            style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey)),
         const SizedBox(height: 4),
         Text(value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: isDarkMode ? Colors.white : Colors.black)),
       ],
     );
   }
@@ -135,6 +164,9 @@ class TimelineTile extends StatelessWidget {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     final destinationType = destinationTypeProvider
         .getDestinationtypeById(destination.destinationTypeId);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return IntrinsicHeight(
       child: Row(
@@ -150,25 +182,29 @@ class TimelineTile extends StatelessWidget {
                 Container(
                   width: 1,
                   height: 20,
-                  color: isFirst ? Colors.transparent : Colors.grey,
+                  color: isFirst
+                      ? Colors.transparent
+                      : (isDarkMode ? Colors.white54 : Colors.grey),
                 ),
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF18A558).withOpacity(0.2),
+                    color: colorScheme.primary.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.location_on,
-                    color: const Color(0xFF18A558),
+                    color: isDarkMode ? Colors.white : colorScheme.primary,
                     size: 24,
                   ),
                 ),
                 Expanded(
                   child: Container(
                     width: 1,
-                    color: isLast ? Colors.transparent : Colors.grey,
+                    color: isLast
+                        ? Colors.transparent
+                        : (isDarkMode ? Colors.white54 : Colors.grey),
                   ),
                 ),
               ],
@@ -179,11 +215,11 @@ class TimelineTile extends StatelessWidget {
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: theme.shadowColor.withOpacity(0.1),
                     spreadRadius: 1,
                     blurRadius: 5,
                   ),
@@ -194,9 +230,10 @@ class TimelineTile extends StatelessWidget {
                 children: [
                   Text(
                     destination.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -216,7 +253,8 @@ class TimelineTile extends StatelessWidget {
                           destination.address.toString(),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.grey),
+                          style: TextStyle(
+                              color: isDarkMode ? Colors.white70 : Colors.grey),
                         ),
                       ),
                     ],

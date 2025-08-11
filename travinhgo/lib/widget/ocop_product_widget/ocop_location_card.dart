@@ -66,7 +66,7 @@ class OcopLocationCard extends StatelessWidget {
                 child: Text(
                   location.locationAddress ?? 'N/A',
                   style: theme.textTheme.bodyMedium,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

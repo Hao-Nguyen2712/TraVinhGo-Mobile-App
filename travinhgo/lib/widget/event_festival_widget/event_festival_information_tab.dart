@@ -15,6 +15,7 @@ class EventFestivalInformationTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       child: Column(
@@ -33,12 +34,14 @@ class EventFestivalInformationTab extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
             ],
           ),
           SizedBox(height: 4.h),
           _buildInfoRow(
+            context,
             icon: Icons.home_filled,
             iconColor: const Color(0xFFF57A82),
             title: localizations.location,
@@ -46,6 +49,7 @@ class EventFestivalInformationTab extends StatelessWidget {
           ),
           SizedBox(height: 2.5.h),
           _buildInfoRow(
+            context,
             icon: Icons.location_on_rounded,
             iconColor: const Color(0xFFF57A82),
             title: localizations.address,
@@ -53,6 +57,7 @@ class EventFestivalInformationTab extends StatelessWidget {
           ),
           SizedBox(height: 2.5.h),
           _buildInfoRow(
+            context,
             icon: Icons.calendar_today_rounded,
             iconColor: const Color(0xFF8F83F3),
             title: localizations.startDate,
@@ -61,6 +66,7 @@ class EventFestivalInformationTab extends StatelessWidget {
           ),
           SizedBox(height: 2.5.h),
           _buildInfoRow(
+            context,
             icon: Icons.timer_rounded,
             iconColor: const Color(0xFFF57A82),
             title: localizations.endDate,
@@ -68,6 +74,7 @@ class EventFestivalInformationTab extends StatelessWidget {
           ),
           SizedBox(height: 2.5.h),
           _buildInfoRow(
+            context,
             icon: Icons.category_rounded,
             iconColor: const Color(0xFF4B9EFC),
             title: localizations.eventType,
@@ -78,12 +85,14 @@ class EventFestivalInformationTab extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow({
+  Widget _buildInfoRow(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
     required String value,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -93,7 +102,7 @@ class EventFestivalInformationTab extends StatelessWidget {
           title,
           style: TextStyle(
               fontSize: 14.sp,
-              color: Colors.black,
+              color: isDarkMode ? Colors.white : Colors.black,
               fontWeight: FontWeight.w700),
         ),
         SizedBox(width: 6.w),
@@ -104,7 +113,7 @@ class EventFestivalInformationTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
           ),
         ),

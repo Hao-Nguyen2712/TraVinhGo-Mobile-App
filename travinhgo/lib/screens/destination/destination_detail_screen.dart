@@ -319,6 +319,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
   Widget build(BuildContext context) {
     final destinationTypeProvider = DestinationTypeProvider.of(context);
     final favoriteProvider = FavoriteProvider.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     void _toggleExpanded() {
       setState(() {
@@ -328,7 +330,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
 
     final tagProvider = TagProvider.of(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? colorScheme.surface : Colors.white,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -430,8 +432,18 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                             right: 4.w,
                             child: GestureDetector(
                               onTap: () {
-                                favoriteProvider.toggleDestinationFavorite(
-                                    destinationDetail);
+                                setState(() {
+                                  if (favoriteProvider
+                                      .isExist(destinationDetail.id)) {
+                                    destinationDetail.favoriteCount =
+                                        destinationDetail.favoriteCount! - 1;
+                                  } else {
+                                    destinationDetail.favoriteCount =
+                                        destinationDetail.favoriteCount! + 1;
+                                  }
+                                  favoriteProvider.toggleDestinationFavorite(
+                                      destinationDetail);
+                                });
                               },
                               child: Icon(
                                 favoriteProvider.isExist(destinationDetail.id)
@@ -465,7 +477,11 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               ),
                               Text(
                                 AppLocalizations.of(context)!.destination,
-                                style: TextStyle(fontSize: 14.sp),
+                                style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                               const Spacer(),
                               const Icon(
@@ -476,15 +492,23 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 width: 2.5.w,
                               ),
                               Text(
-                                "82",
-                                style: TextStyle(fontSize: 14.sp),
+                                destinationDetail.favoriteCount.toString(),
+                                style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                               SizedBox(
                                 width: 1.5.w,
                               ),
                               Text(
                                 AppLocalizations.of(context)!.favorite,
-                                style: TextStyle(fontSize: 14.sp),
+                                style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                             ],
                           ),
@@ -498,7 +522,9 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 style: TextStyle(
                                     fontSize: 22.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: kprimaryColor),
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : kprimaryColor),
                               )),
                           SizedBox(
                             height: 1.h,
@@ -520,13 +546,20 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                             children: [
                               Text(
                                 AppLocalizations.of(context)!.openingHours,
-                                style: TextStyle(fontSize: 15.sp),
+                                style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                               const Spacer(),
                               Text(
                                 AppLocalizations.of(context)!.opening,
                                 style: TextStyle(
-                                    fontSize: 15.sp, color: kprimaryColor),
+                                    fontSize: 15.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : kprimaryColor),
                               ),
                               SizedBox(
                                 width: 1.5.w,
@@ -534,7 +567,11 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               if (destinationDetail.openingHours != null)
                                 Text(
                                   '${destinationDetail.openingHours?.openTime.toString() ?? AppLocalizations.of(context)!.notAvailable} - ${destinationDetail.openingHours?.closeTime.toString() ?? AppLocalizations.of(context)!.notAvailable}',
-                                  style: TextStyle(fontSize: 15.sp),
+                                  style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black),
                                 )
                               else
                                 Text(
@@ -579,7 +616,10 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               child: Text(
                                 AppLocalizations.of(context)!.location,
                                 style: TextStyle(
-                                    fontSize: 18.sp, color: kprimaryColor),
+                                    fontSize: 18.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : kprimaryColor),
                               )),
                           Divider(
                             color: Colors.grey.withOpacity(0.1),
@@ -594,8 +634,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 destinationDetail.location.coordinates![0],
                               ),
                               onTap: () {
-                                context.push(
-                                  '/map',
+                                context.goNamed(
+                                  'map_shell',
                                   extra: {
                                     'latitude': destinationDetail
                                         .location.coordinates![1],
@@ -619,7 +659,10 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                 AppLocalizations.of(context)!.rating(
                                     destinationDetail.avarageRating.toString()),
                                 style: TextStyle(
-                                    fontSize: 20.sp, color: kprimaryColor),
+                                    fontSize: 20.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : kprimaryColor),
                               )),
                           Padding(
                             padding: EdgeInsets.all(2.w),
@@ -630,7 +673,11 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                       EdgeInsets.symmetric(vertical: 0.5.h),
                                   child: Row(
                                     children: [
-                                      Text('${data['stars']}'),
+                                      Text('${data['stars']}',
+                                          style: TextStyle(
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black)),
                                       SizedBox(width: 1.w),
                                       Icon(Icons.star,
                                           color: Colors.amber, size: 14.sp),
@@ -670,6 +717,10 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                         child: Text(
                                           '${(data['percent'] ?? 0).toStringAsFixed(1)}%',
                                           textAlign: TextAlign.right,
+                                          style: TextStyle(
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black),
                                         ),
                                       ),
                                     ],
@@ -687,7 +738,10 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                               Text(
                                 'Reviews',
                                 style: TextStyle(
-                                    fontSize: 20.sp, color: kprimaryColor),
+                                    fontSize: 20.sp,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : kprimaryColor),
                               ),
                               TextButton(
                                 onPressed: () async {
@@ -706,13 +760,21 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                   // Nếu có dữ liệu trả về thì cập nhật lại
                                   if (updatedReviews != null && mounted) {
                                     setState(() {
+                                      final initialReviewCount = reviews.length;
                                       reviews = updatedReviews;
+                                      // If a new review was added, disable further reviews
+                                      if (reviews.length > initialReviewCount) {
+                                        _isReviewsAllowed = false;
+                                      }
                                       updateRating();
                                     });
                                   }
                                 },
                                 child: Text('Show all',
-                                    style: TextStyle(color: kprimaryColor)),
+                                    style: TextStyle(
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : kprimaryColor)),
                               ),
                             ],
                           ),
@@ -743,7 +805,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
                                   ),
                                 )
                               : Column(
-                                  children: reviews.take(5).map((review) {
+                                  children:
+                                      reviews.reversed.take(5).map((review) {
                                     return Padding(
                                       padding:
                                           EdgeInsets.symmetric(vertical: 1.2.h),

@@ -90,14 +90,15 @@ class _TipScreenState extends State<TipScreen> {
               snap: true,
               elevation: 0,
               backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
+              foregroundColor: Colors.white,
               title: Text(
                 AppLocalizations.of(context)!.tipTravel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.white),
               ),
               centerTitle: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
@@ -115,12 +116,20 @@ class _TipScreenState extends State<TipScreen> {
                     onChanged: (value) {
                       setState(() {});
                     },
+                    style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black),
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context)!.search,
-                      prefixIcon: const Icon(Icons.search),
+                      hintStyle: TextStyle(
+                          color: isDarkMode ? Colors.white70 : Colors.grey),
+                      prefixIcon: Icon(Icons.search,
+                          color: isDarkMode ? Colors.white70 : Colors.grey),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon: Icon(Icons.clear,
+                                  color: isDarkMode
+                                      ? Colors.white70
+                                      : Colors.grey),
                               onPressed: () {
                                 _searchController.clear();
                                 setState(() {});
@@ -149,6 +158,7 @@ class _TipScreenState extends State<TipScreen> {
                             final tip = _filteredTips[index];
                             final tag = tagProvider.getTagById(tip.tagId);
                             return Card(
+                              color: theme.cardColor,
                               margin: EdgeInsets.symmetric(
                                   horizontal: 2.w, vertical: 1.h),
                               elevation: 2,
@@ -165,6 +175,9 @@ class _TipScreenState extends State<TipScreen> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 17.sp,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black,
                                       ),
                                     ),
                                     SizedBox(height: 1.h),
@@ -185,8 +198,10 @@ class _TipScreenState extends State<TipScreen> {
                                           tag.name,
                                           style: TextStyle(
                                             fontSize: 13.sp,
-                                            color: theme
-                                                .colorScheme.onSurfaceVariant,
+                                            color: isDarkMode
+                                                ? Colors.white70
+                                                : theme.colorScheme
+                                                    .onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -200,8 +215,10 @@ class _TipScreenState extends State<TipScreen> {
                                               _expandedList[index] ? 1000 : 3,
                                           textOverflow: TextOverflow.ellipsis,
                                           fontSize: FontSize(15.sp),
-                                          color: theme
-                                              .colorScheme.onSurfaceVariant,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : theme
+                                                  .colorScheme.onSurfaceVariant,
                                         ),
                                       },
                                     ),
@@ -222,14 +239,18 @@ class _TipScreenState extends State<TipScreen> {
                                               : AppLocalizations.of(context)!
                                                   .seeMore,
                                           style: TextStyle(
-                                              color: theme.colorScheme.primary,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : theme.colorScheme.primary,
                                               fontSize: 14.sp),
                                         ),
                                         label: Icon(
                                           _expandedList[index]
                                               ? Icons.expand_less
                                               : Icons.expand_more,
-                                          color: theme.colorScheme.primary,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : theme.colorScheme.primary,
                                         ),
                                       ),
                                     )

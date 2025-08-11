@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
 import 'package:travinhgo/models/event_festival/event_and_festival.dart';
 
 import '../../utils/string_helper.dart';
@@ -12,6 +13,7 @@ class EventFestivalItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () {
         context.pushNamed(
@@ -37,7 +39,7 @@ class EventFestivalItem extends StatelessWidget {
               ),
               child: Image.network(
                 eventAndFestival.images.first,
-                height: 200,
+                height: 20.h,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
@@ -68,7 +70,9 @@ class EventFestivalItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: isDarkMode
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),

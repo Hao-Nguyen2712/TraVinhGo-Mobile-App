@@ -188,6 +188,7 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
   Widget _buildCategoryChips() {
     final appLocalizations = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     String getLocalizedCategoryName(String key) {
       switch (key) {
@@ -238,8 +239,9 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
               selectedColor: colorScheme.primary,
               labelStyle: TextStyle(
                 fontWeight: FontWeight.bold,
-                color:
-                    isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                color: isSelected
+                    ? Colors.white
+                    : (isDarkMode ? Colors.white : colorScheme.onSurface),
               ),
               side: const BorderSide(color: Colors.transparent),
             ),
@@ -250,13 +252,17 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
   }
 
   Widget _buildBody() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     if (_isLoading) {
       return Container(); // Show nothing while loading, as the overlay handles it
     }
 
     final appLocalizations = AppLocalizations.of(context)!;
     if (_allPlaces.isEmpty) {
-      return Center(child: Text(appLocalizations.noUtilitiesFound));
+      return Center(
+          child: Text(appLocalizations.noUtilitiesFound,
+              style:
+                  TextStyle(color: isDarkMode ? Colors.white : Colors.black)));
     }
 
     return GridView.builder(
@@ -338,6 +344,7 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
   }
 
   Widget _buildPaginationControls() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final totalPages = (_allPlaces.length / _itemsPerPage).ceil();
     if (totalPages <= 1) {
       return const SizedBox.shrink();
@@ -352,7 +359,8 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios),
+              icon: Icon(Icons.arrow_back_ios,
+                  color: isDarkMode ? Colors.white : Colors.black),
               onPressed: _currentPage == 0
                   ? null
                   : () {
@@ -367,10 +375,13 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
                 (_currentPage + 1).toString(),
                 totalPages.toString(),
               ),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black),
             ),
             IconButton(
-              icon: const Icon(Icons.arrow_forward_ios),
+              icon: Icon(Icons.arrow_forward_ios,
+                  color: isDarkMode ? Colors.white : Colors.black),
               onPressed: _currentPage >= totalPages - 1
                   ? null
                   : () {
@@ -394,8 +405,7 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: Theme.of(context).colorScheme.onPrimary),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
           Expanded(
@@ -403,7 +413,7 @@ class _UtilitiesScreenState extends State<UtilitiesScreen> {
               appLocalizations.utilities,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Colors.white,
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),

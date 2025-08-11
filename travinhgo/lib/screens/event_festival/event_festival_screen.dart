@@ -83,7 +83,7 @@ class _EventFestivalViewState extends State<_EventFestivalView> {
         statusBarBrightness: isDarkMode ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         body: SafeArea(
           top: false,
           child: Consumer<EventFestivalProvider>(
@@ -97,12 +97,16 @@ class _EventFestivalViewState extends State<_EventFestivalView> {
                       floating: true,
                       snap: true,
                       backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      title:
-                          Text(AppLocalizations.of(context)!.eventAndFestival),
+                      foregroundColor: Colors.white,
+                      title: Text(
+                        AppLocalizations.of(context)!.eventAndFestival,
+                        style: const TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                       centerTitle: true,
                       leading: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new),
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ),
@@ -123,8 +127,13 @@ class _EventFestivalViewState extends State<_EventFestivalView> {
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 32),
-                            child: Text(AppLocalizations.of(context)!
-                                .errorPrefix(provider.errorMessage!)),
+                            child: Text(
+                                AppLocalizations.of(context)!
+                                    .errorPrefix(provider.errorMessage!),
+                                style: TextStyle(
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black)),
                           ),
                         ),
                       )
@@ -166,20 +175,28 @@ class _EventFestivalViewState extends State<_EventFestivalView> {
   }
 
   Widget _buildSearchBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
+        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.searchEventOrFestival,
-          prefixIcon: const Icon(Icons.search),
+          hintStyle:
+              TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey),
+          prefixIcon: Icon(Icons.search,
+              color: isDarkMode ? Colors.white70 : Colors.grey),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(60),
             borderSide: BorderSide.none,
           ),
           filled: true,
-          fillColor: kSearchBackgroundColor,
+          fillColor: isDarkMode
+              ? theme.colorScheme.surfaceVariant
+              : kSearchBackgroundColor,
         ),
       ),
     );

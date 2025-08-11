@@ -298,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           // User name
           Text(
-            profile.fullname,
+            profile.fullname ?? AppLocalizations.of(context)!.notUpdatedYet,
             style: GoogleFonts.montserrat(
               fontSize: 24,
               fontWeight: FontWeight.w600,
@@ -308,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 4),
           // User email
           Text(
-            profile.email,
+            profile.email ?? AppLocalizations.of(context)!.notUpdatedYet,
             style: GoogleFonts.montserrat(
               fontSize: 16,
               color: Theme.of(context).textTheme.bodyMedium?.color,

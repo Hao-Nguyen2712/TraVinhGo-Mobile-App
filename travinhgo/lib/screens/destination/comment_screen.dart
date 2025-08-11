@@ -24,7 +24,10 @@ class CommentScreen extends StatefulWidget {
   bool isReviewsAllowed;
 
   CommentScreen(
-      {super.key, required this.destination, required this.reviews, required this.isReviewsAllowed});
+      {super.key,
+      required this.destination,
+      required this.reviews,
+      required this.isReviewsAllowed});
 
   @override
   State<CommentScreen> createState() => _CommentScreenState();
@@ -36,13 +39,15 @@ class _CommentScreenState extends State<CommentScreen> {
   List<File> _selectedImages = [];
   bool _isCommentNotEmpty = false;
   bool _isLoading = true;
+  late bool _isAllowed;
 
   late List<String> allImageDestination;
-  String _error='';
-  
+  String _error = '';
+
   @override
   void initState() {
     super.initState();
+    _isAllowed = widget.isReviewsAllowed;
     fetchDestination();
     _commentController.addListener(() {
       setState(() {
@@ -51,7 +56,6 @@ class _CommentScreenState extends State<CommentScreen> {
     });
     debugPrint('Error during get destination list');
     debugPrint(widget.isReviewsAllowed.toString());
-    
   }
 
   @override
@@ -61,11 +65,13 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 
   Future<void> fetchDestination() async {
-    var _sessionId = await AuthService().getSessionId();
-    if(_sessionId != null) {
-      _error = 'You can only review this destination once.';
+    var sessionId = await AuthService().getSessionId();
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    if (sessionId != null) {
+      _error = l10n.reviewOnceWarning;
     } else {
-      _error = 'Please login before reviewing.';
+      _error = l10n.loginToReview;
     }
     setState(() {
       allImageDestination = [
@@ -104,8 +110,8 @@ class _CommentScreenState extends State<CommentScreen> {
       final remainingSlots = 3 - _selectedImages.length;
       if (remainingSlots <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Chỉ được chọn tối đa 3 ảnh."),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.max3ImagesError),
           ),
         );
         return;
@@ -119,14 +125,13 @@ class _CommentScreenState extends State<CommentScreen> {
           builder: (context) => StatusDialog(
             isSuccess: false,
             title: AppLocalizations.of(context)!.error,
-            message: "Bạn chỉ có thể thêm tối đa 3 ảnh. Một số ảnh đã bị bỏ qua.",
+            message: AppLocalizations.of(context)!.max3ImagesWarning,
             onOkPressed: () {
               Navigator.of(context).pop();
             },
           ),
         );
       }
-
 
       setState(() {
         _selectedImages.addAll(imagesToAdd);
@@ -144,14 +149,15 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 
   Future<void> sendReview(ReviewRequest reviewRequest) async {
-    ReviewResponse? responseData = await ReviewService().sendReview(reviewRequest); // <- thêm await và dùng kiểu nullable
+    ReviewResponse? responseData = await ReviewService()
+        .sendReview(reviewRequest); // <- thêm await và dùng kiểu nullable
 
     _commentController.clear();
 
     if (responseData != null) {
       setState(() {
         widget.reviews.add(responseData);
-        widget.isReviewsAllowed = false;
+        _isAllowed = false;
         _selectedImages.clear();
       });
     } else {
@@ -160,14 +166,15 @@ class _CommentScreenState extends State<CommentScreen> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset:
+          false, // Giữ lại để tránh body bị resize không cần thiết
       body: SafeArea(
         child: Column(
           children: [
@@ -236,7 +243,8 @@ class _CommentScreenState extends State<CommentScreen> {
                                               child: Center(
                                                 child: IconButton(
                                                     onPressed: () {
-                                                      Navigator.pop(context, widget.reviews);
+                                                      Navigator.pop(context,
+                                                          widget.reviews);
                                                     },
                                                     icon: Image.asset(
                                                         'assets/images/navigations/leftarrowwhile.png')),
@@ -254,7 +262,8 @@ class _CommentScreenState extends State<CommentScreen> {
                                             child: IconButton(
                                                 iconSize: 18,
                                                 onPressed: () {
-                                                  Navigator.pop(context, widget.reviews);
+                                                  Navigator.pop(
+                                                      context, widget.reviews);
                                                 },
                                                 icon: Image.asset(
                                                     'assets/images/navigations/share.png')),
@@ -277,7 +286,8 @@ class _CommentScreenState extends State<CommentScreen> {
                                                   microseconds: 300),
                                               width: 20,
                                               height: 8,
-                                              margin: EdgeInsets.only(right: 3),
+                                              margin: const EdgeInsets.only(
+                                                  right: 3),
                                               decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(10),
@@ -292,233 +302,275 @@ class _CommentScreenState extends State<CommentScreen> {
                             ),
                             widget.reviews.isEmpty
                                 ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 32.0),
-                                child: Text(
-                                  // Giả sử bạn có một chuỗi localization cho việc này
-                                  // AppLocalizations.of(context)!.noReviewsYet ?? 'Chưa có đánh giá nào.',
-                                  'Chưa có đánh giá nào.',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 32.0),
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .noReviewsYet,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey[600],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  )
+                                : Column(
+                                    children:
+                                        widget.reviews.reversed.map((review) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 9),
+                                        child: ReviewItem(
+                                          review: review,
+                                        ),
+                                      );
+                                    }).toList(),
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ) :
-                            Column(
-                              children: widget.reviews.map((review) {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 9),
-                                  child: ReviewItem(
-                                    review: review,
-                                  ),
-                                );
-                              }).toList(),
-                            ),
                           ],
                         ),
                       ),
                     ),
             ),
+          ],
+        ),
+      ),
+      bottomNavigationBar:
+          !_isAllowed ? null : _buildCommentInputBar(colorScheme),
+    );
+  }
 
-            // Phần nhập comment + ảnh (nằm dưới cùng, không bị đẩy lên)
-            if (widget.isReviewsAllowed)
-              AnimatedPadding(
-              duration: const Duration(milliseconds: 200),
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_selectedImages.isNotEmpty) ...[
-                      SizedBox(
-                        height: 100,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _selectedImages.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 8),
-                          itemBuilder: (context, index) {
-                            final image = _selectedImages[index];
-                            return Stack(
-                              alignment: Alignment.topRight,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.file(
-                                    image,
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedImages.removeAt(index);
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.surface,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(2),
-                                    child: Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: colorScheme.error,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildCommentInputBar(ColorScheme colorScheme) {
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_selectedImages.isNotEmpty) ...[
+              SizedBox(
+                height: 100,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _selectedImages.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final image = _selectedImages[index];
+                    return Stack(
+                      alignment: Alignment.topRight,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4,),
-                          child: GestureDetector(
-                            onTap: _pickImage,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                CupertinoIcons.photo_on_rectangle,
-                                color: colorScheme.onPrimaryContainer,
-                                size: 30,
-                              ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.file(
+                            image,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedImages.removeAt(index);
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(2),
+                            child: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: colorScheme.error,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _commentController,
-                            maxLength: 300,
-                            minLines: 1, // số dòng tối thiểu
-                            maxLines: 3,
-                            keyboardType: TextInputType.multiline,
-                            decoration: InputDecoration(
-                              hintText: 'Thêm bình luận...',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        if (_isCommentNotEmpty)
-                          IconButton(
-                            icon: Image.asset(
-                              'assets/images/navigations/send.png',
-                              width: 24,
-                              height: 24,
-                            ),
-                            onPressed: () {
-                              final images = List<File>.from(_selectedImages);
-                                if (!widget.isReviewsAllowed) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => StatusDialog(
-                                      isSuccess: false,
-                                      title: AppLocalizations.of(context)!.error,
-                                      message: _error,
-                                      onOkPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  );
-                                } else {
-                                  double _selectedRating = 5;
-
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return StatefulBuilder(
-                                        builder: (context, setState) {
-                                          return AlertDialog(
-                                            title: const Text("Tap to rate"),
-                                            content: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                RatingBar.builder(
-                                                  initialRating: _selectedRating,
-                                                  minRating: 1,
-                                                  direction: Axis.horizontal,
-                                                  allowHalfRating: false,
-                                                  itemCount: 5,
-                                                  itemSize: 40,
-                                                  itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                                  itemBuilder: (context, _) => const Icon(
-                                                    Icons.star,
-                                                    color: Colors.amber,
-                                                  ),
-                                                  onRatingUpdate: (rating) {
-                                                    setState(() {
-                                                      _selectedRating = rating;
-                                                    });
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.of(context).pop(),
-                                                child: const Text("Cancel"),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  ReviewRequest reviewRequest = ReviewRequest(
-                                                    rating: _selectedRating.toInt(),
-                                                    images: images,
-                                                    comment: _commentController.text,
-                                                    destinationId: widget.destination.id,
-                                                  );
-                                                  sendReview(reviewRequest);
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: const Text("Send"),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ); 
-                                }
-                              
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: 4,
+                  ),
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        CupertinoIcons.photo_on_rectangle,
+                        color: colorScheme.onPrimaryContainer,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    maxLength: 300,
+                    minLines: 1, // số dòng tối thiểu
+                    maxLines: 3,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.addCommentHint,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (_isCommentNotEmpty)
+                  IconButton(
+                    icon: Image.asset(
+                      'assets/images/navigations/send.png',
+                      width: 24,
+                      height: 24,
+                    ),
+                    onPressed: () async {
+                      final images = List<File>.from(_selectedImages);
+                      if (!_isAllowed) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => StatusDialog(
+                            isSuccess: false,
+                            title: AppLocalizations.of(context)!.error,
+                            message: _error,
+                            onOkPressed: () {
+                              Navigator.of(context).pop();
                             },
                           ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                        );
+                      } else {
+                        double _selectedRating = 5;
+
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return StatefulBuilder(
+                              builder: (context, setState) {
+                                return AlertDialog(
+                                  title: Text(
+                                      AppLocalizations.of(context)!.tapToRate),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      RatingBar.builder(
+                                        initialRating: _selectedRating,
+                                        minRating: 1,
+                                        direction: Axis.horizontal,
+                                        allowHalfRating: false,
+                                        itemCount: 5,
+                                        itemSize: 40,
+                                        itemPadding: const EdgeInsets.symmetric(
+                                            horizontal: 4.0),
+                                        itemBuilder: (context, _) => const Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                        ),
+                                        onRatingUpdate: (rating) {
+                                          setState(() {
+                                            _selectedRating = rating;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: Text(
+                                          AppLocalizations.of(context)!.cancel),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        ReviewRequest reviewRequest =
+                                            ReviewRequest(
+                                          rating: _selectedRating.toInt(),
+                                          images: images,
+                                          comment: _commentController.text,
+                                          destinationId: widget.destination.id,
+                                        );
+                                        _showLoadingDialog();
+                                        await sendReview(reviewRequest);
+                                        if (!mounted) return;
+                                        Navigator.of(context)
+                                            .pop(); // Close loading dialog
+                                        Navigator.of(context)
+                                            .pop(); // Close rating dialog
+                                      },
+                                      child: Text(
+                                          AppLocalizations.of(context)!.send),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        );
+                      }
+                    },
+                  ),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text(AppLocalizations.of(context)!.sendingReview),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -87,7 +87,7 @@ class PushNotificationService {
       GoRouter.of(ctx).go(route);
     }
   }
-  
+
   /// Lắng nghe firebase message (foreground & khi mở app từ notification)
   void firebaseInit(BuildContext context) {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -119,9 +119,7 @@ class PushNotificationService {
 
   /// Xử lý khi mở app từ notification
   void handleMessage(BuildContext context, RemoteMessage message) {
-    context.pushNamed(
-      'Notification',
-    );
+    context.push('/notification');
   }
 
   /// Hiện local notification
@@ -149,8 +147,10 @@ class PushNotificationService {
     NotificationDetails notificationDetails = NotificationDetails(
         android: androidNotificationDetails, iOS: darwinNotificationDetails);
 
+    final String route = message.data['route'] as String? ?? '/notification';
+
     await _flutterLocalNotificationsPlugin.show(0, message.notification!.title!,
         message.notification!.body!, notificationDetails,
-        payload: '/notification');
+        payload: route);
   }
 }

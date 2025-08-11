@@ -88,9 +88,12 @@ class _EventFesftivalDetailScreenState
   @override
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: theme.colorScheme.surface,
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : NestedScrollView(
@@ -102,8 +105,7 @@ class _EventFesftivalDetailScreenState
                       floating: false,
                       pinned: true,
                       stretch: true,
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
+                      backgroundColor: theme.scaffoldBackgroundColor,
                       leading: Container(
                         margin: EdgeInsets.all(2.w),
                         decoration: BoxDecoration(
@@ -191,8 +193,11 @@ class _EventFesftivalDetailScreenState
                                     style: TextStyle(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                     ),
                                   ),
                                 ),
@@ -207,9 +212,13 @@ class _EventFesftivalDetailScreenState
                     SliverPersistentHeader(
                       delegate: _SliverAppBarDelegate(
                         TabBar(
-                          labelColor: Theme.of(context).colorScheme.primary,
+                          labelColor: isDarkMode
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.primary,
                           unselectedLabelColor: Colors.grey,
-                          indicatorColor: Theme.of(context).colorScheme.primary,
+                          indicatorColor: isDarkMode
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.primary,
                           tabs: [
                             Tab(
                                 text:
@@ -271,6 +280,7 @@ class _EventFesftivalDetailScreenState
   }
 
   Widget _buildBottomButtons(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
@@ -299,13 +309,13 @@ class _EventFesftivalDetailScreenState
                     );
                   }
                 },
-                icon: const Icon(Icons.directions),
+                icon: const Icon(Icons.directions, color: Colors.white),
                 label: Text(
                   AppLocalizations.of(context)!.directions,
-                  style: TextStyle(fontSize: 16.sp),
+                  style: TextStyle(fontSize: 16.sp, color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF39B54A),
+                  backgroundColor: theme.colorScheme.primary,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 1.h),
                   shape: RoundedRectangleBorder(
@@ -336,7 +346,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: Theme.of(context).colorScheme.surface,
       child: _tabBar,
     );
   }

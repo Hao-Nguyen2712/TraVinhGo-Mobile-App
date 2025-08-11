@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'env_config.dart';
 
 const kcontentColor = Color(0xffF5F5F5);
@@ -12,6 +13,10 @@ String get Base_api => "${EnvConfig.apiBaseUrl}/";
 
 // Show authentication success notification
 void showAuthSuccessNotification(BuildContext context, {String? message}) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+  final appLocalizations = AppLocalizations.of(context)!;
+
   // First clear any existing snackbars
   ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -23,12 +28,12 @@ void showAuthSuccessNotification(BuildContext context, {String? message}) {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_circle,
-              color: kprimaryColor,
+              color: colorScheme.primary,
               size: 24,
             ),
           ),
@@ -39,8 +44,8 @@ void showAuthSuccessNotification(BuildContext context, {String? message}) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Success!',
-                  style: const TextStyle(
+                  appLocalizations.success,
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: Colors.white,
@@ -48,8 +53,8 @@ void showAuthSuccessNotification(BuildContext context, {String? message}) {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  message ?? 'Login successful!',
-                  style: const TextStyle(
+                  message ?? appLocalizations.loginSuccessful,
+                  style: TextStyle(
                     fontSize: 14,
                     color: Colors.white,
                   ),
@@ -59,7 +64,7 @@ void showAuthSuccessNotification(BuildContext context, {String? message}) {
           ),
         ],
       ),
-      backgroundColor: kprimaryColor,
+      backgroundColor: colorScheme.primary,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -68,8 +73,8 @@ void showAuthSuccessNotification(BuildContext context, {String? message}) {
       ),
       duration: const Duration(seconds: 4),
       action: SnackBarAction(
-        label: 'DISMISS',
-        textColor: Colors.white,
+        label: appLocalizations.dismiss.toUpperCase(),
+        textColor: colorScheme.onPrimary,
         onPressed: () {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         },
@@ -84,6 +89,8 @@ void showAuthSuccessNotification(BuildContext context, {String? message}) {
 
 // Show a brief success overlay animation
 void showAuthSuccessOverlay(BuildContext context) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
   // Create an overlay entry
   final overlayState = Overlay.of(context);
   late OverlayEntry overlayEntry;
@@ -107,12 +114,12 @@ void showAuthSuccessOverlay(BuildContext context) {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: kprimaryColor.withOpacity(0.9),
+                    color: colorScheme.primary.withOpacity(0.9),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check,
-                    color: Colors.white,
+                    color: colorScheme.onPrimary,
                     size: 80,
                   ),
                 ),

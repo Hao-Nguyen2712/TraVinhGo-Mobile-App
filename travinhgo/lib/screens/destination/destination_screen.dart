@@ -32,7 +32,12 @@ class _DestinationScreenState extends State<DestinationScreen> {
     isAuthentication();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<DestinationProvider>(context, listen: false);
-      provider.fetchDestinations(isRefresh: true);
+
+      // Reset search and filters when entering the screen
+      _searchController.clear();
+      provider.applySearchQuery('');
+      _onFilter(null);
+
       provider.fetchDestinationTypes();
     });
 

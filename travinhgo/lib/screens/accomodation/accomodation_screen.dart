@@ -150,13 +150,16 @@ class _AccomodationScreenState extends State<AccomodationScreen> {
   }
 
   Widget _buildBody() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     if (_isLoading) {
       return Container(); // Show nothing while loading, as the overlay handles it
     }
 
     if (_allAccomodations.isEmpty) {
       return Center(
-          child: Text(AppLocalizations.of(context)!.noAccommodationsFound));
+          child: Text(AppLocalizations.of(context)!.noAccommodationsFound,
+              style:
+                  TextStyle(color: isDarkMode ? Colors.white : Colors.black)));
     }
 
     return GridView.builder(
@@ -237,6 +240,7 @@ class _AccomodationScreenState extends State<AccomodationScreen> {
   }
 
   Widget _buildPaginationControls() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final totalPages = (_allAccomodations.length / _itemsPerPage).ceil();
     if (totalPages <= 1) {
       return const SizedBox.shrink();
@@ -251,7 +255,8 @@ class _AccomodationScreenState extends State<AccomodationScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios),
+              icon: Icon(Icons.arrow_back_ios,
+                  color: isDarkMode ? Colors.white : Colors.black),
               onPressed: _currentPage == 0
                   ? null
                   : () {
@@ -266,10 +271,13 @@ class _AccomodationScreenState extends State<AccomodationScreen> {
                 (_currentPage + 1).toString(),
                 totalPages.toString(),
               ),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black),
             ),
             IconButton(
-              icon: const Icon(Icons.arrow_forward_ios),
+              icon: Icon(Icons.arrow_forward_ios,
+                  color: isDarkMode ? Colors.white : Colors.black),
               onPressed: _currentPage >= totalPages - 1
                   ? null
                   : () {
@@ -291,8 +299,7 @@ class _AccomodationScreenState extends State<AccomodationScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: Theme.of(context).colorScheme.onPrimary),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
           Expanded(
@@ -300,7 +307,7 @@ class _AccomodationScreenState extends State<AccomodationScreen> {
               AppLocalizations.of(context)!.accommodation,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Colors.white,
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),

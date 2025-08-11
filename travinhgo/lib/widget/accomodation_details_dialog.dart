@@ -12,6 +12,7 @@ class AccomodationDetailsDialog extends StatelessWidget {
     final appLocalizations = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -51,7 +52,11 @@ class AccomodationDetailsDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextButton(
-                child: Text(appLocalizations.close),
+                child: Text(
+                  appLocalizations.close,
+                  style: TextStyle(
+                      color: isDarkMode ? Colors.white : colorScheme.primary),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -77,13 +82,15 @@ class AccomodationDetailsDialog extends StatelessWidget {
       {required IconData icon, required String label, required String value}) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: colorScheme.primary, size: 20),
+          Icon(icon,
+              color: isDarkMode ? Colors.white : colorScheme.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

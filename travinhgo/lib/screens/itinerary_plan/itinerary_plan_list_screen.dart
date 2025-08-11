@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../Models/itinerary_plan/itinerary_plan.dart';
 import '../../services/itinerary_plan_service.dart';
-
-const Color _systemGreen = Color(0xFF158247);
 
 class ItineraryPlanListScreen extends StatefulWidget {
   const ItineraryPlanListScreen({super.key});
@@ -74,25 +73,31 @@ class _ItineraryPlanListScreenState extends State<ItineraryPlanListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: _systemGreen,
+      backgroundColor: colorScheme.primary,
       appBar: AppBar(
-        backgroundColor: _systemGreen,
+        backgroundColor: colorScheme.primary,
         elevation: 0,
-        title: const Text(
-          "Lịch trình",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.itinerary,
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
               ),
@@ -113,7 +118,7 @@ class _ItineraryPlanListScreenState extends State<ItineraryPlanListScreen> {
                           if (_allItineraryPlans.isNotEmpty) ...[
                             if (_selectedFilterIndex == 0) ...[
                               _buildSectionHeader(
-                                "Phổ biến nhất",
+                                l10n.mostPopular,
                                 Icons.local_fire_department,
                                 Colors.orange,
                                 showToggleButton: false,
@@ -123,7 +128,7 @@ class _ItineraryPlanListScreenState extends State<ItineraryPlanListScreen> {
                               const SizedBox(height: 16),
                             ],
                             _buildSectionHeader(
-                              "Tất cả lịch trình",
+                              l10n.allItineraries,
                               Icons.map_outlined,
                               Colors.blue,
                               showToggleButton: true,
@@ -133,18 +138,27 @@ class _ItineraryPlanListScreenState extends State<ItineraryPlanListScreen> {
                       ),
                     ),
                     if (_allItineraryPlans.isEmpty && !_isLoading)
-                      const SliverFillRemaining(
+                      SliverFillRemaining(
                         hasScrollBody: false,
                         child: Center(
-                          child: Text("Chưa có lịch trình nào được tạo."),
+                          child: Text(l10n.noItinerariesCreated,
+                              style: TextStyle(
+                                  color: isDarkMode
+                                      ? Colors.white
+                                      : Colors.black)),
                         ),
                       )
                     else if (_filteredItineraryPlans.isEmpty)
-                      const SliverToBoxAdapter(
+                      SliverToBoxAdapter(
                         child: Padding(
-                          padding: EdgeInsets.all(32.0),
+                          padding: const EdgeInsets.all(32.0),
                           child: Center(
-                            child: Text("Không có lịch trình nào phù hợp."),
+                            child: Text(
+                              l10n.noMatchingItineraries,
+                              style: TextStyle(
+                                  color:
+                                      isDarkMode ? Colors.white : Colors.black),
+                            ),
                           ),
                         ),
                       )
@@ -183,6 +197,8 @@ class _ItineraryPlanListScreenState extends State<ItineraryPlanListScreen> {
 
   Widget _buildSectionHeader(String title, IconData icon, Color color,
       {required bool showToggleButton}) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
@@ -194,14 +210,17 @@ class _ItineraryPlanListScreenState extends State<ItineraryPlanListScreen> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black),
               ),
             ],
           ),
           if (showToggleButton)
             IconButton(
-              icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
+              icon: Icon(_isGridView ? Icons.list : Icons.grid_view,
+                  color: isDarkMode ? Colors.white : Colors.black),
               onPressed: () {
                 setState(() {
                   _isGridView = !_isGridView;
@@ -224,10 +243,19 @@ class FilterChipsWidget extends StatefulWidget {
 
 class _FilterChipsWidgetState extends State<FilterChipsWidget> {
   int _selectedIndex = 0;
-  final List<String> _options = ['Tất cả', 'Ngắn ngày', 'Dài ngày'];
+  late List<String> _options;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context)!;
+    _options = [l10n.filterAll, l10n.filterShortStay, l10n.filterLongStay];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox(
       height: 45,
       child: ListView.separated(
@@ -247,16 +275,16 @@ class _FilterChipsWidgetState extends State<FilterChipsWidget> {
                 widget.onFilterChanged(index);
               }
             },
-            selectedColor: _systemGreen,
+            selectedColor: colorScheme.primary,
             labelStyle: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
+              color: isSelected ? Colors.white : colorScheme.onSurface,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: theme.chipTheme.backgroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: isSelected ? _systemGreen : Colors.grey[300]!,
+                color: isSelected ? colorScheme.primary : theme.dividerColor,
               ),
             ),
             showCheckmark: false,
@@ -270,6 +298,9 @@ class _FilterChipsWidgetState extends State<FilterChipsWidget> {
 }
 
 Widget buildItineraryListItem(BuildContext context, ItineraryPlan plan) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+  final isDarkMode = theme.brightness == Brightness.dark;
   return GestureDetector(
     onTap: () {
       context.pushNamed(
@@ -281,17 +312,17 @@ Widget buildItineraryListItem(BuildContext context, ItineraryPlan plan) {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: theme.shadowColor.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 3),
           ),
         ],
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
       ),
       child: Row(
         children: [
@@ -300,7 +331,7 @@ Widget buildItineraryListItem(BuildContext context, ItineraryPlan plan) {
             child: Container(
               width: 90,
               height: 110,
-              color: _systemGreen.withOpacity(0.8),
+              color: colorScheme.primary.withOpacity(0.8),
               child:
                   const Icon(Icons.map_outlined, color: Colors.white, size: 40),
             ),
@@ -315,9 +346,10 @@ Widget buildItineraryListItem(BuildContext context, ItineraryPlan plan) {
                 children: [
                   Text(
                     plan.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -325,15 +357,21 @@ Widget buildItineraryListItem(BuildContext context, ItineraryPlan plan) {
                   Row(
                     children: [
                       Icon(Icons.access_time,
-                          size: 16, color: Colors.grey[600]),
+                          size: 16, color: colorScheme.onSurfaceVariant),
                       const SizedBox(width: 4),
                       Text(plan.duration ?? 'N/A',
-                          style: const TextStyle(fontSize: 12)),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: colorScheme.onSurfaceVariant)),
                       const SizedBox(width: 12),
                       const Icon(Icons.star, size: 16, color: Colors.amber),
                       const SizedBox(width: 4),
-                      const Text('4.8 (124)',
-                          style: TextStyle(fontSize: 12)), // Placeholder
+                      Text('4.8 (124)',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: isDarkMode
+                                  ? Colors.white70
+                                  : colorScheme.onSurfaceVariant)),
                     ],
                   ),
                   Row(
@@ -341,16 +379,20 @@ Widget buildItineraryListItem(BuildContext context, ItineraryPlan plan) {
                       Icon(Icons.wb_sunny_outlined,
                           size: 16, color: Colors.orange[400]),
                       const SizedBox(width: 4),
-                      const Text('28°C - Thời tiết đẹp',
-                          style: TextStyle(fontSize: 12)), // Placeholder
+                      Text('28°C - Thời tiết đẹp',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: isDarkMode
+                                  ? Colors.white70
+                                  : colorScheme.onSurfaceVariant)),
                     ],
                   ),
                   Text(
                     plan.estimatedCost ?? 'N/A',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: _systemGreen,
+                      color: isDarkMode ? Colors.white : colorScheme.onSurface,
                     ),
                   ),
                 ],
@@ -364,6 +406,9 @@ Widget buildItineraryListItem(BuildContext context, ItineraryPlan plan) {
 }
 
 Widget buildItineraryGridItem(BuildContext context, ItineraryPlan plan) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+  final isDarkMode = theme.brightness == Brightness.dark;
   return GestureDetector(
     onTap: () {
       context.pushNamed(
@@ -381,7 +426,7 @@ Widget buildItineraryGridItem(BuildContext context, ItineraryPlan plan) {
           Container(
             height: 100,
             width: double.infinity,
-            color: _systemGreen.withOpacity(0.8),
+            color: colorScheme.primary.withOpacity(0.8),
             child:
                 const Icon(Icons.map_outlined, color: Colors.white, size: 40),
           ),
@@ -394,8 +439,10 @@ Widget buildItineraryGridItem(BuildContext context, ItineraryPlan plan) {
                 children: [
                   Text(
                     plan.name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: colorScheme.onSurface),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -405,19 +452,25 @@ Widget buildItineraryGridItem(BuildContext context, ItineraryPlan plan) {
                       Row(
                         children: [
                           Icon(Icons.access_time,
-                              size: 14, color: Colors.grey[600]),
+                              size: 14, color: colorScheme.onSurfaceVariant),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               plan.duration ?? 'N/A',
-                              style: const TextStyle(fontSize: 12),
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: colorScheme.onSurfaceVariant),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const Icon(Icons.star, size: 14, color: Colors.amber),
                           const SizedBox(width: 2),
-                          const Text('4.8',
-                              style: TextStyle(fontSize: 12)), // Placeholder
+                          Text('4.8',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDarkMode
+                                      ? Colors.white70
+                                      : colorScheme.onSurfaceVariant)),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -426,18 +479,22 @@ Widget buildItineraryGridItem(BuildContext context, ItineraryPlan plan) {
                           Icon(Icons.wb_sunny_outlined,
                               size: 14, color: Colors.orange[400]),
                           const SizedBox(width: 4),
-                          const Text('28°C',
-                              style: TextStyle(fontSize: 12)), // Placeholder
+                          Text('28°C',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDarkMode
+                                      ? Colors.white70
+                                      : colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     ],
                   ),
                   Text(
                     plan.estimatedCost ?? 'N/A',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: _systemGreen,
+                      color: isDarkMode ? Colors.white : colorScheme.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

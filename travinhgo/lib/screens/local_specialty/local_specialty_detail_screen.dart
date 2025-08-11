@@ -110,7 +110,7 @@ class _LocalSpecialtyDetailScreenState
   Widget build(BuildContext context) {
     final tagProvider = TagProvider.of(context);
     final favoriteProvider = FavoriteProvider.of(context);
-
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     void _toggleExpanded() {
       setState(() {
         _isExpanded = !_isExpanded;
@@ -265,9 +265,11 @@ class _LocalSpecialtyDetailScreenState
                                       .headlineSmall
                                       ?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary),
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary),
                                 )),
                             const SizedBox(
                               height: 10,
@@ -288,9 +290,11 @@ class _LocalSpecialtyDetailScreenState
                                       .sellingLocations,
                                   style: TextStyle(
                                       fontSize: 24,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary),
                                 )),
                             const SizedBox(height: 16),
                             GridView.builder(

@@ -40,7 +40,8 @@ class DestinationDetailImageSlider extends StatelessWidget {
                     fadeInDuration: const Duration(milliseconds: 300),
                     placeholder: (context, url) =>
                         const Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
                   ),
                 ),
               ),
