@@ -42,6 +42,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   // PageController for the destination carousel
   final PageController _pageController = PageController(viewportFraction: 0.85);
 
+  // Default location for Tra Vinh
+  static final GeoCoordinates _traVinhCenter = GeoCoordinates(9.9333, 106.3333);
+
   // Late initialized provider
   late MapProvider _mapProvider;
 
@@ -50,6 +53,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   // Text editing controllers for search and departure inputs
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode(); // Add this line
   final TextEditingController _departureController = TextEditingController();
   final FocusNode _departureFocusNode = FocusNode();
   Timer? _debounceTimer;
@@ -67,24 +71,49 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
     _mapProvider = Provider.of<MapProvider>(context, listen: false);
 
+    _searchFocusNode.addListener(() {
+      _mapProvider.setSearchFocus(_searchFocusNode.hasFocus);
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // SDK is already initialized in main.dart, no need to initialize again
       _mapProvider.loadTopDestinations();
-      _mapProvider.getCurrentPosition();
+      _requestLocationPermission(requestIfDenied: true);
     });
   }
 
   /// Requests location permission from the user.
-  Future<void> _requestLocationPermission() async {
+  Future<void> _requestLocationPermission(
+      {bool requestIfDenied = false}) async {
     var status = await Permission.location.status;
-    if (status.isDenied) {
-      if (await Permission.location.request().isGranted) {
-        _mapProvider.getCurrentPosition();
-      }
-    } else if (status.isPermanentlyDenied) {
-      openAppSettings();
-    } else if (status.isGranted) {
+
+    if (status.isGranted) {
       _mapProvider.getCurrentPosition();
+      return;
+    }
+
+    if (status.isPermanentlyDenied) {
+      _mapProvider.moveCamera(_traVinhCenter);
+      openAppSettings();
+      return;
+    }
+
+    // This will handle .isDenied, .isRestricted, and .isLimited
+    // If we are not granted permission, we check if we should request it.
+    if (requestIfDenied) {
+      // Request the permission
+      final newStatus = await Permission.location.request();
+      if (newStatus.isGranted) {
+        // Permission granted after request
+        _mapProvider.getCurrentPosition();
+      } else {
+        // Permission denied after request
+        _mapProvider.moveCamera(_traVinhCenter);
+      }
+    } else {
+      // If we are not supposed to request (e.g., on app resume)
+      // and permission is not granted, just move to the default center.
+      _mapProvider.moveCamera(_traVinhCenter);
     }
   }
 
@@ -106,6 +135,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
     _debounceTimer?.cancel();
     _searchController.dispose();
+    _searchFocusNode.dispose(); // Add this line
     _departureController.dispose();
     _departureFocusNode.dispose();
     _pageController.dispose();
@@ -117,15 +147,14 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Handle app lifecycle changes
     if (state == AppLifecycleState.resumed) {
-      // Refresh the map when app is resumed
-      _mapProvider.getCurrentPosition();
-
-      // Clear any previous markers that may have been cached
-      _mapProvider.cleanupMapResources();
+      // When app is resumed, re-check permissions and reload destinations,
+      // as resources might have been cleared while the app was paused.
+      _requestLocationPermission(requestIfDenied: false);
+      _mapProvider.loadTopDestinations();
     } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.detached) {
-      // Clean up resources when app is paused, inactive or detached
+        state == AppLifecycleState.inactive) {
+      // Clean up resources when app is paused or inactive to free memory.
+      // Note: This will clear markers, they must be reloaded on resume.
       _mapProvider.cleanupMapResources();
     }
   }
@@ -251,7 +280,12 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       controller,
       Theme.of(context).brightness == Brightness.dark,
     );
-    // Start routing if coordinates are provided
+
+    // Immediately set the camera to Tra Vinh as the default position.
+    // The location permission request that follows will override this if granted.
+    _mapProvider.moveCamera(_traVinhCenter);
+
+    // Start routing if coordinates are provided from another screen
     if (widget.latitude != null && widget.longitude != null) {
       final name = widget.name ??
           '${widget.latitude!.toStringAsFixed(5)}, ${widget.longitude!.toStringAsFixed(5)}';
@@ -342,12 +376,17 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                 if (provider.showPoiPopup)
                   const PoiPopup()
                 else if (provider.destinationsLoaded &&
-                    provider.topDestinations.isNotEmpty)
+                    provider.topDestinations.isNotEmpty &&
+                    !provider.isSearchFocused &&
+                    !provider.isShowingDepartureInput)
                   const FavoriteDestinationsSlider(),
               ] else ...[
                 const RoutingUI(),
               ],
-              const map_search.SearchBar(),
+              map_search.SearchBar(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+              ),
             ],
           );
         },

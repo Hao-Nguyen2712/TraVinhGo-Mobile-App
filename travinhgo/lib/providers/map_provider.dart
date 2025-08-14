@@ -422,6 +422,7 @@ class MapProvider extends ChangeNotifier {
   int currentDestinationIndex = 0;
   bool destinationsLoaded = false;
   List<TopFavoriteDestination> topDestinations = [];
+  bool isSearchFocused = false; // Add this line
   final MapService _mapService = MapService();
 
   /// Updates the map theme based on the provided theme mode.
@@ -734,6 +735,14 @@ class MapProvider extends ChangeNotifier {
   void toggleLocalSpecialtyDisplay() {
     _localSpecialtyMapProvider.toggleLocalSpecialtyDisplay();
     notifyListeners();
+  }
+
+  /// Sets the search focus state
+  void setSearchFocus(bool isFocused) {
+    if (isSearchFocused != isFocused) {
+      isSearchFocused = isFocused;
+      notifyListeners();
+    }
   }
 
   /// Display OCOP products on the map
