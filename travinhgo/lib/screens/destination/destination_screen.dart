@@ -264,9 +264,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
               Icon(
                 icon,
                 size: 15.sp,
-                color: isSelected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSurface,
+                color: isSelected ? Colors.white : theme.colorScheme.onSurface,
               ),
             if (imageUrl != null)
               Image.network(

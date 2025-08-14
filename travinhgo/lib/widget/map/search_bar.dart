@@ -9,14 +9,20 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Search bar widget with suggestions dropdown
 class SearchBar extends StatefulWidget {
-  const SearchBar({Key? key}) : super(key: key);
+  final TextEditingController controller;
+  final FocusNode focusNode;
+
+  const SearchBar({
+    Key? key,
+    required this.controller,
+    required this.focusNode,
+  }) : super(key: key);
 
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
 
 class _SearchBarState extends State<SearchBar> {
-  final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
   String? _lastSearchTerm;
   int _lastSearchTimestamp = 0;
@@ -24,7 +30,6 @@ class _SearchBarState extends State<SearchBar> {
   @override
   void dispose() {
     _debounceTimer?.cancel();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -105,7 +110,8 @@ class _SearchBarState extends State<SearchBar> {
                   ],
                 ),
                 child: TextField(
-                  controller: _searchController,
+                  controller: widget.controller,
+                  focusNode: widget.focusNode,
                   keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.search,
 
@@ -132,7 +138,7 @@ class _SearchBarState extends State<SearchBar> {
                             icon: Icon(Icons.clear,
                                 color: colorScheme.onSurfaceVariant),
                             onPressed: () {
-                              _searchController.clear();
+                              widget.controller.clear();
                               provider.clearSearchResults();
                             },
                           ),
@@ -140,6 +146,11 @@ class _SearchBarState extends State<SearchBar> {
                     contentPadding: EdgeInsets.symmetric(vertical: 15),
                   ),
                   onChanged: (text) => _onSearchChanged(text, provider),
+                  onTap: () {
+                    // Manually set focus state in provider when tapped
+                    Provider.of<MapProvider>(context, listen: false)
+                        .setSearchFocus(true);
+                  },
                 ),
               ),
 
@@ -174,7 +185,7 @@ class _SearchBarState extends State<SearchBar> {
                             ),
                             onTap: () {
                               provider.selectSearchSuggestion(suggestion);
-                              _searchController.text = suggestion.title ?? "";
+                              widget.controller.text = suggestion.title ?? "";
                               FocusScope.of(context).unfocus(); // Hide keyboard
                             },
                           );
