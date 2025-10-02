@@ -62,6 +62,8 @@ class SliderEventCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       StringHelper.toTitleCase(title),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,

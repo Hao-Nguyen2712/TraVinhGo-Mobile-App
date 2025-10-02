@@ -11,7 +11,7 @@ class ImageSliderEvent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 24.h,
+      height: 26.h,
       child: PageView.builder(
         itemCount: topEvents.length,
         itemBuilder: (context, index) {

@@ -204,10 +204,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         if (!validExtensions.contains(extension)) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content:
-                      Text(AppLocalizations.of(context)!.invalidImageFormat)),
+            showDialog(
+              context: context,
+              builder: (context) => StatusDialog(
+                isSuccess: false,
+                title: AppLocalizations.of(context)!.error,
+                message: AppLocalizations.of(context)!.invalidImageFormat,
+                onOkPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
             );
           }
           return;
@@ -218,18 +224,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _formChanged = true;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text(AppLocalizations.of(context)!.profilePictureSelected)),
-        );
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => StatusDialog(
+              isSuccess: true,
+              title: AppLocalizations.of(context)!.success,
+              message: AppLocalizations.of(context)!.profilePictureSelected,
+              onOkPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                AppLocalizations.of(context)!.imagePickerError(e.toString()))),
-      );
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => StatusDialog(
+            isSuccess: false,
+            title: AppLocalizations.of(context)!.error,
+            message:
+                AppLocalizations.of(context)!.imagePickerError(e.toString()),
+            onOkPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        );
+      }
     }
   }
 
@@ -648,7 +671,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         body: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                ),
               )
             : _buildEditForm(),
       ),

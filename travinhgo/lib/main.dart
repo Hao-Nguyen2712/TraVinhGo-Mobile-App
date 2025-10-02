@@ -167,7 +167,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    // Lấy context thông qua navigatorKey, vì context của State này có thể không hợp lệ khi app background
     final BuildContext? ctx = navigatorKey.currentContext;
     if (ctx == null) return;
 
